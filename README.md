@@ -2,8 +2,8 @@
 
 > Sistema de Gestión de Relaciones con Clientes (CRM) web moderno inspirado en Microsoft Dynamics CRM, con la identidad visual de STIA y enfoque especial en visualización de datos y analytics.
 
-![Status](https://img.shields.io/badge/status-planning-blue)
-![Version](https://img.shields.io/badge/version-0.1.0-green)
+![Status](https://img.shields.io/badge/status-mvp--ready-success)
+![Version](https://img.shields.io/badge/version-1.0.0-green)
 ![License](https://img.shields.io/badge/license-proprietary-red)
 
 ---
@@ -63,33 +63,54 @@ Este proyecto incluye documentación completa y detallada:
 
 ---
 
-## 🚀 Quick Start (Pendiente)
+## 🚀 Quick Start
 
-*Una vez iniciado el desarrollo, aquí estarán las instrucciones de setup.*
+### Prerrequisitos
+- Node.js 20+ LTS
+- npm o yarn
+
+### Instalación
 
 ```bash
 # Clonar repositorio
-git clone <repo-url>
-cd stia-crm
+git clone https://github.com/FmBlueSystem/Grecia.git
+cd Grecia
 
-# Instalar dependencias
+# Instalar dependencias del backend
+cd backend
 npm install
 
-# Setup de base de datos
-docker-compose up -d
-cd backend
-npx prisma migrate dev
-npx prisma db seed
+# Instalar dependencias del frontend
+cd ../frontend
+npm install
+```
 
-# Iniciar desarrollo
-# Terminal 1 - Backend
+### Iniciar Aplicación
+
+```bash
+# Terminal 1 - Backend (puerto 3000)
 cd backend
 npm run dev
 
-# Terminal 2 - Frontend
+# Terminal 2 - Frontend (puerto 5174)
 cd frontend
 npm run dev
 ```
+
+### Acceder a la Aplicación
+
+- **Frontend**: http://localhost:5174
+- **Backend API**: http://localhost:3000
+- **Health Check**: http://localhost:3000/health
+
+### Credenciales de Acceso
+
+```
+Email: freddy@bluesystem.com
+Password: password123
+```
+
+> **Nota**: El MVP utiliza una base de datos en memoria (Map-based) para facilitar el desarrollo sin dependencias externas. Los datos se reinician al detener el servidor backend.
 
 ---
 
@@ -169,48 +190,76 @@ npm run dev
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
-- **Framework**: React 18.2+ con TypeScript 5.0+
-- **Routing**: React Router v6
-- **State**: Zustand (o Redux Toolkit)
-- **UI Library**: shadcn/ui + Radix UI
-- **Styling**: Tailwind CSS 3.x
-- **Charts**: Recharts + Apache ECharts
-- **Tables**: TanStack Table v8
-- **Forms**: React Hook Form + Zod
-- **HTTP**: Axios + TanStack Query
-- **Drag & Drop**: @dnd-kit
+- **Framework**: React 19 con TypeScript 5
+- **Build Tool**: Vite 7
+- **Styling**: Tailwind CSS v4 con @tailwindcss/postcss
+- **Animations**: Framer Motion 12
+- **Charts**: Recharts 3
+- **Icons**: Lucide React
+- **HTTP**: Fetch API nativo
+- **Auth**: JWT en localStorage
 
 ### Backend
 - **Runtime**: Node.js 20 LTS
-- **Framework**: Fastify 4.x
-- **Language**: TypeScript 5.0+
-- **ORM**: Prisma 5.x
-- **Database**: PostgreSQL 15+
-- **Cache**: Redis 7+
-- **Validation**: Zod
-- **Auth**: JWT (jsonwebtoken + bcrypt)
+- **Framework**: Fastify 5
+- **Language**: TypeScript 5
+- **Database**: In-memory Map-based (MVP)
+- **Auth**: JWT (jsonwebtoken) + Bcrypt 6
+- **Logger**: Pino con pino-pretty
+- **Validation**: TypeScript types
 
 ### DevOps
-- **Containerización**: Docker + Docker Compose
-- **CI/CD**: GitHub Actions
-- **Testing**: Vitest + React Testing Library + Playwright
+- **Version Control**: Git + GitHub
 - **Linting**: ESLint + Prettier
-- **Hosting**: Vercel (frontend) + Railway (backend)
+- **Hosting**: Pendiente (Vercel frontend + Railway backend)
 
 ---
 
-## 📈 Timeline
+## 📈 Estado del Proyecto
 
-| Fase | Duración | Descripción | Estado |
-|------|----------|-------------|--------|
-| **Fase 1** | Semanas 1-2 | Diseño y Planeación | 🔵 En progreso |
-| **Fase 2** | Semana 3 | Setup y Fundamentos | ⚪ Pendiente |
-| **Fase 3** | Semanas 4-9 | Desarrollo Core | ⚪ Pendiente |
-| **Fase 4** | Semanas 10-11 | Features Avanzadas | ⚪ Pendiente |
-| **Fase 5** | Semanas 12-13 | Testing y Refinamiento | ⚪ Pendiente |
-| **Fase 6** | Semana 14 | Deployment y Documentación | ⚪ Pendiente |
+### ✅ Completado (MVP v1.0)
 
-**Fecha estimada de entrega**: Abril 2026
+**Backend:**
+- ✅ Servidor Fastify 5 configurado y corriendo
+- ✅ Base de datos en memoria (Map-based) con datos seed
+- ✅ Autenticación JWT + Bcrypt
+- ✅ CRUD completo para Contactos
+- ✅ CRUD completo para Oportunidades
+- ✅ CRUD completo para Actividades
+- ✅ API RESTful con endpoints funcionales
+- ✅ CORS configurado para múltiples orígenes
+- ✅ Logger Pino integrado
+
+**Frontend:**
+- ✅ Aplicación React 19 + TypeScript 5
+- ✅ Tailwind CSS v4 con tema personalizado STIA
+- ✅ Página de Login con animaciones
+- ✅ Dashboard interactivo con KPIs
+- ✅ Gráficos de Revenue y Win Rate (Recharts)
+- ✅ Sistema completo de animaciones (Framer Motion)
+- ✅ Formularios modales para Contactos y Oportunidades
+- ✅ Tablas de datos con acciones (ver/editar/eliminar)
+- ✅ Diseño responsive y profesional
+- ✅ Protección de rutas con autenticación
+
+**DevOps:**
+- ✅ Repositorio Git inicializado
+- ✅ Código subido a GitHub
+- ✅ .gitignore configurado
+
+### 🔄 Próximas Mejoras
+
+- ⏳ Migrar a PostgreSQL con Prisma
+- ⏳ Agregar Redis para caché
+- ⏳ Implementar búsqueda avanzada
+- ⏳ Agregar filtros y ordenamiento en tablas
+- ⏳ Pipeline visual con drag & drop
+- ⏳ Calendario de actividades
+- ⏳ Exportación a CSV/Excel
+- ⏳ Tests unitarios e integración
+- ⏳ Deployment a producción
+
+**Fecha de MVP completado**: 16 de Enero 2026
 
 ---
 
@@ -224,7 +273,7 @@ npm run dev
 ## 📝 Estructura del Repositorio
 
 ```
-stia-crm/
+Grecia/
 ├── assets/                      # Assets de marca
 │   ├── logos/
 │   │   └── stia-logo.png       # Logo descargado
@@ -241,19 +290,35 @@ stia-crm/
 ├── planning/                    # Planificación del proyecto
 │   └── PLAN_DE_TRABAJO.md
 │
-├── frontend/                    # Aplicación React (próximamente)
+├── frontend/                    # ✅ Aplicación React 19 + Vite
 │   ├── src/
+│   │   ├── components/         # Componentes React
+│   │   │   ├── ContactForm.tsx
+│   │   │   ├── OpportunityForm.tsx
+│   │   │   └── Charts.tsx
+│   │   ├── pages/              # Páginas
+│   │   │   └── Login.tsx
+│   │   ├── utils/              # Utilidades
+│   │   │   └── animations.ts  # Configuraciones Framer Motion
+│   │   ├── App.tsx             # Dashboard principal
+│   │   ├── index.css           # Tailwind CSS v4
+│   │   └── main.tsx
 │   ├── public/
-│   └── package.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── postcss.config.js       # Config Tailwind v4
 │
-├── backend/                     # API Fastify (próximamente)
+├── backend/                     # ✅ API Fastify 5
 │   ├── src/
-│   ├── prisma/
-│   └── package.json
+│   │   ├── utils/
+│   │   │   └── db.ts           # Base de datos en memoria
+│   │   └── index.ts            # Servidor principal
+│   ├── package.json
+│   └── tsconfig.json
 │
-├── docker-compose.yml          # Servicios de desarrollo (próximamente)
 ├── .gitignore
-└── README.md                   # Este archivo
+└── README.md                    # Este archivo
 ```
 
 ---
@@ -295,23 +360,53 @@ Ver [Design System completo](design-system/DESIGN_SYSTEM.md) para más detalles.
 
 ---
 
-## 📦 Próximos Pasos
+## 📦 Funcionalidades Implementadas
 
-### Inmediatos (Esta Semana)
-1. ✅ Documentar Design System
-2. ✅ Documentar Especificación Técnica
-3. ✅ Documentar Modelo de Datos
-4. ✅ Crear Plan de Trabajo
-5. ⏳ Validar paleta de colores con stakeholders
-6. ⏳ Decidir fuente tipográfica
-7. ⏳ Obtener logo en SVG
-8. ⏳ Seleccionar librería de iconos
+### 🎨 UI/UX
+- ✅ Diseño profesional con identidad STIA (#0067B2)
+- ✅ Animaciones fluidas con Framer Motion
+- ✅ Responsive design (mobile-first)
+- ✅ Modales animados para formularios
+- ✅ Efectos hover y transiciones
+- ✅ Partículas animadas en background
+- ✅ Iconos Lucide React
 
-### Semana Próxima
-- Crear wireframes en Figma
-- Prototipos interactivos
-- User stories detalladas
-- Setup de proyecto (boilerplate)
+### 📊 Dashboard
+- ✅ 4 KPIs principales con animaciones
+  - Revenue MTD vs Objetivo
+  - Win Rate con porcentaje
+  - Oportunidades abiertas
+  - Actividades completadas
+- ✅ Gráfico de Revenue (6 meses)
+- ✅ Gráfico de Win Rate por mes
+- ✅ Tablas de Contactos y Oportunidades
+- ✅ Acciones rápidas (ver/editar/eliminar)
+
+### 🔐 Autenticación
+- ✅ Login con email/password
+- ✅ JWT tokens con expiración 24h
+- ✅ Bcrypt para encriptación de passwords
+- ✅ Protección de rutas privadas
+- ✅ Logout funcional
+
+### 📋 CRUD Completo
+- ✅ **Contactos**: Crear, leer, editar, eliminar
+- ✅ **Oportunidades**: Crear, leer, editar, eliminar
+- ✅ **Actividades**: Gestión completa
+- ✅ Soft delete (isActive flag)
+- ✅ Timestamps automáticos
+- ✅ Validación de datos
+
+### 🎯 Próximas Características
+- ⏳ Búsqueda y filtros avanzados
+- ⏳ Ordenamiento en tablas
+- ⏳ Paginación de datos
+- ⏳ Pipeline Kanban drag & drop
+- ⏳ Calendario de actividades
+- ⏳ Customer 360° view
+- ⏳ Exportación CSV/Excel
+- ⏳ Roles y permisos granulares
+- ⏳ Notificaciones en tiempo real
 
 ---
 
@@ -361,6 +456,88 @@ El MVP debe cumplir con:
 
 ---
 
-**Última actualización**: 2026-01-15
+---
+
+## 🎥 Demo
+
+### Capturas de Pantalla
+
+**Login Page**
+- Diseño moderno con gradiente azul STIA
+- Partículas animadas en background
+- Formulario con validación
+- Animaciones de entrada suaves
+
+**Dashboard**
+- KPIs animados con efectos hover
+- Gráficos interactivos de Recharts
+- Tablas responsivas con datos en tiempo real
+- Modales para crear/editar registros
+
+### Video Demo
+> Próximamente: Video mostrando el flujo completo de la aplicación
+
+---
+
+## 🔧 Comandos Útiles
+
+```bash
+# Backend
+cd backend
+npm run dev          # Iniciar servidor desarrollo
+npm run build        # Compilar TypeScript
+npm start            # Iniciar producción
+
+# Frontend
+cd frontend
+npm run dev          # Iniciar Vite dev server
+npm run build        # Build para producción
+npm run preview      # Preview del build
+
+# Git
+git status           # Ver estado
+git add .            # Agregar cambios
+git commit -m "msg"  # Commit
+git push             # Subir a GitHub
+```
+
+---
+
+## 🐛 Troubleshooting
+
+**Backend no responde**
+```bash
+# Verificar que el puerto 3000 esté libre
+lsof -i :3000
+
+# Verificar health del backend
+curl http://localhost:3000/health
+```
+
+**Frontend no carga**
+```bash
+# Verificar que el puerto 5174 esté libre
+lsof -i :5174
+
+# Limpiar cache de Vite
+cd frontend
+rm -rf node_modules/.vite
+npm run dev
+```
+
+**Error de CORS**
+- Verificar que el backend acepte el puerto del frontend en `backend/src/index.ts`
+- Por defecto acepta: 5173 y 5174
+
+**Credenciales no funcionan**
+- Email: `freddy@bluesystem.com`
+- Password: `password123`
+- Verificar que el hash de bcrypt esté correcto en `backend/src/utils/db.ts`
+
+---
+
+**Última actualización**: 16 de Enero 2026
+
+**Status**: ✅ MVP v1.0 Completado y Funcional
 
 **Let's build the best CRM! 🚀**
