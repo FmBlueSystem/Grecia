@@ -748,10 +748,7 @@ function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              STIA CRM MVP v1.0.0 - Desarrollado con React + TypeScript + Fastify
-            </p>
+          <div className="flex justify-center items-center">
             <p className="text-sm text-gray-500">
               © 2026 BlueSystem - Todos los derechos reservados
             </p>
