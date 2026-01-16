@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Users, Building2, TrendingUp, Activity, LogOut, Plus } from 'lucide-react';
+import { BarChart3, Users, Building2, TrendingUp, Activity, LogOut, Plus, Search, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Login from './pages/Login';
 import { RevenueChart, PipelineChart, PerformanceChart, ActivityChart } from './components/Charts';
 import ContactForm from './components/ContactForm';
 import OpportunityForm from './components/OpportunityForm';
-import { fadeInUp, staggerContainer, staggerItem, fadeInLeft, scaleIn } from './utils/animations';
+import { fadeIn, slideUp, staggerContainer, scaleIn, pageTransition } from './lib/animations';
 
 interface Contact {
   id: string;
@@ -130,13 +130,13 @@ function App() {
 
   const getStageColor = (stage: string) => {
     const colors: Record<string, string> = {
-      'Qualification': 'bg-yellow-100 text-yellow-800',
-      'Proposal': 'bg-blue-100 text-blue-800',
-      'Negotiation': 'bg-purple-100 text-purple-800',
-      'Closed Won': 'bg-green-100 text-green-800',
-      'Closed Lost': 'bg-red-100 text-red-800',
+      'Qualification': 'bg-amber-100 text-amber-800 border-amber-200',
+      'Proposal': 'bg-blue-100 text-blue-800 border-blue-200',
+      'Negotiation': 'bg-violet-100 text-violet-800 border-violet-200',
+      'Closed Won': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      'Closed Lost': 'bg-rose-100 text-rose-800 border-rose-200',
     };
-    return colors[stage] || 'bg-gray-100 text-gray-800';
+    return colors[stage] || 'bg-slate-100 text-slate-800 border-slate-200';
   };
 
   // Contact CRUD operations
@@ -231,10 +231,10 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando STIA CRM...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
+          <p className="mt-4 text-slate-600 font-medium">Cargando experiencia...</p>
         </div>
       </div>
     );
@@ -242,25 +242,21 @@ function App() {
 
   if (!backendConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md text-center bg-white p-8 rounded-lg shadow-lg">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Activity className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-md text-center bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Activity className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Backend No Disponible</h2>
-          <p className="text-gray-600 mb-4">
-            No se puede conectar al backend en http://localhost:3000
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Sistema Desconectado</h2>
+          <p className="text-slate-500 mb-6">
+            No se detecta conexión con el servidor. Verifica que el backend esté ejecutándose.
           </p>
-          <div className="bg-gray-50 p-4 rounded-lg text-left text-sm mb-4">
-            <p className="font-semibold mb-2">Para iniciar el backend:</p>
-            <code className="block bg-gray-900 text-green-400 p-2 rounded">
-              cd backend<br />
-              npm run dev
-            </code>
+          <div className="bg-slate-900 text-slate-200 p-4 rounded-xl text-left text-sm mb-6 font-mono">
+            npm run dev
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+            className="w-full bg-slate-900 text-white px-6 py-3 rounded-xl hover:bg-slate-800 transition-colors font-medium"
           >
             Reintentar Conexión
           </button>
@@ -275,484 +271,380 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <div className="min-h-screen bg-slate-50/50">
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50/50 via-slate-50/50 to-white -z-10" />
+
+      {/* Floating Header */}
+      <div className="sticky top-4 z-50 px-4 sm:px-6 lg:px-8 mb-8">
+        <nav className="glass rounded-2xl shadow-lg shadow-slate-200/50 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                S
+              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
+                <span className="text-white font-bold text-xl tracking-tighter">S</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">STIA CRM</h1>
-                <p className="text-xs text-gray-500">MVP Demo</p>
+                <h1 className="text-lg font-bold text-slate-900 leading-tight">STIA</h1>
+                <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Enterprise</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+
+            {/* Navigation Tabs - Pill Style */}
+            <div className="hidden md:flex items-center bg-slate-100/50 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${activeTab === 'dashboard'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Dashboard
+              </button>
+              <button
+                onClick={() => setActiveTab('contacts')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${activeTab === 'contacts'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Contactos
+              </button>
+              <button
+                onClick={() => setActiveTab('opportunities')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${activeTab === 'opportunities'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Oportunidades
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+              <Search className="w-5 h-5" />
+            </button>
+            <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors relative">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+            <div className="h-6 w-px bg-slate-200 mx-2"></div>
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-slate-900 leading-none">{user?.firstName} {user?.lastName}</p>
+                <p className="text-xs text-slate-500 mt-1">Admin</p>
+              </div>
+              <div className="w-9 h-9 bg-slate-900 text-white rounded-full flex items-center justify-center font-medium shadow-md shadow-slate-900/10 cursor-pointer">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
               </div>
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-primary transition-colors p-2 rounded-lg hover:bg-gray-100"
-                title="Cerrar sesión"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'dashboard'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab('contacts')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'contacts'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Contactos
-            </button>
-            <button
-              onClick={() => setActiveTab('opportunities')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === 'opportunities'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Oportunidades
-            </button>
-          </nav>
-        </div>
+        </nav>
       </div>
 
-      {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Dashboard Tab */}
-        {activeTab === 'dashboard' && stats && (
-          <motion.div
-            className="space-y-6"
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-          >
-            <motion.h2
-              className="text-2xl font-bold text-gray-900"
-              variants={fadeInLeft}
-            >
-              Dashboard Ejecutivo
-            </motion.h2>
-
-            {/* KPI Cards */}
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <AnimatePresence mode="wait">
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && stats && (
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              key="dashboard"
+              className="space-y-8"
               variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
             >
-              <motion.div
-                className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 cursor-pointer"
-                variants={staggerItem}
-                whileHover={{
-                  y: -8,
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                  transition: { duration: 0.3 },
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Revenue MTD</p>
-                    <motion.p
-                      className="text-2xl font-bold text-gray-900 mt-2"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.5, type: 'spring' }}
-                    >
-                      {formatCurrency(stats.revenue.mtd)}
-                    </motion.p>
-                    <p className="text-sm text-green-600 mt-1">{stats.revenue.trend}</p>
-                  </div>
-                  <motion.div
-                    className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center"
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
-                  >
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                  </motion.div>
+              <motion.div variants={fadeIn} className="flex justify-between items-end">
+                <div>
+                  <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard Ejecutivo</h2>
+                  <p className="text-slate-500 mt-2">Bienvenido de nuevo, aquí está el resumen de hoy.</p>
                 </div>
-                <div className="mt-4">
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className="bg-primary h-2 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${stats.revenue.percentage}%` }}
-                      transition={{ delay: 0.8, duration: 1, ease: 'easeOut' }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {stats.revenue.percentage}% de objetivo ({formatCurrency(stats.revenue.target)})
-                  </p>
+                <div className="text-sm text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+                  Última actualización: Justo ahora
                 </div>
               </motion.div>
 
+              {/* KPI Cards */}
               <motion.div
-                className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 cursor-pointer"
-                variants={staggerItem}
-                whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', transition: { duration: 0.3 } }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Pipeline Value</p>
-                    <motion.p
-                      className="text-2xl font-bold text-gray-900 mt-2"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.6, type: 'spring' }}
-                    >
-                      {formatCurrency(stats.pipeline.value)}
-                    </motion.p>
-                    <p className="text-sm text-gray-600 mt-1">{stats.pipeline.deals} deals activos</p>
-                  </div>
-                  <motion.div
-                    className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ delay: 0.7, duration: 0.8 }}
-                  >
-                    <Building2 className="w-6 h-6 text-blue-600" />
-                  </motion.div>
-                </div>
-                <p className="text-xs text-gray-500 mt-4">Ponderado: {formatCurrency(stats.pipeline.weighted)}</p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 cursor-pointer"
-                variants={staggerItem}
-                whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', transition: { duration: 0.3 } }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Win Rate</p>
-                    <motion.p
-                      className="text-2xl font-bold text-gray-900 mt-2"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.7, type: 'spring' }}
-                    >
-                      {stats.winRate.percentage}%
-                    </motion.p>
-                    <p className="text-sm text-green-600 mt-1">{stats.winRate.trend}</p>
-                  </div>
-                  <motion.div
-                    className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center"
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ delay: 0.8, duration: 0.8 }}
-                  >
-                    <BarChart3 className="w-6 h-6 text-green-600" />
-                  </motion.div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 cursor-pointer"
-                variants={staggerItem}
-                whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', transition: { duration: 0.3 } }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Actividades Hoy</p>
-                    <motion.p
-                      className="text-2xl font-bold text-gray-900 mt-2"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.8, type: 'spring' }}
-                    >
-                      {stats.activities.today}
-                    </motion.p>
-                    <p className="text-sm text-orange-600 mt-1">{stats.activities.overdue} atrasadas</p>
-                  </div>
-                  <motion.div
-                    className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center"
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ delay: 0.9, duration: 0.6, repeat: Infinity, repeatDelay: 2 }}
-                  >
-                    <Activity className="w-6 h-6 text-orange-600" />
-                  </motion.div>
-                </div>
-                <p className="text-xs text-gray-500 mt-4">Esta semana: {stats.activities.thisWeek}</p>
-              </motion.div>
-            </motion.div>
-
-            {/* Quick Stats */}
-            <motion.div
-              className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
-              variants={fadeInUp}
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen Rápido</h3>
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                 variants={staggerContainer}
-                initial="initial"
-                animate="animate"
               >
-                <motion.div variants={staggerItem}>
-                  <p className="text-sm text-gray-600">Total Contactos</p>
-                  <motion.p
-                    className="text-xl font-bold text-gray-900"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1, type: 'spring' }}
+                {[
+                  {
+                    title: 'Revenue MTD',
+                    value: formatCurrency(stats.revenue.mtd),
+                    trend: stats.revenue.trend,
+                    color: 'slate',
+                    icon: TrendingUp,
+                    metric: `${stats.revenue.percentage}%`,
+                    chart: true
+                  },
+                  {
+                    title: 'Pipeline Value',
+                    value: formatCurrency(stats.pipeline.value),
+                    trend: `${stats.pipeline.deals} active deals`,
+                    color: 'blue',
+                    icon: Building2,
+                    metric: 'Ponderado'
+                  },
+                  {
+                    title: 'Win Rate',
+                    value: `${stats.winRate.percentage}%`,
+                    trend: stats.winRate.trend,
+                    color: 'emerald',
+                    icon: BarChart3,
+                    metric: 'Mensual'
+                  },
+                  {
+                    title: 'Actividades',
+                    value: stats.activities.today,
+                    trend: `${stats.activities.overdue} atrasadas`,
+                    color: 'orange',
+                    icon: Activity,
+                    metric: 'Hoy'
+                  },
+                ].map((kpi, idx) => (
+                  <motion.div
+                    key={idx}
+                    className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 card-hover group"
+                    variants={slideUp}
                   >
-                    {contacts.length}
-                  </motion.p>
-                </motion.div>
-                <motion.div variants={staggerItem}>
-                  <p className="text-sm text-gray-600">Oportunidades Activas</p>
-                  <motion.p
-                    className="text-xl font-bold text-gray-900"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.1, type: 'spring' }}
-                  >
-                    {opportunities.length}
-                  </motion.p>
-                </motion.div>
-                <motion.div variants={staggerItem}>
-                  <p className="text-sm text-gray-600">Pipeline Ponderado</p>
-                  <motion.p
-                    className="text-xl font-bold text-gray-900"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.2, type: 'spring' }}
-                  >
-                    {formatCurrency(stats.pipeline.weighted)}
-                  </motion.p>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-
-            {/* Interactive Charts */}
-            <motion.div
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-              variants={staggerContainer}
-            >
-              <motion.div variants={scaleIn}>
-                <RevenueChart />
-              </motion.div>
-              <motion.div variants={scaleIn}>
-                <PipelineChart />
-              </motion.div>
-            </motion.div>
-
-            <motion.div
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-              variants={staggerContainer}
-            >
-              <motion.div variants={scaleIn}>
-                <PerformanceChart />
-              </motion.div>
-              <motion.div variants={scaleIn}>
-                <ActivityChart />
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Contacts Tab */}
-        {activeTab === 'contacts' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Contactos</h2>
-              <button
-                onClick={() => {
-                  setEditingContact(undefined);
-                  setShowContactForm(true);
-                }}
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Nuevo Contacto
-              </button>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Teléfono
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Empresa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tags
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {contacts.map((contact) => (
-                    <tr key={contact.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <span className="text-primary font-semibold">
-                              {contact.firstName[0]}{contact.lastName[0]}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {contact.firstName} {contact.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500">{contact.jobTitle}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {contact.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {contact.phone}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {contact.company}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex space-x-2">
-                          {contact.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Opportunities Tab */}
-        {activeTab === 'opportunities' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Oportunidades</h2>
-              <button
-                onClick={() => {
-                  setEditingOpportunity(undefined);
-                  setShowOpportunityForm(true);
-                }}
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Nueva Oportunidad
-              </button>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Oportunidad
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cuenta
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Valor
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Etapa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Probabilidad
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cierre
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {opportunities.map((opp) => (
-                    <tr key={opp.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{opp.name}</div>
-                        <div className="text-sm text-gray-500">{opp.contact}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {opp.account}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatCurrency(opp.amount)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStageColor(opp.stage)}`}>
-                          {opp.stage}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3 rounded-xl bg-${kpi.color}-50 text-${kpi.color}-600 group-hover:bg-${kpi.color}-100 transition-colors`}>
+                        <kpi.icon className="w-6 h-6" />
+                      </div>
+                      {kpi.metric && (
+                        <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                          {kpi.metric}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                            <div
-                              className="bg-primary h-2 rounded-full transition-all"
-                              style={{ width: `${opp.probability}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-gray-900">{opp.probability}%</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(opp.closeDate).toLocaleDateString('es-CR')}
-                      </td>
+                      )}
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">{kpi.title}</h3>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl font-bold text-slate-900 tracking-tight">{kpi.value}</span>
+                    </div>
+                    <p className={`text-sm mt-2 font-medium ${kpi.trend.includes('atrasadas') ? 'text-orange-500' : 'text-emerald-600'}`}>
+                      {kpi.trend}
+                    </p>
+
+                    {kpi.chart && (
+                      <div className="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-slate-900 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${stats.revenue.percentage}%` }}
+                          transition={{ delay: 0.5, duration: 1 }}
+                        />
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Charts Grid */}
+              <motion.div
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                variants={staggerContainer}
+              >
+                <motion.div variants={scaleIn} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                  <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Ingresos vs Objetivo</h3>
+                  <RevenueChart />
+                </motion.div>
+                <motion.div variants={scaleIn} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                  <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Pipeline Funnel</h3>
+                  <PipelineChart />
+                </motion.div>
+              </motion.div>
+
+              <motion.div
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                variants={staggerContainer}
+              >
+                <motion.div variants={scaleIn} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                  <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Performance por Equipo</h3>
+                  <PerformanceChart />
+                </motion.div>
+                <motion.div variants={scaleIn} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                  <h3 className="text-lg font-bold text-slate-900 mb-6 font-display">Actividad Reciente</h3>
+                  <ActivityChart />
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* Contacts Tab */}
+          {activeTab === 'contacts' && (
+            <motion.div
+              key="contacts"
+              className="space-y-6"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageTransition}
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">Directorio de Contactos</h2>
+                  <p className="text-slate-500">Gestiona tus relaciones comerciales</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingContact(undefined);
+                    setShowContactForm(true);
+                  }}
+                  className="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2 font-medium active:scale-95"
+                >
+                  <Plus className="w-5 h-5" />
+                  Nuevo Contacto
+                </button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table className="min-w-full divide-y divide-slate-100">
+                  <thead className="bg-slate-50/50">
+                    <tr>
+                      {['Nombre', 'Email', 'Teléfono', 'Empresa', 'Tags'].map((header) => (
+                        <th key={header} className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                          {header}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-50">
+                    {contacts.map((contact) => (
+                      <tr key={contact.id} className="hover:bg-slate-50/80 cursor-pointer transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border border-white shadow-sm text-slate-600 font-semibold group-hover:scale-110 transition-transform">
+                              {contact.firstName[0]}{contact.lastName[0]}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-semibold text-slate-900">
+                                {contact.firstName} {contact.lastName}
+                              </div>
+                              <div className="text-xs text-slate-500">{contact.jobTitle}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {contact.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {contact.phone}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                          {contact.company}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex space-x-2">
+                            {contact.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-100"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Opportunities Tab */}
+          {activeTab === 'opportunities' && (
+            <motion.div
+              key="opportunities"
+              className="space-y-6"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageTransition}
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">Pipeline de Oportunidades</h2>
+                  <p className="text-slate-500">Seguimiento de negocios activos</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingOpportunity(undefined);
+                    setShowOpportunityForm(true);
+                  }}
+                  className="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2 font-medium active:scale-95"
+                >
+                  <Plus className="w-5 h-5" />
+                  Nueva Oportunidad
+                </button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table className="min-w-full divide-y divide-slate-100">
+                  <thead className="bg-slate-50/50">
+                    <tr>
+                      {['Oportunidad', 'Cuenta', 'Valor', 'Etapa', 'Probabilidad', 'Cierre'].map((header) => (
+                        <th key={header} className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-50">
+                    {opportunities.map((opp) => (
+                      <tr key={opp.id} className="hover:bg-slate-50/80 cursor-pointer transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-slate-900">{opp.name}</div>
+                          <div className="text-xs text-slate-500">{opp.contact}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {opp.account}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 font-mono">
+                          {formatCurrency(opp.amount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStageColor(opp.stage)}`}>
+                            {opp.stage}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="w-16 bg-slate-100 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-slate-900 h-2 rounded-full transition-all duration-1000"
+                                style={{ width: `${opp.probability}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium text-slate-600">{opp.probability}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {new Date(opp.closeDate).toLocaleDateString('es-CR')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-center items-center">
-            <p className="text-sm text-gray-500">
-              © 2026 BlueSystem - Todos los derechos reservados
-            </p>
-          </div>
+      {/* Footer - Minimal */}
+      <footer className="mt-12 py-8 border-t border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm text-slate-400 font-medium tracking-wide">
+            POWERED BY <span className="text-slate-900 font-bold">BLUESYSTEM</span>
+          </p>
         </div>
       </footer>
 
