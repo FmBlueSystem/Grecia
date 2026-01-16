@@ -1,0 +1,226 @@
+// STIA CRM - Prisma Schema
+// Modelo de datos simplificado para MVP
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER & AUTH ====================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  avatar    String?
+
+  // Role
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  // Team
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id])
+
+  // Status
+  isActive  Boolean  @default(true)
+
+  // Timestamps
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Ownership relations
+  ownedContacts      Contact[]      @relation("ContactOwner")
+  ownedAccounts      Account[]      @relation("AccountOwner")
+  ownedOpportunities Opportunity[]  @relation("OpportunityOwner")
+  activities         Activity[]     @relation("ActivityOwner")
+
+  @@index([email])
+  @@index([roleId])
+  @@index([isActive])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  permissions Json     // { module: string, actions: string[] }[]
+  isSystem    Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     User[]
+}
+
+// ==================== CRM ENTITIES ====================
+
+model Contact {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  mobile    String?
+  jobTitle  String?
+
+  // Marketing
+  leadSource String?
+  tags       String[]
+
+  // Relations
+  accountId  String?
+  account    Account? @relation(fields: [accountId], references: [id])
+
+  ownerId    String
+  owner      User     @relation("ContactOwner", fields: [ownerId], references: [id])
+
+  // Status
+  isActive   Boolean  @default(true)
+
+  // Timestamps
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Reverse relations
+  opportunities Opportunity[]
+  activities    Activity[]
+
+  @@index([email])
+  @@index([accountId])
+  @@index([ownerId])
+  @@index([isActive])
+}
+
+model Account {
+  id           String   @id @default(uuid())
+  name         String
+  industry     String?
+  accountType  String?
+  website      String?
+  phone        String?
+
+  // Relations
+  ownerId      String
+  owner        User     @relation("AccountOwner", fields: [ownerId], references: [id])
+
+  // Status
+  isActive     Boolean  @default(true)
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Reverse relations
+  contacts      Contact[]
+  opportunities Opportunity[]
+  activities    Activity[]
+
+  @@index([name])
+  @@index([ownerId])
+  @@index([isActive])
+}
+
+model Opportunity {
+  id          String   @id @default(uuid())
+  name        String
+  amount      Float
+  currency    String   @default("USD")
+
+  // Pipeline
+  stage       String
+  probability Int
+
+  // Timing
+  closeDate   DateTime
+
+  // Relations
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id])
+
+  contactId   String?
+  contact     Contact? @relation(fields: [contactId], references: [id])
+
+  ownerId     String
+  owner       User     @relation("OpportunityOwner", fields: [ownerId], references: [id])
+
+  // Status
+  isClosed    Boolean  @default(false)
+  isWon       Boolean?
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Reverse relations
+  activities  Activity[]
+
+  @@index([accountId])
+  @@index([contactId])
+  @@index([ownerId])
+  @@index([stage])
+  @@index([closeDate])
+  @@index([isClosed])
+}
+
+model Activity {
+  id           String    @id @default(uuid())
+  activityType String    // 'Call', 'Email', 'Meeting', 'Task', 'Note'
+  subject      String
+  description  String?
+
+  // Timing
+  dueDate      DateTime?
+
+  // Status
+  status       String    // 'Planned', 'Completed', 'Cancelled'
+  priority     String?
+
+  // Relations
+  contactId    String?
+  contact      Contact?  @relation(fields: [contactId], references: [id])
+
+  accountId    String?
+  account      Account?  @relation(fields: [accountId], references: [id])
+
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+
+  ownerId      String
+  owner        User      @relation("ActivityOwner", fields: [ownerId], references: [id])
+
+  // Status
+  isCompleted  Boolean   @default(false)
+  completedAt  DateTime?
+
+  // Timestamps
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([activityType])
+  @@index([status])
+  @@index([ownerId])
+  @@index([contactId])
+  @@index([accountId])
+  @@index([opportunityId])
+  @@index([dueDate])
+}
