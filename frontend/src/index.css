@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Premium Slate Palette */
+  /* Premium Slate Palette (Base) */
   --color-slate-50: #F8FAFC;
   --color-slate-100: #F1F5F9;
   --color-slate-200: #E2E8F0;
@@ -14,16 +14,24 @@
   --color-slate-900: #0F172A;
   --color-slate-950: #020617;
 
-  /* STIA Modernized Primary (Deep Blue) */
-  --color-primary: #0F172A; /* Slate 900 as primary for sophisticated look */
+  /* STIA Vibrant Accents */
+  --color-primary: #0F172A;
   --color-primary-light: #334155;
-  --color-accent: #3B82F6; /* Vibrant Blue for actions */
+
+  /* Rich Gradients */
+  --color-accent: #3B82F6;
   --color-accent-hover: #2563EB;
+  --color-indigo-500: #6366f1;
+  --color-violet-500: #8b5cf6;
+  --color-fuchsia-500: #d946ef;
+  --color-cyan-500: #06b6d4;
+  --color-teal-500: #14b8a6;
 
   /* Semantic Colors */
   --color-background: var(--color-slate-50);
   --color-surface: #FFFFFF;
-  --color-surface-glass: rgba(255, 255, 255, 0.7);
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
+  /* More opaque for better contrast with colorful bgs */
   --color-text-main: var(--color-slate-900);
   --color-text-muted: var(--color-slate-500);
   --color-border: var(--color-slate-200);
@@ -32,12 +40,13 @@
   --radius: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
-  
-  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
+  --shadow-glow: 0 0 20px -5px rgba(59, 130, 246, 0.5);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 body {
   background-color: var(--color-background);
@@ -48,30 +57,52 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Utilities Enhanced */
 .glass {
   background: var(--color-surface-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .glass-dark {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
 }
 
+.glass-accent {
+  background: rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 .card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  border-color: var(--color-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Gradient Text Utility */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to right, var(--color-slate-900), var(--color-accent));
+}
+
+.text-gradient-primary {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to right, #2563EB, #4F46E5);
 }
 
 /* Scrollbar */

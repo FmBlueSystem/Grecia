@@ -20,23 +20,4 @@
 *   Orden de clases: Layout -> Box Model -> Typography -> Visual -> Misc. (O usar plugin de ordenamiento).
 *   No usar `@apply` excesivamente. Preferir clases utilitarias en el JSX.
 
-## 📂 Estructura de Carpetas (Conductor Compliant)
-```text
-/
-├── CONTEXT.md          # Visión y Dominio
-├── TECH_STACK.md       # Tecnologías
-├── CONVENTIONS.md      # Estas reglas
-├── plan.md             # Plan de ejecución activo (The Track)
-├── src/
-│   ├── features/       # Feature-based architecture
-│   │   ├── auth/
-│   │   ├── contacts/
-│   ├── ui/             # Componentes compartidos (Design System)
-│   ├── lib/            # Utilidades core
-```
 
-## 🤖 Reglas para el Agente (IA)
-1.  **Lee el Contexto**: Antes de proponer cambios grandes, lee `CONTEXT.md`.
-2.  **Actualiza el Plan**: Si terminas una tarea, márcala en `plan.md`. Si surgen nuevas tareas, agrégalas.
-3.  **No rompas el build**: Verifica tipos antes de confirmar código.
-4.  **Estética**: Si generas UI, asegúrate de que se vea "Premium" (sombras suaves, bordes redondeados, espaciado generoso).

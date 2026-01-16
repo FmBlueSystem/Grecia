@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fadeInUp, scaleIn } from '../utils/animations';
+import { fadeIn, scaleIn } from '../lib/animations';
 
 interface LoginProps {
   onLoginSuccess: (token: string, user: any) => void;
@@ -44,29 +44,34 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background particles */}
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-20" />
+
+      {/* Abstract Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl"
+          className="absolute top-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],
+            x: [0, 50, 0],
           }}
           transition={{
-            duration: 8,
+            duration: 15,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"
+          className="absolute bottom-20 right-20 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-3xl"
           animate={{
             scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
+            opacity: [0.3, 0.5, 0.3],
+            y: [0, -50, 0],
           }}
           transition={{
-            duration: 10,
+            duration: 18,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
@@ -74,82 +79,79 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       </div>
 
       <motion.div
-        className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10"
+        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-md relative z-10 border border-white/20"
         variants={scaleIn}
-        initial="initial"
-        animate="animate"
+        initial="hidden"
+        animate="visible"
       >
         {/* Logo */}
         <motion.div
           className="text-center mb-8"
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
+          variants={fadeIn}
         >
           <motion.div
-            className="inline-block bg-primary/10 p-4 rounded-full mb-4"
-            animate={{
-              scale: [1, 1.05, 1],
-              rotate: [0, 5, -5, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            className="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-6 shadow-xl shadow-slate-900/20"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
-            <Lock className="w-12 h-12 text-primary" />
+            <Lock className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-gray-900">STIA CRM</h1>
-          <p className="text-gray-600 mt-2">Inicia sesión en tu cuenta</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">STIA CRM</h1>
+          <p className="text-slate-500 mt-2 font-medium">Enterprise Access Portal</p>
         </motion.div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm font-medium"
+          >
             {error}
-          </div>
+          </motion.div>
         )}
 
         {/* Demo Credentials Info */}
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
-          <p className="text-sm font-medium mb-1">Credenciales de prueba:</p>
-          <p className="text-sm">Email: freddy@bluesystem.com</p>
-          <p className="text-sm">Password: password123</p>
+        <div className="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-3 rounded-xl mb-6 text-sm">
+          <p className="font-semibold mb-1">Credenciales Demo:</p>
+          <div className="flex flex-col gap-0.5 opacity-80">
+            <p>freddy@bluesystem.com</p>
+            <p>password123</p>
+          </div>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Correo electrónico
+            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+              Correo Institucional
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="relative group">
+              <Mail className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="tu@email.com"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-400"
+                placeholder="nombre@empresa.com"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
               Contraseña
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="relative group">
+              <Lock className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-400"
                 placeholder="••••••••"
                 required
               />
@@ -159,18 +161,27 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-slate-900/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Autenticando...
+              </span>
+            ) : (
+              'Iniciar Sesión'
+            )}
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p>STIA CRM MVP v1.0</p>
-          <p className="mt-1">© 2026 STIA. Todos los derechos reservados.</p>
+        <div className="mt-8 text-center">
+          <p className="text-xs text-slate-400 font-medium tracking-wide">
+            POWERED BY <span className="text-slate-600 font-bold">BLUESYSTEM</span>
+          </p>
         </div>
       </motion.div>
     </div>
   );
 }
+

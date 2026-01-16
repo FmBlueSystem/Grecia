@@ -14,8 +14,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-// Paleta profesional para dashboards empresariales
-const COLORS = ['#4338CA', '#0D9488', '#059669', '#CA8A04', '#DC2626'];
+// Conductor Premium Palette (Slate/Blue/Teal)
+const COLORS = ['#334155', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+const GRID_COLOR = '#E2E8F0';
+const TEXT_COLOR = '#64748B';
 
 interface RevenueChartProps {
   data?: Array<{ month: string; revenue: number; target: number }>;
@@ -34,35 +36,55 @@ export function RevenueChart({ data }: RevenueChartProps) {
   const chartData = data || defaultData;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-          <XAxis dataKey="month" stroke="#6B7280" />
-          <YAxis stroke="#6B7280" />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="revenue"
-            stroke="#059669"
-            strokeWidth={3}
-            name="Revenue Actual"
-            dot={{ fill: '#059669', r: 5 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="target"
-            stroke="#64748B"
-            strokeWidth={2}
-            strokeDasharray="5 5"
-            name="Target"
-            dot={{ fill: '#64748B', r: 4 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} />
+        <XAxis
+          dataKey="month"
+          stroke={TEXT_COLOR}
+          axisLine={false}
+          tickLine={false}
+          dy={10}
+          tick={{ fontSize: 12 }}
+        />
+        <YAxis
+          stroke={TEXT_COLOR}
+          axisLine={false}
+          tickLine={false}
+          tick={{ fontSize: 12 }}
+          tickFormatter={(value) => `$${value / 1000}k`}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: '#1E293B',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#F8FAFC',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}
+          itemStyle={{ color: '#F8FAFC' }}
+        />
+        <Legend wrapperStyle={{ paddingTop: '20px' }} />
+        <Line
+          type="monotone"
+          dataKey="revenue"
+          stroke="#10B981"
+          strokeWidth={3}
+          name="Revenue Actual"
+          dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
+          activeDot={{ r: 6, strokeWidth: 0 }}
+        />
+        <Line
+          type="monotone"
+          dataKey="target"
+          stroke="#94A3B8"
+          strokeWidth={2}
+          strokeDasharray="4 4"
+          name="Target"
+          dot={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -80,28 +102,39 @@ export function PipelineChart({ data }: PipelineChartProps) {
   const chartData = data || defaultData;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Pipeline por Etapa</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={({ stage, percent }) => `${stage}: ${(percent * 100).toFixed(0)}%`}
-            outerRadius={100}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={chartData}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={100}
+          fill="#8884d8"
+          paddingAngle={5}
+          dataKey="value"
+        >
+          {chartData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(value: number) => `$${value.toLocaleString()}`}
+          contentStyle={{
+            backgroundColor: '#1E293B',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#F8FAFC'
+          }}
+        />
+        <Legend
+          layout="vertical"
+          verticalAlign="middle"
+          align="right"
+          wrapperStyle={{ fontSize: '12px' }}
+        />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -120,20 +153,32 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
   const chartData = data || defaultData;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance por Vendedor</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-          <XAxis dataKey="name" stroke="#6B7280" />
-          <YAxis stroke="#6B7280" />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="deals" fill="#4338CA" name="Deals Cerrados" />
-          <Bar dataKey="revenue" fill="#059669" name="Revenue ($)" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={chartData} layout="vertical" barSize={20}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} horizontal={true} vertical={false} />
+        <XAxis type="number" hide />
+        <YAxis
+          dataKey="name"
+          type="category"
+          stroke={TEXT_COLOR}
+          axisLine={false}
+          tickLine={false}
+          width={80}
+          tick={{ fontSize: 12 }}
+        />
+        <Tooltip
+          cursor={{ fill: '#F1F5F9' }}
+          contentStyle={{
+            backgroundColor: '#1E293B',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#F8FAFC'
+          }}
+        />
+        <Legend />
+        <Bar dataKey="revenue" fill="#3B82F6" name="Revenue ($)" radius={[0, 4, 4, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -153,20 +198,31 @@ export function ActivityChart({ data }: ActivityChartProps) {
   const chartData = data || defaultData;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividades de la Semana</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-          <XAxis dataKey="day" stroke="#6B7280" />
-          <YAxis stroke="#6B7280" />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="calls" stackId="a" fill="#4338CA" name="Llamadas" />
-          <Bar dataKey="meetings" stackId="a" fill="#0D9488" name="Reuniones" />
-          <Bar dataKey="emails" stackId="a" fill="#CA8A04" name="Emails" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={chartData} barSize={32}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} />
+        <XAxis
+          dataKey="day"
+          stroke={TEXT_COLOR}
+          axisLine={false}
+          tickLine={false}
+          dy={10}
+        />
+        <Tooltip
+          cursor={{ fill: '#F1F5F9' }}
+          contentStyle={{
+            backgroundColor: '#1E293B',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#F8FAFC'
+          }}
+        />
+        <Legend wrapperStyle={{ paddingTop: '20px' }} />
+        <Bar dataKey="calls" stackId="a" fill="#3B82F6" name="Llamadas" />
+        <Bar dataKey="meetings" stackId="a" fill="#10B981" name="Reuniones" />
+        <Bar dataKey="emails" stackId="a" fill="#F59E0B" name="Emails" radius={[4, 4, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
+
