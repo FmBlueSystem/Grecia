@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const COLORS = ['#0067B2', '#3385C2', '#66A3D2', '#99C1E2', '#CCDFF1'];
+const COLORS = ['#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 interface RevenueChartProps {
   data?: Array<{ month: string; revenue: number; target: number }>;
@@ -45,10 +45,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <Line
             type="monotone"
             dataKey="revenue"
-            stroke="#0067B2"
+            stroke="#10B981"
             strokeWidth={3}
             name="Revenue Actual"
-            dot={{ fill: '#0067B2', r: 5 }}
+            dot={{ fill: '#10B981', r: 5 }}
           />
           <Line
             type="monotone"
@@ -128,8 +128,8 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           <YAxis stroke="#6B7280" />
           <Tooltip />
           <Legend />
-          <Bar dataKey="deals" fill="#3385C2" name="Deals Cerrados" />
-          <Bar dataKey="revenue" fill="#0067B2" name="Revenue ($)" />
+          <Bar dataKey="deals" fill="#8B5CF6" name="Deals Cerrados" />
+          <Bar dataKey="revenue" fill="#10B981" name="Revenue ($)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -161,9 +161,9 @@ export function ActivityChart({ data }: ActivityChartProps) {
           <YAxis stroke="#6B7280" />
           <Tooltip />
           <Legend />
-          <Bar dataKey="calls" stackId="a" fill="#0067B2" name="Llamadas" />
-          <Bar dataKey="meetings" stackId="a" fill="#3385C2" name="Reuniones" />
-          <Bar dataKey="emails" stackId="a" fill="#66A3D2" name="Emails" />
+          <Bar dataKey="calls" stackId="a" fill="#EC4899" name="Llamadas" />
+          <Bar dataKey="meetings" stackId="a" fill="#F59E0B" name="Reuniones" />
+          <Bar dataKey="emails" stackId="a" fill="#06B6D4" name="Emails" />
         </BarChart>
       </ResponsiveContainer>
     </div>
