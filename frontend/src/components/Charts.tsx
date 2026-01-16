@@ -14,7 +14,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const COLORS = ['#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
+// Paleta profesional para dashboards empresariales
+const COLORS = ['#4338CA', '#0D9488', '#059669', '#CA8A04', '#DC2626'];
 
 interface RevenueChartProps {
   data?: Array<{ month: string; revenue: number; target: number }>;
@@ -45,19 +46,19 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <Line
             type="monotone"
             dataKey="revenue"
-            stroke="#10B981"
+            stroke="#059669"
             strokeWidth={3}
             name="Revenue Actual"
-            dot={{ fill: '#10B981', r: 5 }}
+            dot={{ fill: '#059669', r: 5 }}
           />
           <Line
             type="monotone"
             dataKey="target"
-            stroke="#ABB8C3"
+            stroke="#64748B"
             strokeWidth={2}
             strokeDasharray="5 5"
             name="Target"
-            dot={{ fill: '#ABB8C3', r: 4 }}
+            dot={{ fill: '#64748B', r: 4 }}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -128,8 +129,8 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           <YAxis stroke="#6B7280" />
           <Tooltip />
           <Legend />
-          <Bar dataKey="deals" fill="#8B5CF6" name="Deals Cerrados" />
-          <Bar dataKey="revenue" fill="#10B981" name="Revenue ($)" />
+          <Bar dataKey="deals" fill="#4338CA" name="Deals Cerrados" />
+          <Bar dataKey="revenue" fill="#059669" name="Revenue ($)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -161,9 +162,9 @@ export function ActivityChart({ data }: ActivityChartProps) {
           <YAxis stroke="#6B7280" />
           <Tooltip />
           <Legend />
-          <Bar dataKey="calls" stackId="a" fill="#EC4899" name="Llamadas" />
-          <Bar dataKey="meetings" stackId="a" fill="#F59E0B" name="Reuniones" />
-          <Bar dataKey="emails" stackId="a" fill="#06B6D4" name="Emails" />
+          <Bar dataKey="calls" stackId="a" fill="#4338CA" name="Llamadas" />
+          <Bar dataKey="meetings" stackId="a" fill="#0D9488" name="Reuniones" />
+          <Bar dataKey="emails" stackId="a" fill="#CA8A04" name="Emails" />
         </BarChart>
       </ResponsiveContainer>
     </div>
