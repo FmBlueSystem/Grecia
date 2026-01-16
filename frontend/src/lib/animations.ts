@@ -1,7 +1,7 @@
-import { Variants } from 'framer-motion';
+import type { Variants, Transition } from 'framer-motion';
 
 // Standard transition for smooth feel
-export const transition = { duration: 0.4, ease: [0.43, 0.13, 0.23, 0.96] };
+export const transition: Transition = { duration: 0.4, ease: [0.43, 0.13, 0.23, 0.96] };
 
 // Fade in (opacity only)
 export const fadeIn: Variants = {
@@ -79,7 +79,14 @@ export const slideInRight: Variants = {
 
 export const pageTransition: Variants = {
     initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.3, ease: "easeInOut" }
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.3, ease: "easeInOut" }
+    },
+    exit: {
+        opacity: 0,
+        y: -10,
+        transition: { duration: 0.3, ease: "easeInOut" }
+    }
 };

@@ -114,12 +114,12 @@ export function PipelineChart({ data }: PipelineChartProps) {
           paddingAngle={5}
           dataKey="value"
         >
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+          {chartData.map((_entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) => `$${value.toLocaleString()}`}
+          formatter={(value: number | string | Array<number | string>) => `$${Number(value).toLocaleString()}`}
           contentStyle={{
             backgroundColor: '#1E293B',
             border: 'none',

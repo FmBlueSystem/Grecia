@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { modalVariants, overlayVariants } from '../utils/animations';
+import { scaleIn, fadeIn } from '../lib/animations';
 
 interface Contact {
   id?: string;
@@ -86,16 +86,16 @@ export default function ContactForm({ contact, onClose, onSave }: ContactFormPro
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-      variants={overlayVariants}
-      initial="initial"
-      animate="animate"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+      variants={fadeIn}
+      initial="hidden"
+      animate="visible"
       exit="exit"
       onClick={onClose}
     >
       <motion.div
         className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
-        variants={modalVariants}
+        variants={scaleIn}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
