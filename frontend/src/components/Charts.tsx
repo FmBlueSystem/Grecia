@@ -119,7 +119,7 @@ export function PipelineChart({ data }: PipelineChartProps) {
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number | string | Array<number | string>) => `$${Number(value).toLocaleString()}`}
+          formatter={(value: any) => `$${Number(value).toLocaleString()}`}
           contentStyle={{
             backgroundColor: '#1E293B',
             border: 'none',

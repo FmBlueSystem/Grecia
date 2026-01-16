@@ -8,26 +8,28 @@ import OpportunityForm from './components/OpportunityForm';
 import { fadeIn, slideUp, staggerContainer, scaleIn, pageTransition } from './lib/animations';
 
 interface Contact {
-  id: string;
+  id?: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
-  jobTitle: string;
-  company: string;
+  email?: string;
+  phone?: string;
+  mobile?: string;
+  jobTitle?: string;
+  company?: string;
+  leadSource?: string;
   tags: string[];
 }
 
 interface Opportunity {
-  id: string;
+  id?: string;
   name: string;
   amount: number;
   currency: string;
   stage: string;
   probability: number;
   closeDate: string;
-  account: string;
-  contact: string;
+  accountName: string;
+  contactName: string;
 }
 
 interface Stats {
@@ -301,8 +303,8 @@ function App() {
               <button
                 onClick={() => setActiveTab('dashboard')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center relative overflow-hidden ${activeTab === 'dashboard'
-                    ? 'text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                  ? 'text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                   }`}
               >
                 {activeTab === 'dashboard' && (
@@ -321,8 +323,8 @@ function App() {
               <button
                 onClick={() => setActiveTab('contacts')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center relative overflow-hidden ${activeTab === 'contacts'
-                    ? 'text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                  ? 'text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                   }`}
               >
                 {activeTab === 'contacts' && (
@@ -341,8 +343,8 @@ function App() {
               <button
                 onClick={() => setActiveTab('opportunities')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center relative overflow-hidden ${activeTab === 'opportunities'
-                    ? 'text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                  ? 'text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                   }`}
               >
                 {activeTab === 'opportunities' && (
@@ -655,10 +657,10 @@ function App() {
                       <tr key={opp.id} className="hover:bg-indigo-50/30 cursor-pointer transition-colors group">
                         <td className="px-6 py-4">
                           <div className="text-sm font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">{opp.name}</div>
-                          <div className="text-xs text-slate-500">{opp.contact}</div>
+                          <div className="text-xs text-slate-500">{opp.contactName}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          {opp.account}
+                          {opp.accountName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900 font-mono">
                           {formatCurrency(opp.amount)}
