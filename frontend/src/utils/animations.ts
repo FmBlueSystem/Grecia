@@ -1,7 +1,5 @@
-import { Variants } from 'framer-motion';
-
 // Animación de fade in desde abajo
-export const fadeInUp: Variants = {
+export const fadeInUp = {
   initial: {
     opacity: 0,
     y: 40,
@@ -24,7 +22,7 @@ export const fadeInUp: Variants = {
 };
 
 // Animación de fade in desde la izquierda
-export const fadeInLeft: Variants = {
+export const fadeInLeft = {
   initial: {
     opacity: 0,
     x: -60,
@@ -40,7 +38,7 @@ export const fadeInLeft: Variants = {
 };
 
 // Animación de fade in desde la derecha
-export const fadeInRight: Variants = {
+export const fadeInRight = {
   initial: {
     opacity: 0,
     x: 60,
@@ -56,7 +54,7 @@ export const fadeInRight: Variants = {
 };
 
 // Animación de escala (zoom in)
-export const scaleIn: Variants = {
+export const scaleIn = {
   initial: {
     opacity: 0,
     scale: 0.8,
@@ -72,7 +70,7 @@ export const scaleIn: Variants = {
 };
 
 // Animación para contenedor con hijos (stagger)
-export const staggerContainer: Variants = {
+export const staggerContainer = {
   initial: {},
   animate: {
     transition: {
@@ -83,7 +81,7 @@ export const staggerContainer: Variants = {
 };
 
 // Animación para items individuales en un stagger
-export const staggerItem: Variants = {
+export const staggerItem = {
   initial: {
     opacity: 0,
     y: 20,
@@ -99,7 +97,7 @@ export const staggerItem: Variants = {
 };
 
 // Animación de modal
-export const modalVariants: Variants = {
+export const modalVariants = {
   initial: {
     opacity: 0,
     scale: 0.75,
@@ -126,7 +124,7 @@ export const modalVariants: Variants = {
 };
 
 // Animación de overlay (backdrop)
-export const overlayVariants: Variants = {
+export const overlayVariants = {
   initial: {
     opacity: 0,
   },
