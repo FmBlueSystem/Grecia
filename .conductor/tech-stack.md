@@ -19,8 +19,8 @@
 *   **Framework**: Fastify 5 (por performance y bajas latencias).
 *   **Lenguaje**: TypeScript 5
 *   **Base de Datos**:
-    *   *Actual (MVP)*: In-memory (transición).
-    *   *Target*: PostgreSQL + Prisma ORM.
+    *   *Actual (MVP)*: PostgreSQL + Prisma ORM (Dockerized).
+    *   *Target*: Optimización y escalado de la instancia PostgreSQL.
 *   **IA & Orquestación**:
     *   **Modelo Principal**: Google Gemini Pro (vía Vertex AI o AI Studio).
     *   **Patrón**: Orchestrator-Workers (ver `docs/CONDUCTOR_METHODOLOGY.md`).
