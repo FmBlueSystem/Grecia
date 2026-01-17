@@ -1,19 +1,16 @@
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { scaleIn, fadeIn } from '../lib/animations';
+import { contactSchema, type ContactFormData } from '../lib/schemas';
+import { ButtonLoading } from './ButtonLoading';
+import { toast } from '../lib/toast';
+import { useClickOutside } from '../lib/hooks';
+import { useRef } from 'react';
 
-interface Contact {
+interface Contact extends ContactFormData {
   id?: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  mobile?: string;
-  jobTitle?: string;
-  company?: string;
-  leadSource?: string;
-  tags: string[];
 }
 
 interface ContactFormProps {
@@ -23,64 +20,43 @@ interface ContactFormProps {
 }
 
 export default function ContactForm({ contact, onClose, onSave }: ContactFormProps) {
-  const [formData, setFormData] = useState<Contact>(
-    contact || {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: contact || {
       firstName: '',
       lastName: '',
       email: '',
       phone: '',
-      mobile: '',
+      companyName: '',
       jobTitle: '',
-      company: '',
-      leadSource: '',
-      tags: [],
-    }
-  );
-  const [tagInput, setTagInput] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+      notes: '',
+    },
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // Close on outside click (only if not submitting)
+  useClickOutside(modalRef, () => {
+    if (!isSubmitting) onClose();
+  });
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()],
-      });
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter((t) => t !== tag),
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!formData.firstName || !formData.lastName) {
-      setError('Nombre y apellido son requeridos');
-      return;
-    }
-
-    setIsSubmitting(true);
+  const onSubmit = async (data: ContactFormData) => {
     try {
-      await onSave(formData);
+      await onSave({ ...data, id: contact?.id });
+      toast.success(
+        contact ? 'Contacto actualizado' : 'Contacto creado',
+        'Los cambios se guardaron exitosamente'
+      );
       onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar contacto');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      toast.error(
+        'Error al guardar',
+        error instanceof Error ? error.message : 'No se pudo guardar el contacto'
+      );
     }
   };
 
@@ -91,202 +67,181 @@ export default function ContactForm({ contact, onClose, onSave }: ContactFormPro
       initial="hidden"
       animate="visible"
       exit="exit"
-      onClick={onClose}
     >
       <motion.div
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        ref={modalRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
         variants={scaleIn}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-primary text-white px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <h2 className="text-xl font-bold">
             {contact ? 'Editar Contacto' : 'Nuevo Contacto'}
           </h2>
           <button
             onClick={onClose}
-            className="text-white hover:bg-primary-dark rounded-lg p-1 transition-colors"
+            disabled={isSubmitting}
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-all disabled:opacity-50"
+            aria-label="Cerrar"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-              {error}
-            </div>
-          )}
-
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Nombre <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
+                {...register('firstName')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.firstName
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="Juan"
               />
+              {errors.firstName && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.firstName.message}</p>
+              )}
             </div>
 
             {/* Last Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Apellido <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
+                {...register('lastName')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.lastName
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="Pérez"
               />
+              {errors.lastName && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.lastName.message}</p>
+              )}
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                {...register('email')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.email
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="juan@ejemplo.com"
               />
+              {errors.email && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Teléfono</label>
               <input
                 type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                {...register('phone')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.phone
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="+506 1234-5678"
               />
+              {errors.phone && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.phone.message}</p>
+              )}
             </div>
 
-            {/* Mobile */}
+            {/* Company Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Móvil</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Empresa</label>
               <input
-                type="tel"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                type="text"
+                {...register('companyName')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.companyName
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="ACME Corp"
               />
+              {errors.companyName && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.companyName.message}</p>
+              )}
             </div>
 
             {/* Job Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Puesto</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Puesto</label>
               <input
                 type="text"
-                name="jobTitle"
-                value={formData.jobTitle}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                {...register('jobTitle')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  errors.jobTitle
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                placeholder="Director de Ventas"
               />
-            </div>
-
-            {/* Company */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Lead Source */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fuente de Lead
-              </label>
-              <select
-                name="leadSource"
-                value={formData.leadSource}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">Seleccionar...</option>
-                <option value="Referral">Referido</option>
-                <option value="Website">Sitio Web</option>
-                <option value="Event">Evento</option>
-                <option value="Cold Call">Llamada en Frío</option>
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="Partner">Partner</option>
-              </select>
+              {errors.jobTitle && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.jobTitle.message}</p>
+              )}
             </div>
           </div>
 
-          {/* Tags */}
+          {/* Notes */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Agregar tag..."
-              />
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
-              >
-                Agregar
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="hover:bg-primary/20 rounded-full p-0.5"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Notas</label>
+            <textarea
+              {...register('notes')}
+              rows={3}
+              className={`w-full px-4 py-2.5 border rounded-lg transition-all focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${
+                errors.notes
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-slate-300 hover:border-slate-400'
+              }`}
+              placeholder="Información adicional sobre el contacto..."
+            />
+            {errors.notes && (
+              <p className="mt-1.5 text-sm text-red-600">{errors.notes.message}</p>
+            )}
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex justify-end gap-3">
-            <button
+          <div className="mt-8 flex justify-end gap-3">
+            <ButtonLoading
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={isSubmitting}
             >
               Cancelar
-            </button>
-            <button
+            </ButtonLoading>
+            <ButtonLoading
               type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              loading={isSubmitting}
+              loadingText="Guardando..."
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar'}
-            </button>
+              {contact ? 'Actualizar' : 'Crear'} Contacto
+            </ButtonLoading>
           </div>
         </form>
       </motion.div>

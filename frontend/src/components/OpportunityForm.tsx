@@ -1,18 +1,16 @@
-import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { scaleIn, fadeIn } from '../lib/animations';
+import { opportunitySchema, type OpportunityFormData, stageTranslations } from '../lib/schemas';
+import { ButtonLoading } from './ButtonLoading';
+import { toast } from '../lib/toast';
+import { useClickOutside } from '../lib/hooks';
+import { useRef } from 'react';
 
-interface Opportunity {
+interface Opportunity extends OpportunityFormData {
   id?: string;
-  name: string;
-  amount: number;
-  currency: string;
-  stage: string;
-  probability: number;
-  closeDate: string;
-  accountName: string;
-  contactName: string;
 }
 
 interface OpportunityFormProps {
@@ -21,85 +19,66 @@ interface OpportunityFormProps {
   onSave: (opportunity: Opportunity) => Promise<void>;
 }
 
-export default function OpportunityForm({
-  opportunity,
-  onClose,
-  onSave,
-}: OpportunityFormProps) {
-  const [formData, setFormData] = useState<Opportunity>(
-    opportunity || {
+const stages: Array<{ value: OpportunityFormData['stage']; probability: number }> = [
+  { value: 'prospecting', probability: 10 },
+  { value: 'qualification', probability: 25 },
+  { value: 'proposal', probability: 50 },
+  { value: 'negotiation', probability: 75 },
+  { value: 'closed_won', probability: 100 },
+  { value: 'closed_lost', probability: 0 },
+];
+
+export default function OpportunityForm({ opportunity, onClose, onSave }: OpportunityFormProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<OpportunityFormData>({
+    resolver: zodResolver(opportunitySchema),
+    defaultValues: opportunity || {
       name: '',
+      accountId: '',
+      contactId: '',
       amount: 0,
-      currency: 'USD',
-      stage: 'Qualification',
-      probability: 0,
-      closeDate: '',
-      accountName: '',
-      contactName: '',
-    }
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+      probability: 10,
+      stage: 'prospecting',
+      expectedCloseDate: '',
+      description: '',
+      nextStep: '',
+    },
+  });
 
-  const stages = [
-    { value: 'Qualification', label: 'Calificación', probability: 10 },
-    { value: 'Needs Analysis', label: 'Análisis de Necesidades', probability: 25 },
-    { value: 'Proposal', label: 'Propuesta', probability: 50 },
-    { value: 'Negotiation', label: 'Negociación', probability: 75 },
-    { value: 'Closed Won', label: 'Ganada', probability: 100 },
-    { value: 'Closed Lost', label: 'Perdida', probability: 0 },
-  ];
+  useClickOutside(modalRef, () => {
+    if (!isSubmitting) onClose();
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'stage') {
-      const stage = stages.find((s) => s.value === value);
-      setFormData({
-        ...formData,
-        stage: value,
-        probability: stage?.probability || 0,
-      });
-    } else if (name === 'amount') {
-      setFormData({
-        ...formData,
-        [name]: parseFloat(value) || 0,
-      });
-    } else if (name === 'probability') {
-      setFormData({
-        ...formData,
-        [name]: parseInt(value) || 0,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+  // Auto-update probability when stage changes
+  const selectedStage = watch('stage');
+  const handleStageChange = (stage: OpportunityFormData['stage']) => {
+    const stageData = stages.find(s => s.value === stage);
+    if (stageData) {
+      setValue('probability', stageData.probability);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!formData.name || !formData.accountName || !formData.closeDate) {
-      setError('Nombre, cuenta y fecha de cierre son requeridos');
-      return;
-    }
-
-    if (formData.amount <= 0) {
-      setError('El monto debe ser mayor a 0');
-      return;
-    }
-
-    setIsSubmitting(true);
+  const onSubmit = async (data: OpportunityFormData) => {
     try {
-      await onSave(formData);
+      await onSave({ ...data, id: opportunity?.id });
+      toast.success(
+        opportunity ? 'Oportunidad actualizada' : 'Oportunidad creada',
+        'Los cambios se guardaron exitosamente'
+      );
       onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar oportunidad');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      toast.error(
+        'Error al guardar',
+        error instanceof Error ? error.message : 'No se pudo guardar la oportunidad'
+      );
     }
   };
 
@@ -110,205 +89,153 @@ export default function OpportunityForm({
       initial="hidden"
       animate="visible"
       exit="exit"
-      onClick={onClose}
     >
       <motion.div
-        className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        ref={modalRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
         variants={scaleIn}
-        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-primary text-white px-6 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <h2 className="text-xl font-bold">
             {opportunity ? 'Editar Oportunidad' : 'Nueva Oportunidad'}
           </h2>
           <button
             onClick={onClose}
-            className="text-white hover:bg-primary-dark rounded-lg p-1 transition-colors"
+            disabled={isSubmitting}
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-all"
+            aria-label="Cerrar"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-              {error}
-            </div>
-          )}
-
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Name */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Nombre de la Oportunidad <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="ej. Implementación CRM - Q1 2026"
-                required
+                {...register('name')}
+                className={`w-full px-4 py-2.5 border rounded-lg transition-all ${
+                  errors.name ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                }`}
+                placeholder="Venta de Software CRM"
               />
+              {errors.name && <p className="mt-1.5 text-sm text-red-600">{errors.name.message}</p>}
             </div>
 
-            {/* Account Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Cuenta <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="accountName"
-                value={formData.accountName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Nombre de la empresa"
-                required
+                {...register('accountId')}
+                className={`w-full px-4 py-2.5 border rounded-lg ${
+                  errors.accountId ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                }`}
+                placeholder="ID de la cuenta"
               />
+              {errors.accountId && <p className="mt-1.5 text-sm text-red-600">{errors.accountId.message}</p>}
             </div>
 
-            {/* Contact Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Contacto Principal
-              </label>
-              <input
-                type="text"
-                name="contactName"
-                value={formData.contactName}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Nombre del contacto"
-              />
-            </div>
-
-            {/* Amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Monto <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                min="0"
                 step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
+                {...register('amount', { valueAsNumber: true })}
+                className={`w-full px-4 py-2.5 border rounded-lg ${
+                  errors.amount ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                }`}
+                placeholder="100000"
               />
+              {errors.amount && <p className="mt-1.5 text-sm text-red-600">{errors.amount.message}</p>}
             </div>
 
-            {/* Currency */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
-              <select
-                name="currency"
-                value={formData.currency}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="USD">USD</option>
-                <option value="CRC">CRC</option>
-                <option value="EUR">EUR</option>
-              </select>
-            </div>
-
-            {/* Stage */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Etapa <span className="text-red-500">*</span>
               </label>
-              <select
+              <Controller
                 name="stage"
-                value={formData.stage}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              >
-                {stages.map((stage) => (
-                  <option key={stage.value} value={stage.value}>
-                    {stage.label}
-                  </option>
-                ))}
-              </select>
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleStageChange(e.target.value as OpportunityFormData['stage']);
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-lg ${
+                      errors.stage ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                    }`}
+                  >
+                    {Object.entries(stageTranslations).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
+              {errors.stage && <p className="mt-1.5 text-sm text-red-600">{errors.stage.message}</p>}
             </div>
 
-            {/* Probability */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Probabilidad (%)
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Probabilidad (%) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                name="probability"
-                value={formData.probability}
-                onChange={handleChange}
+                {...register('probability', { valueAsNumber: true })}
+                className={`w-full px-4 py-2.5 border rounded-lg ${
+                  errors.probability ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                }`}
                 min="0"
                 max="100"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+              {errors.probability && <p className="mt-1.5 text-sm text-red-600">{errors.probability.message}</p>}
             </div>
 
-            {/* Close Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Fecha de Cierre Estimada <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
-                name="closeDate"
-                value={formData.closeDate}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
+                {...register('expectedCloseDate')}
+                className={`w-full px-4 py-2.5 border rounded-lg ${
+                  errors.expectedCloseDate ? 'border-red-300 bg-red-50' : 'border-slate-300'
+                }`}
               />
+              {errors.expectedCloseDate && (
+                <p className="mt-1.5 text-sm text-red-600">{errors.expectedCloseDate.message}</p>
+              )}
             </div>
           </div>
 
-          {/* Summary */}
-          <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Resumen</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Valor Ponderado:</span>
-                <span className="ml-2 font-semibold text-gray-900">
-                  {formData.currency}{' '}
-                  {((formData.amount * formData.probability) / 100).toLocaleString('es-CR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">Etapa:</span>
-                <span className="ml-2 font-semibold text-gray-900">
-                  {stages.find((s) => s.value === formData.stage)?.label}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="mt-6 flex justify-end gap-3">
-            <button
+          <div className="mt-8 flex justify-end gap-3">
+            <ButtonLoading
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={isSubmitting}
             >
               Cancelar
-            </button>
-            <button
+            </ButtonLoading>
+            <ButtonLoading
               type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              loading={isSubmitting}
+              loadingText="Guardando..."
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar'}
-            </button>
+              {opportunity ? 'Actualizar' : 'Crear'} Oportunidad
+            </ButtonLoading>
           </div>
         </form>
       </motion.div>
