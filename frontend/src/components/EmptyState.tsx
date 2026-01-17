@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
 import { ButtonLoading } from './ButtonLoading';
+
+// Tipo para iconos de Lucide
+type LucideIcon = React.ComponentType<{ className?: string; strokeWidth?: number }>;
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -9,6 +11,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   illustration?: ReactNode;
+  variant?: 'default' | 'search';
 }
 
 /**
@@ -22,7 +25,11 @@ export function EmptyState({
   actionLabel,
   onAction,
   illustration,
+  variant = 'default',
 }: EmptyStateProps) {
+  // Si es variante search, no mostrar botón de acción
+  const showAction = variant === 'default' && actionLabel && onAction;
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       {/* Illustration o Icon */}
@@ -44,7 +51,7 @@ export function EmptyState({
       </p>
 
       {/* Action */}
-      {actionLabel && onAction && (
+      {showAction && (
         <ButtonLoading
           variant="primary"
           onClick={onAction}
