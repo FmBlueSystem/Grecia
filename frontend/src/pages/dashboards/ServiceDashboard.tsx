@@ -161,9 +161,10 @@ export default function ServiceDashboard() {
                             <div className="p-12 text-center text-slate-400">
                                 No hay casos registrados recientemente.
                             </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )}
+            </div>
                 </>
             )}
         </div>

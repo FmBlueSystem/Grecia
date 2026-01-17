@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="letterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0E7FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded rectangle background -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGradient)"/>
+  
+  <!-- Letter S with modern design -->
+  <path d="M 180 160 Q 200 140 240 140 Q 280 140 300 160 Q 320 180 320 210 Q 320 240 300 260 L 212 320 Q 192 335 192 360 Q 192 380 212 395 Q 232 410 272 410 Q 312 410 332 390" 
+        stroke="url(#letterGradient)" 
+        stroke-width="40" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        fill="none"/>
+  
+  <!-- Small accent circle -->
+  <circle cx="400" cy="140" r="24" fill="#FBBF24" opacity="0.9"/>
+</svg>
