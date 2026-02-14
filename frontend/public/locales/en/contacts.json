@@ -1,0 +1,74 @@
+{
+  "title": "Contacts",
+  "subtitle": "Key people and contact points",
+  "newContact": "New Contact",
+  "searchPlaceholder": "Search by name, email...",
+  "filters": "Filters",
+  "table": {
+    "fullName": "Full Name",
+    "jobTitle": "Job Title",
+    "contactInfo": "Contact Info",
+    "owner": "Owner",
+    "account": "Account",
+    "actions": "Actions"
+  },
+  "form": {
+    "title": "Create New Contact",
+    "editTitle": "Edit Contact",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "jobTitle": "Job Title",
+    "company": "Company",
+    "department": "Department",
+    "address": "Address",
+    "city": "City",
+    "state": "State/Province",
+    "country": "Country",
+    "postalCode": "Postal Code",
+    "notes": "Notes",
+    "owner": "Owner",
+    "source": "Source",
+    "tags": "Tags",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create Contact",
+    "update": "Update Contact"
+  },
+  "empty": {
+    "title": "No contacts",
+    "description": "Create your first contact to start managing your customer relationships",
+    "action": "Create Contact"
+  },
+  "actions": {
+    "view": "View Details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "email": "Send Email",
+    "call": "Call",
+    "addNote": "Add Note",
+    "assignTask": "Assign Task",
+    "export": "Export"
+  },
+  "delete": {
+    "title": "Delete Contact",
+    "message": "Are you sure you want to delete this contact? This action cannot be undone.",
+    "confirm": "Yes, delete",
+    "cancel": "Cancel"
+  },
+  "messages": {
+    "created": "Contact created successfully",
+    "updated": "Contact updated successfully",
+    "deleted": "Contact deleted successfully",
+    "errorLoad": "Error loading contacts",
+    "errorCreate": "Could not create contact",
+    "errorUpdate": "Could not update contact",
+    "errorDelete": "Could not delete contact"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "archived": "Archived"
+  }
+}

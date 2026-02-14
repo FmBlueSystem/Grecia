@@ -1,0 +1,73 @@
+{
+  "title": "Sales Dashboard",
+  "subtitle": "Key commercial performance metrics",
+  "kpis": {
+    "revenueMTD": "Revenue MTD",
+    "pipelineValue": "Pipeline Value",
+    "winRate": "Win Rate",
+    "activities": "Activities",
+    "activeDeals": "Active Deals",
+    "today": "Today",
+    "vsLastMonth": "vs last month",
+    "vsAvg": "vs avg"
+  },
+  "charts": {
+    "pipelineFunnel": "Pipeline Funnel (By Stage)",
+    "revenueVsGoal": "Revenue vs Goal",
+    "teamActivity": "Team Activity (Last Week)",
+    "topPerformers": "Top Performers (Revenue)",
+    "doubleClickToFilter": "Double click to filter"
+  },
+  "filters": {
+    "title": "Filter",
+    "adjustVisualization": "Adjust data visualization",
+    "dateRange": "Date Range",
+    "thisMonth": "This Month",
+    "lastQuarter": "Last Quarter",
+    "currentYear": "Current Year",
+    "custom": "Custom",
+    "salesPerson": "Sales Person / Team",
+    "all": "All",
+    "teamAlpha": "Team Alpha",
+    "teamBeta": "Team Beta",
+    "cancel": "Cancel",
+    "applyFilters": "Apply Filters"
+  },
+  "actions": {
+    "downloadReport": "Download Report",
+    "viewDetails": "View Details",
+    "export": "Export"
+  },
+  "summary": {
+    "title": "Summary and Forecasts",
+    "subtitle": "Current period analysis",
+    "forecast": "Forecast",
+    "target": "Target",
+    "actual": "Actual",
+    "variance": "Variance"
+  },
+  "periods": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "thisQuarter": "This Quarter",
+    "lastQuarter": "Last Quarter",
+    "thisYear": "This Year",
+    "lastYear": "Last Year"
+  },
+  "metrics": {
+    "revenue": "Revenue",
+    "profit": "Profit",
+    "deals": "Deals",
+    "customers": "Customers",
+    "conversion": "Conversion",
+    "avgDealSize": "Avg Deal Size",
+    "salesCycle": "Sales Cycle",
+    "quota": "Quota",
+    "pipeline": "Pipeline",
+    "forecast": "Forecast"
+  }
+}

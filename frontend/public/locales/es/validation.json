@@ -1,0 +1,65 @@
+{
+  "required": "Este campo es requerido",
+  "email": {
+    "invalid": "El correo electrónico no es válido",
+    "required": "El correo electrónico es requerido"
+  },
+  "password": {
+    "required": "La contraseña es requerida",
+    "tooShort": "La contraseña debe tener al menos {{min}} caracteres",
+    "tooWeak": "La contraseña es muy débil",
+    "mismatch": "Las contraseñas no coinciden",
+    "mustContain": "Debe contener mayúsculas, minúsculas y números"
+  },
+  "phone": {
+    "invalid": "El número de teléfono no es válido",
+    "tooShort": "El número de teléfono es muy corto",
+    "tooLong": "El número de teléfono es muy largo"
+  },
+  "name": {
+    "required": "El nombre es requerido",
+    "tooShort": "El nombre es muy corto",
+    "tooLong": "El nombre es muy largo",
+    "invalid": "El nombre contiene caracteres no válidos"
+  },
+  "number": {
+    "invalid": "Debe ser un número válido",
+    "min": "El valor mínimo es {{min}}",
+    "max": "El valor máximo es {{max}}",
+    "positive": "Debe ser un número positivo",
+    "negative": "Debe ser un número negativo",
+    "integer": "Debe ser un número entero"
+  },
+  "date": {
+    "invalid": "La fecha no es válida",
+    "past": "La fecha debe ser en el pasado",
+    "future": "La fecha debe ser en el futuro",
+    "range": "La fecha debe estar entre {{min}} y {{max}}"
+  },
+  "url": {
+    "invalid": "La URL no es válida",
+    "required": "La URL es requerida"
+  },
+  "file": {
+    "required": "Debe seleccionar un archivo",
+    "tooLarge": "El archivo es muy grande (máx: {{max}})",
+    "invalidType": "Tipo de archivo no permitido",
+    "uploadFailed": "Error al subir el archivo"
+  },
+  "select": {
+    "required": "Debe seleccionar una opción",
+    "invalid": "La opción seleccionada no es válida"
+  },
+  "text": {
+    "tooShort": "Debe tener al menos {{min}} caracteres",
+    "tooLong": "No puede exceder {{max}} caracteres",
+    "pattern": "El formato no es válido"
+  },
+  "custom": {
+    "uniqueEmail": "Este correo ya está registrado",
+    "uniqueUsername": "Este nombre de usuario ya existe",
+    "invalidCredentials": "Credenciales inválidas",
+    "accountNotFound": "Cuenta no encontrada",
+    "sessionExpired": "Sesión expirada. Por favor inicia sesión nuevamente"
+  }
+}

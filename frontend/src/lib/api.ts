@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { toast } from './toast';
 
 // Configuración base de Axios
@@ -20,7 +20,7 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // Agregar company header si existe
     const company = localStorage.getItem('company');
     if (company && config.headers) {
@@ -47,14 +47,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
+
       toast.error('Sesión expirada', 'Por favor inicia sesión nuevamente');
-      
+
       // Evitar loop de redirects
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
-      
+
       return Promise.reject(error);
     }
 

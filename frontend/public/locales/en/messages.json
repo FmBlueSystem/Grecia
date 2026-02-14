@@ -1,0 +1,52 @@
+{
+  "success": {
+    "created": "{{entity}} created successfully",
+    "updated": "{{entity}} updated successfully",
+    "deleted": "{{entity}} deleted successfully",
+    "saved": "Changes saved successfully",
+    "sent": "Sent successfully",
+    "uploaded": "File uploaded successfully",
+    "downloaded": "File downloaded successfully",
+    "copied": "Copied to clipboard",
+    "imported": "Data imported successfully",
+    "exported": "Data exported successfully"
+  },
+  "info": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "uploading": "Uploading file...",
+    "downloading": "Downloading...",
+    "syncing": "Syncing...",
+    "searching": "Searching...",
+    "noChanges": "No changes to save",
+    "noResults": "No results found",
+    "emptyList": "List is empty"
+  },
+  "warning": {
+    "unsavedChanges": "You have unsaved changes",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "confirmLeave": "Are you sure you want to leave?",
+    "lowStorage": "Low storage space",
+    "slowConnection": "Slow connection detected",
+    "outdatedVersion": "New version available",
+    "sessionExpiringSoon": "Your session will expire soon"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again",
+    "loadFailed": "Error loading {{entity}}",
+    "saveFailed": "Error saving {{entity}}",
+    "deleteFailed": "Error deleting {{entity}}",
+    "uploadFailed": "Error uploading file",
+    "networkError": "Connection error",
+    "permissionDenied": "Permission denied",
+    "notFound": "{{entity}} not found"
+  },
+  "action": {
+    "tryAgain": "Try again",
+    "undo": "Undo",
+    "dismiss": "Dismiss",
+    "viewDetails": "View details",
+    "reload": "Reload"
+  }
+}

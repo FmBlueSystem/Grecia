@@ -47,3 +47,6 @@ export {
   SearchEmptyState,
   ErrorEmptyState
 } from './EmptyState';
+
+// i18n
+export { LanguageSwitcher } from './LanguageSwitcher';

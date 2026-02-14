@@ -1,0 +1,52 @@
+{
+  "success": {
+    "created": "{{entity}} creado exitosamente",
+    "updated": "{{entity}} actualizado exitosamente",
+    "deleted": "{{entity}} eliminado exitosamente",
+    "saved": "Cambios guardados exitosamente",
+    "sent": "Enviado exitosamente",
+    "uploaded": "Archivo subido exitosamente",
+    "downloaded": "Archivo descargado exitosamente",
+    "copied": "Copiado al portapapeles",
+    "imported": "Datos importados exitosamente",
+    "exported": "Datos exportados exitosamente"
+  },
+  "info": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "processing": "Procesando...",
+    "uploading": "Subiendo archivo...",
+    "downloading": "Descargando...",
+    "syncing": "Sincronizando...",
+    "searching": "Buscando...",
+    "noChanges": "No hay cambios para guardar",
+    "noResults": "No se encontraron resultados",
+    "emptyList": "La lista está vacía"
+  },
+  "warning": {
+    "unsavedChanges": "Tienes cambios sin guardar",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar esto?",
+    "confirmLeave": "¿Estás seguro de que deseas salir?",
+    "lowStorage": "Espacio de almacenamiento bajo",
+    "slowConnection": "Conexión lenta detectada",
+    "outdatedVersion": "Hay una nueva versión disponible",
+    "sessionExpiringSoon": "Tu sesión expirará pronto"
+  },
+  "error": {
+    "generic": "Algo salió mal. Intenta nuevamente",
+    "loadFailed": "Error al cargar {{entity}}",
+    "saveFailed": "Error al guardar {{entity}}",
+    "deleteFailed": "Error al eliminar {{entity}}",
+    "uploadFailed": "Error al subir archivo",
+    "networkError": "Error de conexión",
+    "permissionDenied": "Permiso denegado",
+    "notFound": "{{entity}} no encontrado"
+  },
+  "action": {
+    "tryAgain": "Intentar nuevamente",
+    "undo": "Deshacer",
+    "dismiss": "Cerrar",
+    "viewDetails": "Ver detalles",
+    "reload": "Recargar"
+  }
+}

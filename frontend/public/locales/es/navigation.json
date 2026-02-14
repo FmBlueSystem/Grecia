@@ -1,0 +1,23 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "accounts": "Cuentas",
+    "contacts": "Contactos",
+    "activities": "Actividades",
+    "leads": "Leads",
+    "pipeline": "Pipeline",
+    "products": "Productos",
+    "quotes": "Ofertas",
+    "invoices": "Facturas",
+    "orders": "Pedidos",
+    "opportunities": "Oportunidades",
+    "cases": "Casos",
+    "logout": "Cerrar Sesión",
+    "admin": "Admin"
+  },
+  "tabs": {
+    "sales": "Ventas",
+    "logistics": "Logística",
+    "service": "Servicio"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "general": {
+    "unknown": "An unexpected error occurred",
+    "network": "Connection error. Check your internet connection",
+    "timeout": "Request took too long",
+    "serverError": "Server error. Please try again later",
+    "notFound": "Resource not found",
+    "forbidden": "You don't have permission to access this resource",
+    "unauthorized": "Unauthorized. Please sign in"
+  },
+  "auth": {
+    "invalidCredentials": "Invalid credentials",
+    "sessionExpired": "Session expired. Please sign in again",
+    "accountLocked": "Account locked. Contact administrator",
+    "accountNotVerified": "Account not verified. Check your email",
+    "passwordResetFailed": "Could not reset password",
+    "tokenInvalid": "Invalid or expired token"
+  },
+  "data": {
+    "loadFailed": "Could not load data",
+    "saveFailed": "Could not save changes",
+    "deleteFailed": "Could not delete item",
+    "updateFailed": "Could not update item",
+    "createFailed": "Could not create item",
+    "duplicateEntry": "An item with this data already exists",
+    "invalidData": "Provided data is not valid"
+  },
+  "file": {
+    "uploadFailed": "Error uploading file",
+    "downloadFailed": "Error downloading file",
+    "tooLarge": "File is too large",
+    "invalidType": "File type not allowed",
+    "corruptedFile": "File is corrupted or damaged"
+  },
+  "api": {
+    "rateLimitExceeded": "Too many requests. Please try later",
+    "maintenanceMode": "Server under maintenance. Please try later",
+    "deprecated": "This feature is deprecated",
+    "badRequest": "Bad request",
+    "conflict": "Conflict with current resource state"
+  },
+  "form": {
+    "validationFailed": "Please correct the errors in the form",
+    "requiredFields": "Complete all required fields",
+    "invalidFormat": "Some fields have invalid format",
+    "submissionFailed": "Error submitting form"
+  },
+  "payment": {
+    "paymentFailed": "Payment declined",
+    "cardDeclined": "Card declined",
+    "insufficientFunds": "Insufficient funds",
+    "invalidCard": "Invalid card",
+    "expiredCard": "Card expired"
+  },
+  "permissions": {
+    "accessDenied": "Access denied",
+    "insufficientPermissions": "You don't have the necessary permissions",
+    "featureNotAvailable": "This feature is not available for your plan",
+    "readOnly": "You only have read permissions"
+  }
+}

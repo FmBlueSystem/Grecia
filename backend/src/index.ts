@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { db } from './utils/db';
+// import { db } from './utils/db'; // Removed legacy db
+
 
 const fastify = Fastify({
   logger: {
@@ -18,13 +20,60 @@ const fastify = Fastify({
   },
 });
 
+import authPlugin from './plugins/auth';
+import authRoutes from './routes/auth.routes';
+import contactRoutes from './routes/contacts.routes';
+import opportunityRoutes from './routes/opportunities.routes';
+import activityRoutes from './routes/activities.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import leadRoutes from './routes/leads.routes';
+import productRoutes from './routes/products.routes';
+import quoteRoutes from './routes/quotes.routes';
+import orderRoutes from './routes/orders.routes';
+import caseRoutes from './routes/cases.routes';
+import accountRoutes from './routes/accounts.routes';
+import invoiceRoutes from './routes/invoices.routes';
+
+
+
+
+// ... (existing imports)
+
+import cookie from '@fastify/cookie';
+
+// ... (existing imports)
+
 // Plugins
 fastify.register(cors, {
   origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
 });
 
+fastify.register(cookie);
+
 fastify.register(helmet);
+fastify.register(helmet);
+fastify.register(authPlugin);
+// Global Company Middleware
+import { companyMiddleware } from './middleware/company.middleware';
+fastify.addHook('preHandler', companyMiddleware);
+
+fastify.register(authRoutes, { prefix: '/api/auth' });
+fastify.register(contactRoutes, { prefix: '/api/contacts' });
+fastify.register(opportunityRoutes, { prefix: '/api/opportunities' });
+fastify.register(activityRoutes, { prefix: '/api/activities' });
+fastify.register(dashboardRoutes, { prefix: '/api/dashboard' });
+fastify.register(leadRoutes, { prefix: '/api/leads' });
+fastify.register(productRoutes, { prefix: '/api/products' });
+fastify.register(quoteRoutes, { prefix: '/api/quotes' });
+fastify.register(orderRoutes, { prefix: '/api/orders' });
+fastify.register(invoiceRoutes, { prefix: '/api/invoices' });
+
+fastify.register(caseRoutes, { prefix: '/api/cases' });
+fastify.register(accountRoutes, { prefix: '/api/accounts' });
+
+
+
 
 // Health check
 fastify.get('/health', async () => {
@@ -54,305 +103,16 @@ fastify.get('/api', async () => {
   };
 });
 
-// Authentication endpoints
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
-fastify.post('/api/auth/login', async (request, reply) => {
-  const { email, password } = request.body as { email: string; password: string };
 
-  const user = db.getUserByEmail(email);
-  if (!user) {
-    reply.code(401);
-    return { error: 'Credenciales inválidas' };
-  }
+// Contacts endpoints (Moved to routes/contacts.routes.ts)
 
-  const isValidPassword = await bcrypt.compare(password, user.password);
-  if (!isValidPassword) {
-    reply.code(401);
-    return { error: 'Credenciales inválidas' };
-  }
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, roleId: user.roleId },
-    JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+// Opportunities endpoints (Moved to routes/opportunities.routes.ts)
 
-  return {
-    success: true,
-    token,
-    user: {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      roleId: user.roleId,
-    },
-  };
-});
 
-fastify.post('/api/auth/logout', async () => {
-  return { success: true, message: 'Sesión cerrada exitosamente' };
-});
+// Endpoints moved to individual route files
 
-fastify.get('/api/auth/me', async (request, reply) => {
-  const authHeader = request.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    reply.code(401);
-    return { error: 'No autorizado' };
-  }
-
-  const token = authHeader.substring(7);
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    const user = db.getUserById(decoded.userId);
-    if (!user) {
-      reply.code(401);
-      return { error: 'Usuario no encontrado' };
-    }
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        roleId: user.roleId,
-      },
-    };
-  } catch (err) {
-    reply.code(401);
-    return { error: 'Token inválido' };
-  }
-});
-
-// Contacts endpoints
-fastify.get('/api/contacts', async () => {
-  const contacts = db.getContacts();
-  return {
-    data: contacts,
-    total: contacts.length,
-  };
-});
-
-fastify.get('/api/contacts/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const contact = db.getContactById(id);
-  if (!contact) {
-    return { error: 'Contact not found' };
-  }
-  return { data: contact };
-});
-
-fastify.post('/api/contacts', async (request) => {
-  const contactData = request.body as any;
-  const newContact = db.createContact({
-    firstName: contactData.firstName,
-    lastName: contactData.lastName,
-    email: contactData.email,
-    phone: contactData.phone,
-    mobile: contactData.mobile,
-    jobTitle: contactData.jobTitle,
-    company: contactData.company,
-    leadSource: contactData.leadSource,
-    tags: contactData.tags || [],
-    ownerId: contactData.ownerId || 'user-1',
-    isActive: true,
-  });
-  return { data: newContact };
-});
-
-fastify.put('/api/contacts/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const contactData = request.body as any;
-  const updated = db.updateContact(id, contactData);
-  if (!updated) {
-    return { error: 'Contact not found' };
-  }
-  return { data: updated };
-});
-
-fastify.delete('/api/contacts/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const success = db.deleteContact(id);
-  if (!success) {
-    return { error: 'Contact not found' };
-  }
-  return { success: true };
-});
-
-// Opportunities endpoints
-fastify.get('/api/opportunities', async () => {
-  const opportunities = db.getOpportunities();
-  const pipelineValue = opportunities.reduce((sum, opp) => sum + opp.amount, 0);
-  const weightedPipeline = opportunities.reduce(
-    (sum, opp) => sum + opp.amount * (opp.probability / 100),
-    0
-  );
-  return {
-    data: opportunities,
-    total: opportunities.length,
-    pipelineValue,
-    weightedPipeline,
-  };
-});
-
-fastify.get('/api/opportunities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const opportunity = db.getOpportunityById(id);
-  if (!opportunity) {
-    return { error: 'Opportunity not found' };
-  }
-  return { data: opportunity };
-});
-
-fastify.post('/api/opportunities', async (request) => {
-  const oppData = request.body as any;
-  const newOpp = db.createOpportunity({
-    name: oppData.name,
-    amount: oppData.amount,
-    currency: oppData.currency || 'USD',
-    stage: oppData.stage,
-    probability: oppData.probability,
-    closeDate: oppData.closeDate,
-    accountName: oppData.accountName,
-    contactName: oppData.contactName,
-    ownerId: oppData.ownerId || 'user-1',
-    isClosed: false,
-  });
-  return { data: newOpp };
-});
-
-fastify.put('/api/opportunities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const oppData = request.body as any;
-  const updated = db.updateOpportunity(id, oppData);
-  if (!updated) {
-    return { error: 'Opportunity not found' };
-  }
-  return { data: updated };
-});
-
-fastify.delete('/api/opportunities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const success = db.deleteOpportunity(id);
-  if (!success) {
-    return { error: 'Opportunity not found' };
-  }
-  return { success: true };
-});
-
-// Activities endpoints
-fastify.get('/api/activities', async () => {
-  const activities = db.getActivities();
-  return {
-    data: activities,
-    total: activities.length,
-  };
-});
-
-fastify.get('/api/activities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const activity = db.getActivityById(id);
-  if (!activity) {
-    return { error: 'Activity not found' };
-  }
-  return { data: activity };
-});
-
-fastify.post('/api/activities', async (request) => {
-  const actData = request.body as any;
-  const newActivity = db.createActivity({
-    activityType: actData.activityType,
-    subject: actData.subject,
-    description: actData.description,
-    dueDate: actData.dueDate,
-    status: actData.status || 'Planned',
-    priority: actData.priority,
-    contactId: actData.contactId,
-    opportunityId: actData.opportunityId,
-    ownerId: actData.ownerId || 'user-1',
-    isCompleted: false,
-  });
-  return { data: newActivity };
-});
-
-fastify.put('/api/activities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const actData = request.body as any;
-  const updated = db.updateActivity(id, actData);
-  if (!updated) {
-    return { error: 'Activity not found' };
-  }
-  return { data: updated };
-});
-
-fastify.delete('/api/activities/:id', async (request) => {
-  const { id } = request.params as { id: string };
-  const success = db.deleteActivity(id);
-  if (!success) {
-    return { error: 'Activity not found' };
-  }
-  return { success: true };
-});
-
-// Dashboard stats
-fastify.get('/api/dashboard/stats', async () => {
-  const opportunities = db.getOpportunities();
-  const activities = db.getActivities();
-
-  const pipelineValue = opportunities.reduce((sum, opp) => sum + opp.amount, 0);
-  const weightedPipeline = opportunities.reduce(
-    (sum, opp) => sum + opp.amount * (opp.probability / 100),
-    0
-  );
-
-  const now = new Date();
-  const todayActivities = activities.filter((a) => {
-    if (!a.dueDate) return false;
-    const dueDate = new Date(a.dueDate);
-    return (
-      dueDate.toDateString() === now.toDateString() && !a.isCompleted
-    );
-  });
-
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - now.getDay());
-  const thisWeekActivities = activities.filter((a) => {
-    if (!a.dueDate) return false;
-    const dueDate = new Date(a.dueDate);
-    return dueDate >= weekStart && !a.isCompleted;
-  });
-
-  const overdueActivities = activities.filter((a) => {
-    if (!a.dueDate) return false;
-    const dueDate = new Date(a.dueDate);
-    return dueDate < now && !a.isCompleted;
-  });
-
-  return {
-    revenue: {
-      mtd: 125000,
-      target: 200000,
-      percentage: 62.5,
-      trend: '+15%',
-    },
-    pipeline: {
-      value: pipelineValue,
-      weighted: Math.round(weightedPipeline),
-      deals: opportunities.length,
-    },
-    winRate: {
-      percentage: 68,
-      trend: '+5%',
-    },
-    activities: {
-      today: todayActivities.length,
-      thisWeek: thisWeekActivities.length,
-      overdue: overdueActivities.length,
-    },
-  };
-});
 
 // Start server
 const start = async () => {

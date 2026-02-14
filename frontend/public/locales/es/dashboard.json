@@ -1,0 +1,73 @@
+{
+  "title": "Dashboard de Ventas",
+  "subtitle": "Métricas clave de rendimiento comercial",
+  "kpis": {
+    "revenueMTD": "Ingresos MTD",
+    "pipelineValue": "Valor del Pipeline",
+    "winRate": "Tasa de Cierre",
+    "activities": "Actividades",
+    "activeDeals": "Negocios Activos",
+    "today": "Hoy",
+    "vsLastMonth": "vs mes anterior",
+    "vsAvg": "vs promedio"
+  },
+  "charts": {
+    "pipelineFunnel": "Pipeline Funnel (Por Etapa)",
+    "revenueVsGoal": "Revenue vs Objetivo",
+    "teamActivity": "Actividad del Equipo (Última Semana)",
+    "topPerformers": "Top Performers (Ingresos)",
+    "doubleClickToFilter": "Doble click para filtrar"
+  },
+  "filters": {
+    "title": "Filtrar",
+    "adjustVisualization": "Ajustar visualización de datos",
+    "dateRange": "Rango de Fecha",
+    "thisMonth": "Este Mes",
+    "lastQuarter": "Último Trimestre",
+    "currentYear": "Año Actual",
+    "custom": "Personalizado",
+    "salesPerson": "Vendedor / Equipo",
+    "all": "Todos",
+    "teamAlpha": "Equipo Alpha",
+    "teamBeta": "Equipo Beta",
+    "cancel": "Cancelar",
+    "applyFilters": "Aplicar Filtros"
+  },
+  "actions": {
+    "downloadReport": "Descargar Reporte",
+    "viewDetails": "Ver Detalles",
+    "export": "Exportar"
+  },
+  "summary": {
+    "title": "Resumen y Proyecciones",
+    "subtitle": "Análisis del período actual",
+    "forecast": "Proyección",
+    "target": "Objetivo",
+    "actual": "Real",
+    "variance": "Varianza"
+  },
+  "periods": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "thisWeek": "Esta Semana",
+    "lastWeek": "Semana Pasada",
+    "thisMonth": "Este Mes",
+    "lastMonth": "Mes Pasado",
+    "thisQuarter": "Este Trimestre",
+    "lastQuarter": "Último Trimestre",
+    "thisYear": "Este Año",
+    "lastYear": "Año Pasado"
+  },
+  "metrics": {
+    "revenue": "Ingresos",
+    "profit": "Ganancia",
+    "deals": "Negocios",
+    "customers": "Clientes",
+    "conversion": "Conversión",
+    "avgDealSize": "Tamaño Promedio de Negocio",
+    "salesCycle": "Ciclo de Venta",
+    "quota": "Cuota",
+    "pipeline": "Pipeline",
+    "forecast": "Pronóstico"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "menu": {
+    "tabs": {
+      "sales": "Sales",
+      "logistics": "Logistics",
+      "service": "Service"
+    },
+    "sales": {
+      "dashboard": "Dashboard",
+      "leads": "Leads",
+      "opportunities": "Opportunities",
+      "pipeline": "Pipeline",
+      "quotes": "Quotes",
+      "contacts": "Contacts",
+      "accounts": "Accounts"
+    },
+    "logistics": {
+      "orders": "Orders",
+      "inventory": "Inventory",
+      "products": "Products",
+      "warehouses": "Warehouses",
+      "shipping": "Shipping"
+    },
+    "service": {
+      "cases": "Cases",
+      "tickets": "Tickets",
+      "knowledge": "Knowledge Base",
+      "sla": "SLA Management"
+    },
+    "other": {
+      "activities": "Activities",
+      "reports": "Reports",
+      "settings": "Settings"
+    }
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "changeCompany": "Change Company"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "general": {
+    "unknown": "Ocurrió un error inesperado",
+    "network": "Error de conexión. Verifica tu conexión a internet",
+    "timeout": "La solicitud tardó demasiado tiempo",
+    "serverError": "Error del servidor. Intenta nuevamente más tarde",
+    "notFound": "Recurso no encontrado",
+    "forbidden": "No tienes permisos para acceder a este recurso",
+    "unauthorized": "No autorizado. Por favor inicia sesión"
+  },
+  "auth": {
+    "invalidCredentials": "Credenciales inválidas",
+    "sessionExpired": "Sesión expirada. Inicia sesión nuevamente",
+    "accountLocked": "Cuenta bloqueada. Contacta al administrador",
+    "accountNotVerified": "Cuenta no verificada. Revisa tu correo",
+    "passwordResetFailed": "No se pudo restablecer la contraseña",
+    "tokenInvalid": "Token inválido o expirado"
+  },
+  "data": {
+    "loadFailed": "No se pudieron cargar los datos",
+    "saveFailed": "No se pudieron guardar los cambios",
+    "deleteFailed": "No se pudo eliminar el elemento",
+    "updateFailed": "No se pudo actualizar el elemento",
+    "createFailed": "No se pudo crear el elemento",
+    "duplicateEntry": "Ya existe un elemento con estos datos",
+    "invalidData": "Los datos proporcionados no son válidos"
+  },
+  "file": {
+    "uploadFailed": "Error al subir el archivo",
+    "downloadFailed": "Error al descargar el archivo",
+    "tooLarge": "El archivo es demasiado grande",
+    "invalidType": "Tipo de archivo no permitido",
+    "corruptedFile": "El archivo está corrupto o dañado"
+  },
+  "api": {
+    "rateLimitExceeded": "Demasiadas solicitudes. Intenta más tarde",
+    "maintenanceMode": "Servidor en mantenimiento. Intenta más tarde",
+    "deprecated": "Esta función está obsoleta",
+    "badRequest": "Solicitud incorrecta",
+    "conflict": "Conflicto con el estado actual del recurso"
+  },
+  "form": {
+    "validationFailed": "Por favor corrige los errores en el formulario",
+    "requiredFields": "Completa todos los campos requeridos",
+    "invalidFormat": "El formato de algunos campos no es válido",
+    "submissionFailed": "Error al enviar el formulario"
+  },
+  "payment": {
+    "paymentFailed": "Pago rechazado",
+    "cardDeclined": "Tarjeta rechazada",
+    "insufficientFunds": "Fondos insuficientes",
+    "invalidCard": "Tarjeta inválida",
+    "expiredCard": "Tarjeta expirada"
+  },
+  "permissions": {
+    "accessDenied": "Acceso denegado",
+    "insufficientPermissions": "No tienes los permisos necesarios",
+    "featureNotAvailable": "Esta función no está disponible para tu plan",
+    "readOnly": "Solo tienes permisos de lectura"
+  }
+}

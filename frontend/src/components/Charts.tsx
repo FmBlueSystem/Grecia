@@ -19,11 +19,15 @@ const COLORS = ['#334155', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 const GRID_COLOR = '#E2E8F0';
 const TEXT_COLOR = '#64748B';
 
-interface RevenueChartProps {
-  data?: Array<{ month: string; revenue: number; target: number }>;
+// Common Interactivity Props
+interface ChartProps {
+  data?: any[];
+  onChartClick?: (data: any) => void;
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
+interface RevenueChartProps extends ChartProps { }
+
+export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
   const defaultData = [
     { month: 'Ene', revenue: 85000, target: 80000 },
     { month: 'Feb', revenue: 92000, target: 90000 },
@@ -37,7 +41,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={chartData}>
+      <LineChart
+        data={chartData}
+        onDoubleClick={() => onChartClick && onChartClick({ type: 'Revenue', view: 'Detailed' })}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} />
         <XAxis
           dataKey="month"
@@ -72,7 +79,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
           strokeWidth={3}
           name="Revenue Actual"
           dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
-          activeDot={{ r: 6, strokeWidth: 0 }}
+          activeDot={{ r: 6, strokeWidth: 0, onClick: (e) => onChartClick && onChartClick(e) }}
         />
         <Line
           type="monotone"
@@ -88,11 +95,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
   );
 }
 
-interface PipelineChartProps {
-  data?: Array<{ stage: string; value: number }>;
-}
+interface PipelineChartProps extends ChartProps { }
 
-export function PipelineChart({ data }: PipelineChartProps) {
+export function PipelineChart({ data, onChartClick }: PipelineChartProps) {
   const defaultData = [
     { stage: 'Qualification', value: 85000 },
     { stage: 'Proposal', value: 120000 },
@@ -103,7 +108,7 @@ export function PipelineChart({ data }: PipelineChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
+      <PieChart onDoubleClick={() => onChartClick && onChartClick({ type: 'Pipeline', stage: 'All' })}>
         <Pie
           data={chartData}
           cx="50%"
@@ -113,9 +118,10 @@ export function PipelineChart({ data }: PipelineChartProps) {
           fill="#8884d8"
           paddingAngle={5}
           dataKey="value"
+          onClick={(data) => onChartClick && onChartClick(data)}
         >
           {chartData.map((_entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} style={{ cursor: 'pointer' }} />
           ))}
         </Pie>
         <Tooltip
@@ -138,11 +144,9 @@ export function PipelineChart({ data }: PipelineChartProps) {
   );
 }
 
-interface PerformanceChartProps {
-  data?: Array<{ name: string; deals: number; revenue: number }>;
-}
+interface PerformanceChartProps extends ChartProps { }
 
-export function PerformanceChart({ data }: PerformanceChartProps) {
+export function PerformanceChart({ data, onChartClick }: PerformanceChartProps) {
   const defaultData = [
     { name: 'Freddy M.', deals: 8, revenue: 255000 },
     { name: 'María G.', deals: 6, revenue: 180000 },
@@ -154,7 +158,12 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={chartData} layout="vertical" barSize={20}>
+      <BarChart
+        data={chartData}
+        layout="vertical"
+        barSize={20}
+        onDoubleClick={() => onChartClick && onChartClick({ type: 'Performance', view: 'Team' })}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} horizontal={true} vertical={false} />
         <XAxis type="number" hide />
         <YAxis
@@ -176,17 +185,22 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           }}
         />
         <Legend />
-        <Bar dataKey="revenue" fill="#3B82F6" name="Revenue ($)" radius={[0, 4, 4, 0]} />
+        <Bar
+          dataKey="revenue"
+          fill="#3B82F6"
+          name="Revenue ($)"
+          radius={[0, 4, 4, 0]}
+          onClick={(data) => onChartClick && onChartClick(data)}
+          cursor="pointer"
+        />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-interface ActivityChartProps {
-  data?: Array<{ day: string; calls: number; meetings: number; emails: number }>;
-}
+interface ActivityChartProps extends ChartProps { }
 
-export function ActivityChart({ data }: ActivityChartProps) {
+export function ActivityChart({ data, onChartClick }: ActivityChartProps) {
   const defaultData = [
     { day: 'Lun', calls: 12, meetings: 5, emails: 28 },
     { day: 'Mar', calls: 15, meetings: 7, emails: 32 },
@@ -199,7 +213,11 @@ export function ActivityChart({ data }: ActivityChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={chartData} barSize={32}>
+      <BarChart
+        data={chartData}
+        barSize={32}
+        onDoubleClick={() => onChartClick && onChartClick({ type: 'Activity', view: 'Weekly' })}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false} />
         <XAxis
           dataKey="day"
@@ -218,9 +236,9 @@ export function ActivityChart({ data }: ActivityChartProps) {
           }}
         />
         <Legend wrapperStyle={{ paddingTop: '20px' }} />
-        <Bar dataKey="calls" stackId="a" fill="#3B82F6" name="Llamadas" />
-        <Bar dataKey="meetings" stackId="a" fill="#10B981" name="Reuniones" />
-        <Bar dataKey="emails" stackId="a" fill="#F59E0B" name="Emails" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="calls" stackId="a" fill="#3B82F6" name="Llamadas" onClick={(d) => onChartClick && onChartClick(d)} />
+        <Bar dataKey="meetings" stackId="a" fill="#10B981" name="Reuniones" onClick={(d) => onChartClick && onChartClick(d)} />
+        <Bar dataKey="emails" stackId="a" fill="#F59E0B" name="Emails" radius={[4, 4, 0, 0]} onClick={(d) => onChartClick && onChartClick(d)} />
       </BarChart>
     </ResponsiveContainer>
   );

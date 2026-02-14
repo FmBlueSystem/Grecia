@@ -1,0 +1,74 @@
+{
+  "title": "Contactos",
+  "subtitle": "Personas y puntos de contacto clave",
+  "newContact": "Nuevo Contacto",
+  "searchPlaceholder": "Buscar por nombre, correo...",
+  "filters": "Filtros",
+  "table": {
+    "fullName": "Nombre Completo",
+    "jobTitle": "Cargo",
+    "contactInfo": "Datos de Contacto",
+    "owner": "Propietario",
+    "account": "Cuenta",
+    "actions": "Acciones"
+  },
+  "form": {
+    "title": "Crear Nuevo Contacto",
+    "editTitle": "Editar Contacto",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "jobTitle": "Cargo",
+    "company": "Empresa",
+    "department": "Departamento",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado/Provincia",
+    "country": "País",
+    "postalCode": "Código Postal",
+    "notes": "Notas",
+    "owner": "Propietario",
+    "source": "Fuente",
+    "tags": "Etiquetas",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "create": "Crear Contacto",
+    "update": "Actualizar Contacto"
+  },
+  "empty": {
+    "title": "No hay contactos",
+    "description": "Crea tu primer contacto para comenzar a gestionar tus relaciones con clientes",
+    "action": "Crear Contacto"
+  },
+  "actions": {
+    "view": "Ver Detalles",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "email": "Enviar Email",
+    "call": "Llamar",
+    "addNote": "Agregar Nota",
+    "assignTask": "Asignar Tarea",
+    "export": "Exportar"
+  },
+  "delete": {
+    "title": "Eliminar Contacto",
+    "message": "¿Estás seguro de que deseas eliminar este contacto? Esta acción no se puede deshacer.",
+    "confirm": "Sí, eliminar",
+    "cancel": "Cancelar"
+  },
+  "messages": {
+    "created": "Contacto creado exitosamente",
+    "updated": "Contacto actualizado exitosamente",
+    "deleted": "Contacto eliminado exitosamente",
+    "errorLoad": "Error al cargar contactos",
+    "errorCreate": "No se pudo crear el contacto",
+    "errorUpdate": "No se pudo actualizar el contacto",
+    "errorDelete": "No se pudo eliminar el contacto"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "archived": "Archivado"
+  }
+}

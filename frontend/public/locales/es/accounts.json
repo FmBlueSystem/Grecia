@@ -1,0 +1,102 @@
+{
+  "title": "Cuentas",
+  "subtitle": "Empresas y organizaciones cliente",
+  "newAccount": "Nueva Cuenta",
+  "searchPlaceholder": "Buscar por nombre, industria...",
+  "filters": "Filtros",
+  "table": {
+    "name": "Nombre de la Cuenta",
+    "industry": "Industria",
+    "contacts": "Contactos",
+    "opportunities": "Oportunidades",
+    "owner": "Propietario",
+    "website": "Sitio Web",
+    "phone": "Teléfono",
+    "revenue": "Ingresos",
+    "employees": "Empleados",
+    "actions": "Acciones"
+  },
+  "form": {
+    "title": "Crear Nueva Cuenta",
+    "editTitle": "Editar Cuenta",
+    "name": "Nombre de la Cuenta",
+    "namePlaceholder": "Acme Corporation",
+    "industry": "Industria",
+    "industryPlaceholder": "Tecnología",
+    "website": "Sitio Web",
+    "websitePlaceholder": "https://ejemplo.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+1 234 567 8900",
+    "email": "Email Corporativo",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado/Provincia",
+    "country": "País",
+    "postalCode": "Código Postal",
+    "employees": "Número de Empleados",
+    "revenue": "Ingresos Anuales",
+    "description": "Descripción",
+    "owner": "Propietario",
+    "type": "Tipo de Cuenta",
+    "parentAccount": "Cuenta Padre",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "create": "Crear Cuenta",
+    "update": "Actualizar Cuenta"
+  },
+  "types": {
+    "customer": "Cliente",
+    "prospect": "Prospecto",
+    "partner": "Socio",
+    "vendor": "Proveedor",
+    "competitor": "Competidor",
+    "other": "Otro"
+  },
+  "industries": {
+    "technology": "Tecnología",
+    "finance": "Finanzas",
+    "healthcare": "Salud",
+    "retail": "Retail",
+    "manufacturing": "Manufactura",
+    "education": "Educación",
+    "realestate": "Bienes Raíces",
+    "consulting": "Consultoría",
+    "other": "Otro"
+  },
+  "empty": {
+    "title": "No hay cuentas",
+    "description": "Crea tu primera cuenta para comenzar a gestionar tus clientes empresariales",
+    "action": "Crear Cuenta"
+  },
+  "actions": {
+    "view": "Ver Detalles",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "addContact": "Agregar Contacto",
+    "createOpportunity": "Crear Oportunidad",
+    "viewContacts": "Ver Contactos",
+    "viewOpportunities": "Ver Oportunidades",
+    "export": "Exportar"
+  },
+  "delete": {
+    "title": "Eliminar Cuenta",
+    "message": "¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer y se eliminarán todos los datos relacionados.",
+    "confirm": "Sí, eliminar",
+    "cancel": "Cancelar"
+  },
+  "messages": {
+    "created": "Cuenta creada exitosamente",
+    "updated": "Cuenta actualizada exitosamente",
+    "deleted": "Cuenta eliminada exitosamente",
+    "errorLoad": "Error al cargar cuentas",
+    "errorCreate": "No se pudo crear la cuenta",
+    "errorUpdate": "No se pudo actualizar la cuenta",
+    "errorDelete": "No se pudo eliminar la cuenta"
+  },
+  "stats": {
+    "totalAccounts": "Total de Cuentas",
+    "activeCustomers": "Clientes Activos",
+    "totalRevenue": "Ingresos Totales",
+    "avgDealSize": "Tamaño Promedio"
+  }
+}

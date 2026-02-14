@@ -1,0 +1,81 @@
+{
+  "app": {
+    "name": "STIA CRM",
+    "tagline": "Enterprise",
+    "poweredBy": "POWERED BY BLUESYSTEM"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtros",
+    "export": "Exportar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "retry": "Reintentar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "viewDetails": "Ver Detalle",
+    "viewAll": "Ver Todo",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "processing": "Procesando..."
+  },
+  "common": {
+    "all": "Todos",
+    "yes": "Sí",
+    "no": "No",
+    "or": "o",
+    "and": "y",
+    "of": "de",
+    "in": "en",
+    "at": "a las",
+    "by": "por",
+    "to": "para",
+    "from": "desde",
+    "with": "con",
+    "without": "sin",
+    "unknown": "Desconocido",
+    "notAvailable": "N/D",
+    "notSpecified": "No especificado",
+    "general": "General"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "processing": "Procesando",
+    "failed": "Fallido",
+    "success": "Exitoso",
+    "error": "Error"
+  },
+  "time": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "thisWeek": "Esta Semana",
+    "thisMonth": "Este Mes",
+    "thisQuarter": "Este Trimestre",
+    "thisYear": "Año Actual",
+    "lastMonth": "Último Mes",
+    "lastQuarter": "Último Trimestre",
+    "custom": "Personalizado"
+  },
+  "countries": {
+    "costaRica": "Costa Rica",
+    "guatemala": "Guatemala",
+    "elSalvador": "El Salvador",
+    "honduras": "Honduras",
+    "panama": "Panamá"
+  }
+}

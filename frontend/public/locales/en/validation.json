@@ -1,0 +1,65 @@
+{
+  "required": "This field is required",
+  "email": {
+    "invalid": "Email is not valid",
+    "required": "Email is required"
+  },
+  "password": {
+    "required": "Password is required",
+    "tooShort": "Password must be at least {{min}} characters",
+    "tooWeak": "Password is too weak",
+    "mismatch": "Passwords do not match",
+    "mustContain": "Must contain uppercase, lowercase and numbers"
+  },
+  "phone": {
+    "invalid": "Phone number is not valid",
+    "tooShort": "Phone number is too short",
+    "tooLong": "Phone number is too long"
+  },
+  "name": {
+    "required": "Name is required",
+    "tooShort": "Name is too short",
+    "tooLong": "Name is too long",
+    "invalid": "Name contains invalid characters"
+  },
+  "number": {
+    "invalid": "Must be a valid number",
+    "min": "Minimum value is {{min}}",
+    "max": "Maximum value is {{max}}",
+    "positive": "Must be a positive number",
+    "negative": "Must be a negative number",
+    "integer": "Must be a whole number"
+  },
+  "date": {
+    "invalid": "Date is not valid",
+    "past": "Date must be in the past",
+    "future": "Date must be in the future",
+    "range": "Date must be between {{min}} and {{max}}"
+  },
+  "url": {
+    "invalid": "URL is not valid",
+    "required": "URL is required"
+  },
+  "file": {
+    "required": "Must select a file",
+    "tooLarge": "File is too large (max: {{max}})",
+    "invalidType": "File type not allowed",
+    "uploadFailed": "Error uploading file"
+  },
+  "select": {
+    "required": "Must select an option",
+    "invalid": "Selected option is not valid"
+  },
+  "text": {
+    "tooShort": "Must be at least {{min}} characters",
+    "tooLong": "Cannot exceed {{max}} characters",
+    "pattern": "Format is not valid"
+  },
+  "custom": {
+    "uniqueEmail": "This email is already registered",
+    "uniqueUsername": "This username already exists",
+    "invalidCredentials": "Invalid credentials",
+    "accountNotFound": "Account not found",
+    "sessionExpired": "Session expired. Please sign in again"
+  }
+}

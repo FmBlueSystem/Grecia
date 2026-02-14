@@ -1,0 +1,102 @@
+{
+  "title": "Accounts",
+  "subtitle": "Client companies and organizations",
+  "newAccount": "New Account",
+  "searchPlaceholder": "Search by name, industry...",
+  "filters": "Filters",
+  "table": {
+    "name": "Account Name",
+    "industry": "Industry",
+    "contacts": "Contacts",
+    "opportunities": "Opportunities",
+    "owner": "Owner",
+    "website": "Website",
+    "phone": "Phone",
+    "revenue": "Revenue",
+    "employees": "Employees",
+    "actions": "Actions"
+  },
+  "form": {
+    "title": "Create New Account",
+    "editTitle": "Edit Account",
+    "name": "Account Name",
+    "namePlaceholder": "Acme Corporation",
+    "industry": "Industry",
+    "industryPlaceholder": "Technology",
+    "website": "Website",
+    "websitePlaceholder": "https://example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 234 567 8900",
+    "email": "Corporate Email",
+    "address": "Address",
+    "city": "City",
+    "state": "State/Province",
+    "country": "Country",
+    "postalCode": "Postal Code",
+    "employees": "Number of Employees",
+    "revenue": "Annual Revenue",
+    "description": "Description",
+    "owner": "Owner",
+    "type": "Account Type",
+    "parentAccount": "Parent Account",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create Account",
+    "update": "Update Account"
+  },
+  "types": {
+    "customer": "Customer",
+    "prospect": "Prospect",
+    "partner": "Partner",
+    "vendor": "Vendor",
+    "competitor": "Competitor",
+    "other": "Other"
+  },
+  "industries": {
+    "technology": "Technology",
+    "finance": "Finance",
+    "healthcare": "Healthcare",
+    "retail": "Retail",
+    "manufacturing": "Manufacturing",
+    "education": "Education",
+    "realestate": "Real Estate",
+    "consulting": "Consulting",
+    "other": "Other"
+  },
+  "empty": {
+    "title": "No accounts",
+    "description": "Create your first account to start managing your business customers",
+    "action": "Create Account"
+  },
+  "actions": {
+    "view": "View Details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addContact": "Add Contact",
+    "createOpportunity": "Create Opportunity",
+    "viewContacts": "View Contacts",
+    "viewOpportunities": "View Opportunities",
+    "export": "Export"
+  },
+  "delete": {
+    "title": "Delete Account",
+    "message": "Are you sure you want to delete this account? This action cannot be undone and will delete all related data.",
+    "confirm": "Yes, delete",
+    "cancel": "Cancel"
+  },
+  "messages": {
+    "created": "Account created successfully",
+    "updated": "Account updated successfully",
+    "deleted": "Account deleted successfully",
+    "errorLoad": "Error loading accounts",
+    "errorCreate": "Could not create account",
+    "errorUpdate": "Could not update account",
+    "errorDelete": "Could not delete account"
+  },
+  "stats": {
+    "totalAccounts": "Total Accounts",
+    "activeCustomers": "Active Customers",
+    "totalRevenue": "Total Revenue",
+    "avgDealSize": "Average Deal Size"
+  }
+}
