@@ -1,0 +1,62 @@
+Buenos días Freddy:
+
+¡Feliz inicio de semana!
+
+Te escribo para dar seguimiento al proyecto de CRM y consultar si hemos podido avanzar en algo o si requieres información adicional de mi parte.
+
+Quisiera comentarte que el proveedor de servicios Altec, quien desarrolló la pantalla de demostración dentro de Microsoft Dynamics, me ha estado consultando por el estado del proyecto. Existe la posibilidad de que en las próximas semanas perdamos el acceso a este usuario demo, el cual es una referencia muy clara y funcional de lo que necesitamos para el área de Mercadeo y Ventas.
+
+Por esta razón, considero importante que puedas revisar a detalle el usuario demo, de manera que se pueda tomar como base para el desarrollo de la aplicación con las funcionalidades previamente solicitadas.
+
+Quedo atenta a tus comentarios y a cualquier información que necesites de mi parte.
+
+Gracias de antemano por tu apoyo.
+
+
+
+De: Grecia Rosales <marketing@stia.net>
+Enviado: viernes, 16 de enero de 2026 13:00
+Para: Freddy Molina <freddy@bluesystem.io>
+Cc: Fernanda Perez <ventas@stia.net>; Brigitte Mendez <bmendez@stia.net>; Nancy Salazar <nsalazar@stia.net>
+Asunto: RE: Material y accesos
+ 
+Buenas tardes Freddy:
+
+Un gusto saludarte, a continuación te envío la información para que puedas acceder a la pantalla de demostración de Microsoft Dynamics 365 Sales:
+
+URL: https://demoventas.crm.dynamics.com/
+Usuario: demouser@altecsoluciones.com
+Contraseña: DemoAltec.2025!
+
+Por favor, revisar los siguientes módulos, con el fin de evaluar la viabilidad de crear un modelo similar:
+
+Paneles
+Actividades
+Cuentas
+Contactos
+Clientes potenciales
+Oportunidades
+Ofertas
+Pedidos (considerando agregar seguimiento logístico y estados del pedido como: facturado, disponible para entrega, salió de puerto y llegó a puerto)
+Facturas
+Productos
+Casos
+
+Adjunto el archivo de Excel con la información que les compartí para la creación de los paneles, así como un PDF donde se detalla lo que esperaba visualizar en cada uno de ellos.
+
+Adicionalmente, incluyo el flujo del proceso de ventas para tu referencia.
+
+Quedo a tu entera disposición para ampliar cualquier información o atender cualquier consulta adicional
+
+Cordialmente,
+
+
+De: Freddy Molina <Freddy@blueSystem.io>
+Enviado: viernes, 16 de enero de 2026 08:33
+Para: Grecia Rosales <marketing@stia.net>
+Asunto: Material y accesos
+ 
+Hola buenos días
+
+Tengo un ratito en la mañana me pasas todo el material que tienes como pantallas flujos en fin todo para empezar a realizar el prototipo.
+
