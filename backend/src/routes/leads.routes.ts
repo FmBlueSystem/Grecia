@@ -43,7 +43,7 @@ const leadsRoutes: FastifyPluginAsync = async (fastify) => {
 
         // Auto-assign logic (Stage 3 Stub)
         // For MVP, assign to creator (request.user) or Default Sales Rep
-        const ownerId = request.user?.id;
+        const ownerId = (request.user as any)?.id;
 
         const newLead = await prisma.lead.create({
             data: {

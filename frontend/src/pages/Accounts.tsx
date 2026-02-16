@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Building2, Plus, Search, Globe, Phone, MoreHorizontal, Filter, Trash2 } from 'lucide-react';
+import { Building2, Plus, Search, Globe, MoreHorizontal, Filter, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { staggerContainer, fadeIn, slideUp } from '../lib/animations';
+import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast, toastCRUD } from '../lib';
 import { TableSkeleton, EmptyState, ConfirmDialog, useConfirmDialog } from '../components';
+import api from '../lib/api';
 
 interface Account {
     id: string;
@@ -50,12 +51,10 @@ export default function Accounts() {
 
     const fetchAccounts = async () => {
         try {
-            // Assuming authorization headers are handled by App.tsx global interceptor logic
-            const res = await fetch('http://localhost:3000/api/accounts');
-            const json = await res.json();
-            if (json.data) setAccounts(json.data);
+            const res = await api.get('/accounts');
+            if (res.data?.data) setAccounts(res.data.data);
         } catch (err) {
-            console.error("Failed to fetch accounts", err);
+            console.error("Error al obtener cuentas", err);
             toast.error('Error al cargar cuentas', 'No se pudieron cargar las cuentas');
         } finally {
             setLoading(false);
@@ -65,22 +64,14 @@ export default function Accounts() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:3000/api/accounts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            if (res.ok) {
-                setShowModal(false);
-                fetchAccounts();
-                setFormData(prev => ({ ...prev, name: '', industry: '', website: '', phone: '' }));
-                toastCRUD.created('Cuenta');
-            } else {
-                toast.error('Error', 'No se pudo crear la cuenta');
-            }
+            await api.post('/accounts', formData);
+            setShowModal(false);
+            fetchAccounts();
+            setFormData(prev => ({ ...prev, name: '', industry: '', website: '', phone: '' }));
+            toastCRUD.created('Cuenta');
         } catch (err) {
-            console.error("Failed to create account", err);
-            toast.error('Error', 'No se pudo crear la cuenta');
+            console.error("Error al crear cuenta", err);
+            toast.error('Error al crear', 'No se pudo crear la cuenta');
         }
     };
 
@@ -91,21 +82,14 @@ export default function Accounts() {
 
     const handleDeleteConfirm = async () => {
         if (!accountToDelete) return;
-        
+
         try {
-            const res = await fetch(`http://localhost:3000/api/accounts/${accountToDelete}`, {
-                method: 'DELETE'
-            });
-            
-            if (res.ok) {
-                fetchAccounts();
-                toastCRUD.deleted('Cuenta');
-            } else {
-                toast.error('Error', 'No se pudo eliminar la cuenta');
-            }
+            await api.delete(`/accounts/${accountToDelete}`);
+            fetchAccounts();
+            toastCRUD.deleted('Cuenta');
         } catch (err) {
-            console.error("Failed to delete account", err);
-            toast.error('Error', 'No se pudo eliminar la cuenta');
+            console.error("Error al eliminar cuenta", err);
+            toast.error('Error al eliminar', 'No se pudo eliminar la cuenta');
         } finally {
             setAccountToDelete(null);
             confirm.close();

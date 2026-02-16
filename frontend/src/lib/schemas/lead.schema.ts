@@ -44,17 +44,17 @@ export const leadSchema = z.object({
     'social',
     'event',
     'other'
-  ], {
-    errorMap: () => ({ message: 'Debe seleccionar una fuente válida' })
+  ] as const, {
+    message: 'Debe seleccionar una fuente válida'
   }),
-  
+
   status: z.enum([
     'new',
     'contacted',
     'qualified',
     'unqualified'
-  ], {
-    errorMap: () => ({ message: 'Debe seleccionar un estado válido' })
+  ] as const, {
+    message: 'Debe seleccionar un estado válido'
   }),
   
   notes: z

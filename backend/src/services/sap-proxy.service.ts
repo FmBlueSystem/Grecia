@@ -1,0 +1,546 @@
+/**
+ * SAP Service Layer Proxy
+ * Provides real-time data access from SAP B1 Service Layer.
+ * Maps SAP entities to CRM-compatible formats.
+ */
+import sapService from './sap.service';
+import { CountryCode, COMPANIES } from '../config/companies';
+export { CountryCode };
+
+// ─── Tipos compartidos ────────────────────────────────
+export interface PaginationParams {
+    top?: number;
+    skip?: number;
+    filter?: string;
+    orderBy?: string;
+    search?: string;
+}
+
+interface SapListResponse<T> {
+    data: T[];
+    total: number;
+}
+
+// ─── Helpers ──────────────────────────────────────────
+function buildQuery(endpoint: string, select: string, params: PaginationParams = {}): string {
+    const parts: string[] = [`$select=${select}`];
+    if (params.top) parts.push(`$top=${params.top}`);
+    if (params.skip) parts.push(`$skip=${params.skip}`);
+    if (params.filter) parts.push(`$filter=${params.filter}`);
+    if (params.orderBy) parts.push(`$orderby=${params.orderBy}`);
+    return `${endpoint}?${parts.join('&')}`;
+}
+
+export async function sapGet(companyCode: CountryCode, path: string): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const res = await client.get(path);
+    return res.data;
+}
+
+export async function sapPost(companyCode: CountryCode, path: string, data: any): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const res = await client.post(path, data);
+    return res.data;
+}
+
+async function sapPatch(companyCode: CountryCode, path: string, data: any): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const res = await client.patch(path, data);
+    return res.data;
+}
+
+// ─── SalesPersons Cache (para resolver owner names) ──
+const spCache = new Map<string, Map<number, string>>();
+
+export async function loadSalesPersons(companyCode: CountryCode): Promise<Map<number, string>> {
+    if (spCache.has(companyCode)) return spCache.get(companyCode)!;
+    try {
+        const data = await sapGet(companyCode, 'SalesPersons?$select=SalesEmployeeCode,SalesEmployeeName&$top=500');
+        const map = new Map<number, string>();
+        for (const sp of data.value || []) {
+            map.set(sp.SalesEmployeeCode, sp.SalesEmployeeName || '');
+        }
+        spCache.set(companyCode, map);
+        return map;
+    } catch {
+        return new Map();
+    }
+}
+
+function resolveOwner(code: number | undefined, spMap: Map<number, string>): any {
+    const name = (spMap.get(code ?? -1) || '').trim();
+    const parts = name.split(' ');
+    return {
+        id: String(code ?? -1),
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' ') || '',
+    };
+}
+
+// ─── Helper: combinar filtro de usuario con filtro de query ─
+function withSalesPersonFilter(baseFilter: string, salesPersonCode?: number): string {
+    if (salesPersonCode == null) return baseFilter;
+    return `(${baseFilter}) and SalesPersonCode eq ${salesPersonCode}`;
+}
+
+// ─── ACCOUNTS (BusinessPartners) ──────────────────────
+export async function getAccounts(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const spMap = await loadSalesPersons(companyCode);
+    let filter = params.search
+        ? `CardType eq 'C' and contains(CardName,'${params.search}')`
+        : "CardType eq 'C'";
+    filter = withSalesPersonFilter(filter, salesPersonCode);
+    const path = buildQuery('BusinessPartners',
+        'CardCode,CardName,Phone1,Website,Country,Industry,Valid,SalesPersonCode',
+        { top: params.top || 50, skip: params.skip || 0, filter, orderBy: params.orderBy || 'CardName asc' }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map((bp: any) => mapAccount(bp, spMap));
+    return { data: items, total: items.length };
+}
+
+export async function getAccountById(companyCode: CountryCode, cardCode: string): Promise<any> {
+    const spMap = await loadSalesPersons(companyCode);
+    const data = await sapGet(companyCode, `BusinessPartners('${cardCode}')?$select=CardCode,CardName,Phone1,Phone2,Website,Country,Industry,Valid,SalesPersonCode,ContactEmployees`);
+    const account = mapAccount(data, spMap);
+    account.contacts = (data.ContactEmployees || []).map((cp: any) => mapContact(cp, cardCode, data.CardName || cardCode, data.SalesPersonCode, spMap));
+    return account;
+}
+
+function mapAccount(bp: any, spMap: Map<number, string>): any {
+    return {
+        id: bp.CardCode,
+        name: bp.CardName || bp.CardCode,
+        sapId: bp.CardCode,
+        phone: bp.Phone1 || null,
+        website: bp.Website || null,
+        country: bp.Country || null,
+        industry: bp.Industry != null ? String(bp.Industry) : null,
+        isActive: bp.Valid === 'tYES' || bp.Valid === 'Y',
+        accountType: 'Customer',
+        owner: resolveOwner(bp.SalesPersonCode, spMap),
+        _count: { contacts: 0, opportunities: 0 },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+}
+
+// ─── CONTACTS (ContactEmployees) ──────────────────────
+export async function getContacts(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const spMap = await loadSalesPersons(companyCode);
+    let filter = params.search
+        ? `CardType eq 'C' and contains(CardName,'${params.search}')`
+        : "CardType eq 'C'";
+    filter = withSalesPersonFilter(filter, salesPersonCode);
+
+    // Paginar BPs siguiendo odata.nextLink de SAP (max 500 BPs para evitar timeouts)
+    const MAX_BPS = 500;
+    const allContacts: any[] = [];
+    let url: string | null = buildQuery('BusinessPartners',
+        'CardCode,CardName,SalesPersonCode,ContactEmployees',
+        { filter }
+    );
+    let bpCount = 0;
+    while (url && bpCount < MAX_BPS) {
+        const data = await sapGet(companyCode, url);
+        for (const bp of data.value || []) {
+            for (const cp of bp.ContactEmployees || []) {
+                allContacts.push(mapContact(cp, bp.CardCode, bp.CardName, bp.SalesPersonCode, spMap));
+            }
+        }
+        bpCount += (data.value || []).length;
+        url = data['odata.nextLink'] || null;
+    }
+
+    // Aplicar paginación sobre la lista total de contactos
+    const start = params.skip || 0;
+    const end = start + (params.top || 50);
+    return { data: allContacts.slice(start, end), total: allContacts.length };
+}
+
+function mapContact(cp: any, cardCode: string, cardName: string, salesPersonCode?: number, spMap?: Map<number, string>): any {
+    const parts = (cp.Name || '').trim().split(' ');
+    return {
+        id: `${cardCode}-${cp.InternalCode || cp.Name}`,
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' ') || '',
+        email: cp.E_Mail || null,
+        phone: cp.Phone1 || null,
+        mobile: cp.MobilePhone || null,
+        jobTitle: cp.Position || null,
+        isActive: cp.Active === 'tYES' || cp.Active === 'Y',
+        accountId: cardCode,
+        accountName: cardName || cardCode,
+        owner: spMap ? resolveOwner(salesPersonCode, spMap) : { id: String(salesPersonCode ?? -1), firstName: '', lastName: '' },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+}
+
+// ─── PRODUCTS (Items) ─────────────────────────────────
+export async function getProducts(companyCode: CountryCode, params: PaginationParams = {}): Promise<SapListResponse<any>> {
+    const filter = params.search
+        ? `contains(ItemName,'${params.search}')`
+        : undefined;
+    const path = buildQuery('Items',
+        'ItemCode,ItemName,ItemsGroupCode,Frozen,QuantityOnStock,ItemPrices',
+        { top: params.top || 50, skip: params.skip || 0, filter, orderBy: 'ItemName asc' }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map(mapProduct);
+    return { data: items, total: items.length };
+}
+
+function mapProduct(item: any): any {
+    // Get price from first price list (PriceList 1 is usually default)
+    let price = 0;
+    if (item.ItemPrices && Array.isArray(item.ItemPrices)) {
+        const defaultPrice = item.ItemPrices.find((p: any) => p.PriceList === 1) || item.ItemPrices[0];
+        if (defaultPrice) price = Number(defaultPrice.Price) || 0;
+    }
+    return {
+        id: item.ItemCode,
+        code: item.ItemCode,
+        name: item.ItemName || item.ItemCode,
+        category: item.ItemsGroupCode != null ? String(item.ItemsGroupCode) : 'General',
+        price,
+        currency: 'USD',
+        stockLevel: Number(item.QuantityOnStock) || 0,
+        isActive: item.Frozen !== 'tYES' && item.Frozen !== 'Y',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+}
+
+// ─── QUOTES (Quotations) ─────────────────────────────
+export async function getQuotes(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const spMap = await loadSalesPersons(companyCode);
+    const filter = salesPersonCode != null
+        ? (params.filter ? `(${params.filter}) and SalesPersonCode eq ${salesPersonCode}` : `SalesPersonCode eq ${salesPersonCode}`)
+        : params.filter;
+    const path = buildQuery('Quotations',
+        'DocEntry,DocNum,CardCode,CardName,DocTotal,DocDate,DocDueDate,DocumentStatus,SalesPersonCode',
+        { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'DocDate desc', filter }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map((q: any) => mapQuote(q, spMap));
+    return { data: items, total: items.length };
+}
+
+export async function getQuoteById(companyCode: CountryCode, docEntry: string): Promise<any> {
+    const spMap = await loadSalesPersons(companyCode);
+    const data = await sapGet(companyCode, `Quotations(${docEntry})`);
+    const quote = mapQuote(data, spMap);
+    quote.items = (data.DocumentLines || []).map(mapDocLine);
+    // Trazabilidad: buscar órdenes derivadas de esta cotización
+    try {
+        const ordersFromQuote = await sapGet(companyCode,
+            `Orders?$filter=DocumentLines/any(d: d/BaseEntry eq ${docEntry} and d/BaseType eq 23)&$select=DocEntry,DocNum,DocTotal,DocDate,DocumentStatus&$top=10`
+        );
+        quote.linkedOrders = (ordersFromQuote.value || []).map((o: any) => ({
+            docEntry: o.DocEntry, docNum: o.DocNum, total: Number(o.DocTotal) || 0, date: o.DocDate,
+            status: o.DocumentStatus === 'bost_Close' ? 'Cerrada' : 'Abierta',
+        }));
+    } catch { quote.linkedOrders = []; }
+    return quote;
+}
+
+function mapQuote(q: any, spMap: Map<number, string>): any {
+    return {
+        id: String(q.DocEntry),
+        sapDocNum: q.DocNum,
+        sapDocEntry: q.DocEntry,
+        quoteNumber: `QT-${q.DocNum}`,
+        name: `${q.CardName || q.CardCode} - QT-${q.DocNum}`,
+        totalAmount: Number(q.DocTotal) || 0,
+        currency: 'USD',
+        status: q.DocumentStatus === 'bost_Close' ? 'ACCEPTED' : q.DocumentStatus === 'bost_Open' ? 'SENT' : 'DRAFT',
+        expirationDate: q.DocDueDate || null,
+        account: { name: q.CardName || q.CardCode },
+        owner: resolveOwner(q.SalesPersonCode, spMap),
+        createdAt: q.DocDate || new Date().toISOString(),
+        updatedAt: q.DocDate || new Date().toISOString(),
+    };
+}
+
+// ─── ORDERS ───────────────────────────────────────────
+export async function getOrders(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const spMap = await loadSalesPersons(companyCode);
+    const filter = salesPersonCode != null
+        ? (params.filter ? `(${params.filter}) and SalesPersonCode eq ${salesPersonCode}` : `SalesPersonCode eq ${salesPersonCode}`)
+        : params.filter;
+    const path = buildQuery('Orders',
+        'DocEntry,DocNum,CardCode,CardName,DocTotal,DocDate,DocDueDate,DocumentStatus,SalesPersonCode',
+        { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'DocDate desc', filter }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map((o: any) => mapOrder(o, spMap));
+    return { data: items, total: items.length };
+}
+
+export async function getOrderById(companyCode: CountryCode, docEntry: string): Promise<any> {
+    const spMap = await loadSalesPersons(companyCode);
+    const data = await sapGet(companyCode, `Orders(${docEntry})`);
+    const order = mapOrder(data, spMap);
+    order.items = (data.DocumentLines || []).map(mapDocLine);
+    // Trazabilidad: buscar cotización origen y facturas derivadas
+    const baseLine = (data.DocumentLines || [])[0];
+    if (baseLine?.BaseType === 23 && baseLine?.BaseEntry) {
+        order.linkedQuote = { docEntry: baseLine.BaseEntry };
+    }
+    try {
+        const invoicesFromOrder = await sapGet(companyCode,
+            `Invoices?$filter=DocumentLines/any(d: d/BaseEntry eq ${docEntry} and d/BaseType eq 17)&$select=DocEntry,DocNum,DocTotal,DocDate,PaidToDate&$top=10`
+        );
+        order.linkedInvoices = (invoicesFromOrder.value || []).map((i: any) => ({
+            docEntry: i.DocEntry, docNum: i.DocNum, total: Number(i.DocTotal) || 0, date: i.DocDate,
+            paid: Number(i.PaidToDate) || 0,
+        }));
+    } catch { order.linkedInvoices = []; }
+    return order;
+}
+
+function mapOrder(o: any, spMap: Map<number, string>): any {
+    return {
+        id: String(o.DocEntry),
+        orderNumber: `ORD-${o.DocNum}`,
+        sapOrderId: String(o.DocEntry),
+        totalAmount: Number(o.DocTotal) || 0,
+        currency: 'USD',
+        status: o.DocumentStatus === 'bost_Close' ? 'DELIVERED' : 'PROCESSING',
+        logisticsStatus: null,
+        trackingNumber: null,
+        dueDate: o.DocDueDate || null,
+        account: { name: o.CardName || o.CardCode },
+        owner: resolveOwner(o.SalesPersonCode, spMap),
+        createdAt: o.DocDate || new Date().toISOString(),
+        updatedAt: o.DocDate || new Date().toISOString(),
+    };
+}
+
+// ─── INVOICES ─────────────────────────────────────────
+export async function getInvoices(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const filter = salesPersonCode != null
+        ? (params.filter ? `(${params.filter}) and SalesPersonCode eq ${salesPersonCode}` : `SalesPersonCode eq ${salesPersonCode}`)
+        : params.filter;
+    const path = buildQuery('Invoices',
+        'DocEntry,DocNum,CardCode,CardName,DocTotal,DocDate,DocDueDate,DocumentStatus,PaidToDate,SalesPersonCode',
+        { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'DocDate desc', filter }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map(mapInvoice);
+    return { data: items, total: items.length };
+}
+
+export async function getInvoiceById(companyCode: CountryCode, docEntry: string): Promise<any> {
+    const data = await sapGet(companyCode, `Invoices(${docEntry})`);
+    const invoice = mapInvoice(data);
+    invoice.items = (data.DocumentLines || []).map(mapDocLine);
+    return invoice;
+}
+
+function mapInvoice(inv: any): any {
+    const amount = Number(inv.DocTotal) || 0;
+    const paid = Number(inv.PaidToDate) || 0;
+    const dueDate = inv.DocDueDate ? new Date(inv.DocDueDate) : new Date();
+    let status: string;
+    if (paid >= amount && amount > 0) status = 'PAID';
+    else if (paid > 0) status = 'PARTIAL';
+    else if (dueDate < new Date()) status = 'OVERDUE';
+    else status = 'UNPAID';
+
+    return {
+        id: String(inv.DocEntry),
+        invoiceNumber: `INV-${inv.DocNum}`,
+        sapInvoiceId: String(inv.DocEntry),
+        amount,
+        paidAmount: paid,
+        status,
+        dueDate: inv.DocDueDate || null,
+        paidDate: status === 'PAID' ? new Date().toISOString() : null,
+        account: { name: inv.CardName || inv.CardCode },
+        createdAt: inv.DocDate || new Date().toISOString(),
+        updatedAt: inv.DocDate || new Date().toISOString(),
+    };
+}
+
+// ─── ACTIVITIES ───────────────────────────────────────
+export async function getActivities(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
+    const spMap = await loadSalesPersons(companyCode);
+    // Activities use HandledBy instead of SalesPersonCode
+    const filter = salesPersonCode != null
+        ? (params.filter ? `(${params.filter}) and HandledBy eq ${salesPersonCode}` : `HandledBy eq ${salesPersonCode}`)
+        : params.filter;
+    const path = buildQuery('Activities',
+        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,HandledBy',
+        { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'StartDate desc', filter }
+    );
+    const data = await sapGet(companyCode, path);
+    const items = (data.value || []).map((act: any) => mapActivity(act, spMap));
+    return { data: items, total: items.length };
+}
+
+const ACT_TYPE_MAP: Record<number, string> = { [-1]: 'Task', 0: 'Call', 1: 'Meeting', 2: 'Task', 3: 'Note', 4: 'Email' };
+const ACT_STATUS_MAP: Record<string, string> = { cn_Open: 'Planned', cn_Closed: 'Completed', cn_Cancel: 'Cancelled' };
+
+function mapActivity(act: any, spMap: Map<number, string>): any {
+    const typeLabel = ACT_TYPE_MAP[act.ActivityType] || 'Actividad';
+    // SAP Subject is an integer ID, not a description. Use Notes as primary subject.
+    const subject = act.Notes
+        ? (act.Notes.length > 120 ? act.Notes.substring(0, 120) + '...' : act.Notes)
+        : `${typeLabel} #${act.ActivityCode}`;
+
+    return {
+        id: String(act.ActivityCode),
+        activityType: typeLabel,
+        subject,
+        description: act.Notes || null,
+        dueDate: act.CloseDate || act.StartDate || null,
+        status: ACT_STATUS_MAP[act.Status] || 'Planned',
+        priority: null,
+        isCompleted: act.Status === 'cn_Closed',
+        completedAt: act.Status === 'cn_Closed' ? (act.CloseDate || act.StartDate) : null,
+        contact: null,
+        opportunity: null,
+        owner: resolveOwner(act.HandledBy, spMap),
+        createdAt: act.StartDate || new Date().toISOString(),
+        updatedAt: act.StartDate || new Date().toISOString(),
+    };
+}
+
+// ─── Document Line Items ──────────────────────────────
+function mapDocLine(line: any): any {
+    return {
+        id: String(line.LineNum),
+        productId: line.ItemCode,
+        product: { id: line.ItemCode, code: line.ItemCode, name: line.ItemDescription || line.ItemCode },
+        quantity: Number(line.Quantity) || 1,
+        unitPrice: Number(line.UnitPrice) || Number(line.Price) || 0,
+        totalPrice: Number(line.LineTotal) || 0,
+        discount: Number(line.DiscountPercent) || 0,
+    };
+}
+
+// ─── DASHBOARD Stats (aggregated from SAP — all real data) ────────────
+export async function getDashboardStats(companyCode: CountryCode, salesPersonCode?: number): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const spFilter = salesPersonCode != null ? ` and SalesPersonCode eq ${salesPersonCode}` : '';
+    const spFilterLead = salesPersonCode != null ? `&$filter=SalesPersonCode eq ${salesPersonCode}` : '';
+
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const dayOfWeek = now.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysToMonday);
+    const fmtD = (d: Date) => d.toISOString().split('T')[0];
+
+    const [openOrdersRes, openQuotesRes, closedOrdersRes, invoicesRes, activitiesRes, salesPersonsRes] = await Promise.all([
+        client.get(`Orders?$select=DocTotal,DocEntry&$filter=DocumentStatus eq 'bost_Open'${spFilter}`).catch(() => ({ data: { value: [] } })),
+        client.get(`Quotations?$select=DocTotal,DocEntry&$filter=DocumentStatus eq 'bost_Open'${spFilter}`).catch(() => ({ data: { value: [] } })),
+        client.get(`Orders?$select=DocEntry&$filter=DocumentStatus eq 'bost_Close'${spFilter}&$top=0&$inlinecount=allpages`).catch(() => ({ data: {} })),
+        client.get(`Invoices?$select=DocTotal,DocDate,SalesPersonCode&$filter=DocDate ge '${fmtD(sixMonthsAgo)}'${spFilter}&$orderby=DocDate desc&$top=500`).catch(() => ({ data: { value: [] } })),
+        client.get(`Activities?$select=ActivityDate,ActivityType,Status&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
+        client.get(`SalesPersons?$select=SalesEmployeeCode,SalesEmployeeName&$top=500`).catch(() => ({ data: { value: [] } })),
+    ]);
+
+    const openOrders: any[] = openOrdersRes.data.value || [];
+    const openQuotes: any[] = openQuotesRes.data.value || [];
+    const closedOrdersCount = Number(closedOrdersRes.data['odata.count'] || 0);
+    const invoices: any[] = invoicesRes.data.value || [];
+    const activities: any[] = activitiesRes.data.value || [];
+    const salesPersons: any[] = salesPersonsRes.data.value || [];
+
+    // Pipeline totals
+    const pipelineOrdersValue = openOrders.reduce((s, o) => s + (Number(o.DocTotal) || 0), 0);
+    const pipelineQuotesValue = openQuotes.reduce((s, o) => s + (Number(o.DocTotal) || 0), 0);
+
+    // Revenue by month (from invoices)
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const revenueByMonth: Record<string, number> = {};
+    for (const inv of invoices) {
+        const d = new Date(inv.DocDate);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        revenueByMonth[key] = (revenueByMonth[key] || 0) + (Number(inv.DocTotal) || 0);
+    }
+
+    // Revenue chart: last 6 months
+    const monthValues: number[] = [];
+    const revenueChart: any[] = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const rev = revenueByMonth[key] || 0;
+        monthValues.push(rev);
+        revenueChart.push({ month: monthNames[d.getMonth()], revenue: Math.round(rev), target: 0 });
+    }
+    const nonZero = monthValues.filter(v => v > 0);
+    const avgRevenue = nonZero.length > 0 ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length : 0;
+    const target = Math.round(avgRevenue);
+    for (const item of revenueChart) item.target = target;
+
+    // Current & previous month revenue for trend
+    const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const prevD = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevKey = `${prevD.getFullYear()}-${String(prevD.getMonth() + 1).padStart(2, '0')}`;
+    const revenueMTD = revenueByMonth[curKey] || 0;
+    const prevRevenue = revenueByMonth[prevKey] || 0;
+    const trendPct = prevRevenue > 0 ? Math.round(((revenueMTD - prevRevenue) / prevRevenue) * 100) : 0;
+    const trendStr = trendPct >= 0 ? `+${trendPct}%` : `${trendPct}%`;
+
+    // Conversion rate: open orders / (open orders + open quotes) — current pipeline
+    const winDenom = openOrders.length + openQuotes.length;
+    const winRate = winDenom > 0 ? Math.round((openOrders.length / winDenom) * 100) : 0;
+
+    // Pipeline chart (embudo)
+    const pipelineChart = [
+        { stage: 'Cotizaciones', value: Math.round(pipelineQuotesValue) },
+        { stage: 'Órdenes Abiertas', value: Math.round(pipelineOrdersValue) },
+    ];
+
+    // Activity chart: this week by day
+    const dayLabels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const actByDay: Record<string, { calls: number; meetings: number; tasks: number }> = {};
+    for (const label of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie']) {
+        actByDay[label] = { calls: 0, meetings: 0, tasks: 0 };
+    }
+    for (const act of activities) {
+        const d = new Date(act.ActivityDate);
+        const label = dayLabels[d.getDay()];
+        if (!actByDay[label]) continue;
+        const t = String(act.ActivityType || '');
+        if (t === 'cn_PhoneCall' || t.includes('Phone')) actByDay[label].calls++;
+        else if (t === 'cn_Meeting' || t.includes('Meeting')) actByDay[label].meetings++;
+        else actByDay[label].tasks++;
+    }
+    const activityChart = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'].map(day => ({
+        day, ...actByDay[day],
+    }));
+
+    // Top sellers (from invoices by SalesPersonCode)
+    const sellerTotals: Record<number, { total: number; count: number }> = {};
+    for (const inv of invoices) {
+        const code = Number(inv.SalesPersonCode);
+        if (code < 0) continue;
+        if (!sellerTotals[code]) sellerTotals[code] = { total: 0, count: 0 };
+        sellerTotals[code].total += Number(inv.DocTotal) || 0;
+        sellerTotals[code].count++;
+    }
+    const spNames: Record<number, string> = {};
+    for (const sp of salesPersons) spNames[Number(sp.SalesEmployeeCode)] = sp.SalesEmployeeName;
+    const topSellers = Object.entries(sellerTotals)
+        .map(([code, v]) => ({ name: spNames[Number(code)] || `Vendedor ${code}`, deals: v.count, revenue: Math.round(v.total) }))
+        .filter(s => !['Stia', 'STIA', 'stia'].includes(s.name.trim()))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5);
+
+    const openActivitiesCount = activities.filter(a => a.Status === 'cn_Open' || a.Status === '-2').length;
+
+    return {
+        revenue: { mtd: revenueMTD, target, percentage: target > 0 ? (revenueMTD / target) * 100 : 0, trend: trendStr },
+        pipeline: { value: openOrders.length, weighted: Math.round(pipelineOrdersValue + pipelineQuotesValue), deals: openQuotes.length },
+        winRate: { percentage: winRate, trend: `${openOrders.length} de ${winDenom} convertidas` },
+        activities: { today: openActivitiesCount, thisWeek: activities.length, overdue: 0 },
+        charts: { revenue: revenueChart, pipeline: pipelineChart, activity: activityChart, topSellers },
+    };
+}

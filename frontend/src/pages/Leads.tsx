@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Check, X, ArrowRight, Building2, Mail, Phone, Calendar, Briefcase, DollarSign, Clock, Users } from 'lucide-react';
+import { Plus, Check, X, ArrowRight, Building2, Briefcase, DollarSign, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../lib/api';
 
 interface Lead {
     id: string;
@@ -21,6 +22,7 @@ interface Lead {
     timeframe?: string;
     notes?: string;
 
+    sourceDetail?: string;
     createdAt: string;
 }
 
@@ -35,9 +37,8 @@ export default function Leads() {
 
     const fetchLeads = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/leads');
-            const data = await res.json();
-            if (data.data) setLeads(data.data);
+            const res = await api.get('/leads');
+            if (res.data?.data) setLeads(res.data.data);
             setLoading(false);
         } catch (err) {
             console.error(err);
@@ -46,24 +47,16 @@ export default function Leads() {
     };
 
     const handleQualify = async (leadId: string) => {
-        // In a real app, you might want to save the expanded details first if they were edited in the modal
         try {
-            const res = await fetch(`http://localhost:3000/api/leads/${leadId}/qualify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    createAccount: true,
-                    createContact: true,
-                    createOpportunity: true
-                })
+            await api.post(`/leads/${leadId}/qualify`, {
+                createAccount: true,
+                createContact: true,
+                createOpportunity: true
             });
-
-            if (res.ok) {
-                setLeads(leads.map(l => l.id === leadId ? { ...l, status: 'QUALIFIED' } : l));
-                setShowQualifyModal(null);
-            }
+            setLeads(leads.map(l => l.id === leadId ? { ...l, status: 'QUALIFIED' } : l));
+            setShowQualifyModal(null);
         } catch (err) {
-            alert("Error calificando lead");
+            alert("Error al calificar prospecto");
         }
     };
 

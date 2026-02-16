@@ -2,7 +2,7 @@
 
 ## Resumen
 CRM para STIA (Soluciones al Procesar Alimentos) diseñado en Pencil (.pen).
-19 pantallas completadas con datos reales de SAP Business One Service Layer.
+26 pantallas completadas con datos reales de SAP Business One Service Layer.
 Multi-país: Costa Rica, Guatemala, El Salvador, Honduras, Panamá.
 
 ## Archivo de Diseño
@@ -10,15 +10,16 @@ Multi-país: Costa Rica, Guatemala, El Salvador, Honduras, Panamá.
 - **Archivo:** stia-crm.pen
 - **Para abrir:** usar `mcp__pencil__open_document` con el path del archivo
 
-## Pantallas (19 total)
+## Pantallas (26 total)
 
 ### Grid de posiciones en el canvas
 | Posición | x:0 | x:1540 | x:3080 | x:4620 | x:6160 | x:7700 |
 |----------|-----|--------|--------|--------|--------|--------|
 | y:0 | Dashboard Light | Customer 360 | Login | Casos | Ofertas Perdidas | Trazabilidad |
-| y:1060 | Dashboard Dark | Contactos | Prospectos | Dash Logística | | |
-| y:2120 | Pipeline | Cotizaciones | Pedidos | Detalle Cotización | | |
-| y:3180 | Facturas | Actividades | Productos | Reportes | | |
+| y:1060 | Dashboard Dark | Contactos | Prospectos | Dash Logística | Cuentas | Calendario |
+| y:2120 | Pipeline | Cotizaciones | Pedidos | Detalle Cotización | Det. Pedido | Det. Factura |
+| y:3180 | Facturas | Actividades | Productos | Reportes | Det. Caso | Dash Servicio |
+| y:4240 | Configuración | Notificaciones | | | | |
 
 ### IDs de pantallas
 | Pantalla | ID | Descripción |
@@ -41,6 +42,14 @@ Multi-país: Costa Rica, Guatemala, El Salvador, Honduras, Panamá.
 | Trazabilidad | lekBG | Seguimiento de productos/lotes |
 | Dash Logística | oaq4L | Dashboard de envíos, estados, países |
 | Reportes | VCcoo | Reportes con KPIs, ventas por país y vendedor |
+| Cuentas | Zm1GF | Lista de cuentas con KPIs (87 total), tabla con empresas por país |
+| Calendario | isOvs | Vista mensual Feb 2026, eventos de actividades, KPIs del día/semana |
+| Detalle Pedido | 9idUc | PED-14523, BPF 5 etapas (En Producción), líneas, timeline |
+| Detalle Factura | RmrXJ | FAC-28734, BPF 4 etapas (Pagada), líneas, pagos recibidos |
+| Detalle Caso | VOPUZ | CAS-5892, prioridad alta, SLA warning, timeline interacciones |
+| Dashboard Servicio | cKcOs | KPIs soporte (24 casos, 94.2% SLA), donut categorías, tendencia semanal |
+| Configuración | oEiNq | Tabs (Perfil/Empresa/Usuarios/Integraciones), formulario, seguridad, avatar |
+| Notificaciones | aoBwW | Lista con secciones Hoy/Ayer, filtros por categoría, 7 notificaciones |
 
 ## Componente Reutilizable: Navegación
 - **ID:** ZwCF4 (en Dashboard Light, reusable: true)
@@ -89,6 +98,16 @@ Multi-país: Costa Rica, Guatemala, El Salvador, Honduras, Panamá.
 --border-sidebar: #1A2D47
 --font-display: Inter
 ```
+
+## Pantallas Nuevas (Ronda 2 — 8 de 8)
+1. **Cuentas** - Lista de empresas con KPIs, tabla con datos de 5 países
+2. **Calendario** - Vista mensual con eventos de actividades CRM
+3. **Detalle Pedido** - BPF 5 etapas, líneas de producto, totales, timeline
+4. **Detalle Factura** - BPF 4 etapas completadas, pagos recibidos
+5. **Detalle Caso** - SLA warning, timeline de interacciones, info del caso
+6. **Dashboard Servicio** - KPIs de soporte, gráfico donut, tendencia semanal, tabla casos
+7. **Configuración** - Perfil con formulario, seguridad 2FA, avatar, preferencias toggles
+8. **Notificaciones** - Lista categorizada con estados leído/no leído, filtros
 
 ## Mejoras Implementadas (10 de 10)
 1. **Detalle Cotización** - Pantalla nueva con BPF, líneas de producto, totales

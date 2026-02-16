@@ -3,6 +3,7 @@ import { LifeBuoy, CheckCircle, Clock, AlertOctagon, MoreHorizontal, MessageSqua
 import { motion } from 'framer-motion';
 import { scaleIn } from '../../lib/animations';
 import { DashboardSkeleton } from '../../components';
+import api from '../../lib/api';
 
 interface Case {
     id: string;
@@ -43,17 +44,15 @@ export default function ServiceDashboard() {
 
     const fetchCases = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/cases');
-            const json = await res.json();
-            if (json.data) {
-                setCases(json.data);
-                // Calculate basic stats for MVP
-                const open = json.data.filter((c: Case) => c.status !== 'CLOSED' && c.status !== 'RESOLVED').length;
-                const critical = json.data.filter((c: Case) => c.priority === 'CRITICAL').length;
+            const res = await api.get('/cases');
+            if (res.data?.data) {
+                setCases(res.data.data);
+                const open = res.data.data.filter((c: Case) => c.status !== 'CLOSED' && c.status !== 'RESOLVED').length;
+                const critical = res.data.data.filter((c: Case) => c.priority === 'CRITICAL').length;
                 setStats(prev => ({ ...prev, open, critical }));
             }
         } catch (err) {
-            console.error("Failed to fetch cases", err);
+            console.error("Error al obtener casos", err);
         } finally {
             setLoading(false);
         }

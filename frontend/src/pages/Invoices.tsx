@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Download, CreditCard, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { FileText, Search, Download, CreditCard, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../lib/animations';
 import api from '../lib/api';
 import { EmptyState } from '../components/EmptyState';
+import Pagination from '../components/shared/Pagination';
 // import { ButtonLoading } from '../components/ButtonLoading';
 // import { toast } from '../lib/toast';
 
@@ -19,25 +21,30 @@ interface Invoice {
 }
 
 export default function Invoices() {
+    const navigate = useNavigate();
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [refreshing, setRefreshing] = useState(false);
+    const [page, setPage] = useState(0);
+    const [total, setTotal] = useState(0);
+    const pageSize = 25;
 
     useEffect(() => {
         fetchInvoices();
-    }, []);
+    }, [page]);
 
     const fetchInvoices = async () => {
         try {
             setRefreshing(true);
-            const res = await api.get('/invoices');
+            const res = await api.get(`/invoices?top=${pageSize}&skip=${page * pageSize}`);
             if (res.data && res.data.data) {
                 setInvoices(res.data.data);
             }
+            if (res.data?.total != null) setTotal(res.data.total);
         } catch (error) {
-            console.error('Failed to fetch invoices:', error);
+            console.error('Error al obtener facturas:', error);
             // Error is already handled by api interceptor toast
         } finally {
             setLoading(false);
@@ -97,9 +104,7 @@ export default function Invoices() {
                         <Clock className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                         {refreshing ? 'Actualizando...' : 'Actualizar'}
                     </button>
-                    <button className="bg-indigo-600/90 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 hover:scale-105 transition-all active:scale-95 flex items-center gap-2">
-                        <Plus className="w-5 h-5" /> Nueva Factura
-                    </button>
+                    {/* Facturas se crean desde SAP */}
                 </div>
             </motion.div>
 
@@ -203,7 +208,8 @@ export default function Invoices() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="hover:bg-indigo-50/30 transition-colors group cursor-default"
+                                        onClick={() => navigate(`/invoices/${invoice.id}`)}
+                                        className="hover:bg-indigo-50/30 transition-colors group cursor-pointer"
                                     >
                                         <td className="px-8 py-5">
                                             <div className="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
@@ -224,7 +230,7 @@ export default function Invoices() {
                                         <td className="px-8 py-5 text-center">
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(invoice.status)}`}>
                                                 {getStatusIcon(invoice.status)}
-                                                {invoice.status}
+                                                {{ PAID: 'Pagado', UNPAID: 'Pendiente', OVERDUE: 'Vencido', PARTIAL: 'Parcial' }[invoice.status] || invoice.status}
                                             </span>
                                         </td>
                                         <td className="px-8 py-5 text-right">
@@ -258,6 +264,7 @@ export default function Invoices() {
                         </div>
                     )}
                 </div>
+                <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
             </motion.div>
         </motion.div>
     );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Package, Search, Tag, DollarSign } from 'lucide-react';
+import { Package } from 'lucide-react';
+import api from '../lib/api';
 
 interface Product {
     id: string;
@@ -16,12 +17,12 @@ export default function Products() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/products')
-            .then(res => res.json())
-            .then(data => {
-                if (data.data) setProducts(data.data);
+        api.get('/products')
+            .then(res => {
+                if (res.data?.data) setProducts(res.data.data);
                 setLoading(false);
-            });
+            })
+            .catch(() => setLoading(false));
     }, []);
 
     const formatCurrency = (amount: number) => {

@@ -3,7 +3,7 @@ import { toast } from './toast';
 
 // Configuración base de Axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? `${import.meta.env.BASE_URL}api` : 'http://localhost:3000/api'),
   timeout: 30000, // 30 segundos
   headers: {
     'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const _originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
     // 401 Unauthorized - Redirect a login
     if (error.response?.status === 401) {
@@ -190,7 +190,7 @@ export async function apiWithLoading<T>(
     loading: messages.loading,
     success: messages.success,
     error: messages.error || 'Ocurrió un error',
-  });
+  }) as Promise<T>;
 }
 
 export default api;

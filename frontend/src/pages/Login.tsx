@@ -1,17 +1,36 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeIn, scaleIn } from '../lib/animations';
+import { useAuthStore } from '../lib/store';
+import api from '../lib/api';
 
-interface LoginProps {
-  onLoginSuccess: (token: string, user: any) => void;
-}
+const DEMO_ACCOUNTS = [
+  { label: 'Administrador', email: 'freddy@bluesystem.com', password: 'password123', initials: 'FM', color: 'from-slate-700 to-slate-900' },
+  { label: 'Gerente', email: 'mariana.solis@stia.com', password: 'password123', initials: 'MS', color: 'from-blue-600 to-blue-800' },
+  { label: 'Vendedor', email: 'mario.marin@stia.com', password: 'password123', initials: 'MM', color: 'from-emerald-600 to-emerald-800' },
+];
 
-export default function Login({ onLoginSuccess }: LoginProps) {
+export default function Login() {
+  const navigate = useNavigate();
+  const login = useAuthStore(s => s.login);
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const fillCredentials = (account: typeof DEMO_ACCOUNTS[0]) => {
+    setEmail(account.email);
+    setPassword(account.password);
+  };
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    navigate('/', { replace: true });
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,23 +38,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const { data } = await api.post('/auth/login', { email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al iniciar sesión');
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      onLoginSuccess(data.token, data.user);
+      login(data.token, data.user);
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {
@@ -97,7 +103,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <Lock className="w-8 h-8 text-white" />
           </motion.div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">STIA CRM</h1>
-          <p className="text-slate-500 mt-2 font-medium">Enterprise Access Portal</p>
+          <p className="text-slate-500 mt-2 font-medium">Portal de Acceso Empresarial</p>
         </motion.div>
 
         {/* Error Message */}
@@ -111,12 +117,27 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </motion.div>
         )}
 
-        {/* Demo Credentials Info */}
-        <div className="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-3 rounded-xl mb-6 text-sm">
-          <p className="font-semibold mb-1">Credenciales Demo:</p>
-          <div className="flex flex-col gap-0.5 opacity-80">
-            <p>freddy@bluesystem.com</p>
-            <p>password123</p>
+        {/* Quick Access Roles */}
+        <div className="mb-6">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Acceso Rápido</p>
+          <div className="grid grid-cols-3 gap-2">
+            {DEMO_ACCOUNTS.map((acc) => (
+              <button
+                key={acc.email}
+                type="button"
+                onClick={() => fillCredentials(acc)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-95 ${
+                  email === acc.email
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div className={`w-8 h-8 bg-gradient-to-br ${acc.color} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
+                  {acc.initials}
+                </div>
+                <span className="text-xs font-semibold text-slate-700">{acc.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 

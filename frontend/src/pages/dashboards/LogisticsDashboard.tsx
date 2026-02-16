@@ -1,14 +1,14 @@
-import { Package, Truck, Clock, AlertTriangle, MapPin } from 'lucide-react';
+import { Truck, Clock, AlertTriangle, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { staggerContainer, fadeIn, slideUp, scaleIn } from '../../lib/animations';
 
 const logisticsData = [
-    { stage: 'Processing', count: 12 },
-    { stage: 'Billed', count: 8 },
-    { stage: 'Port Dispatch', count: 5 },
-    { stage: 'Port Arrival', count: 3 },
-    { stage: 'Delivered', count: 45 },
+    { stage: 'Procesando', count: 12 },
+    { stage: 'Facturado', count: 8 },
+    { stage: 'Salió Puerto', count: 5 },
+    { stage: 'Llegó Puerto', count: 3 },
+    { stage: 'Entregado', count: 45 },
 ];
 
 export default function LogisticsDashboard() {

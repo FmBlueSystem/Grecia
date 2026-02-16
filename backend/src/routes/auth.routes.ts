@@ -20,7 +20,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
         try {
             const user = await prisma.user.findUnique({
-                where: { email }
+                where: { email },
+                include: { role: true }
             });
 
             if (!user) {
@@ -35,7 +36,13 @@ export default async function authRoutes(fastify: FastifyInstance) {
             }
 
             const token = fastify.jwt.sign(
-                { userId: user.id, email: user.email, roleId: user.roleId },
+                {
+                    userId: user.id,
+                    email: user.email,
+                    roleId: user.roleId,
+                    sapSalesPersonCode: user.sapSalesPersonCode,
+                    scopeLevel: user.role.scopeLevel,
+                },
                 { expiresIn: '24h' }
             );
 
@@ -56,6 +63,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     roleId: user.roleId,
+                    role: user.role.name,
+                    sapSalesPersonCode: user.sapSalesPersonCode,
+                    scopeLevel: user.role.scopeLevel,
                 },
             };
         } catch (error) {
@@ -68,7 +78,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
         try {
             const { userId } = request.user as { userId: string };
             const user = await prisma.user.findUnique({
-                where: { id: userId }
+                where: { id: userId },
+                include: { role: true }
             });
 
             if (!user) {
@@ -83,6 +94,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     roleId: user.roleId,
+                    role: user.role.name,
+                    sapSalesPersonCode: user.sapSalesPersonCode,
+                    scopeLevel: user.role.scopeLevel,
                 },
             };
         } catch (error) {

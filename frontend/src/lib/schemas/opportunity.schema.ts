@@ -35,8 +35,8 @@ export const opportunitySchema = z.object({
     'negotiation',
     'closed_won',
     'closed_lost'
-  ], {
-    errorMap: () => ({ message: 'Debe seleccionar una etapa válida' })
+  ] as const, {
+    message: 'Debe seleccionar una etapa válida'
   }),
   
   expectedCloseDate: z

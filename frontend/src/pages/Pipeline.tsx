@@ -7,19 +7,18 @@ import {
     useSensor,
     useSensors,
     DragOverlay,
-    defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import {
     SortableContext,
-    arrayMove,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Plus, DollarSign, Calendar, MoreHorizontal } from 'lucide-react';
-import { getStageColor } from '../lib/utils'; // We'll need to double check this util exists or create it
+import api from '../lib/api';
+// Stage colors handled via COLUMNS config
 
 interface Opportunity {
     id: string;
@@ -40,7 +39,7 @@ const COLUMNS = [
 ];
 
 // Sortable Item Component
-function SortableItem({ id, opp }: { id: string, opp: Opportunity }) {
+function SortableItem({ opp }: { id: string, opp: Opportunity }) {
     const {
         attributes,
         listeners,
@@ -99,12 +98,12 @@ export default function Pipeline() {
     );
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/opportunities')
-            .then(res => res.json())
-            .then(data => {
-                if (data.data) setOpportunities(data.data);
+        api.get('/opportunities')
+            .then(res => {
+                if (res.data?.data) setOpportunities(res.data.data);
                 setLoading(false);
-            });
+            })
+            .catch(() => setLoading(false));
     }, []);
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -129,14 +128,9 @@ export default function Pipeline() {
 
             // API Call
             try {
-                await fetch(`http://localhost:3000/api/opportunities/${active.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stage: overContainerId })
-                });
+                await api.put(`/opportunities/${active.id}`, { stage: overContainerId });
             } catch (err) {
-                console.error("Failed to update status", err);
-                // Revert on error would go here
+                console.error("Error al actualizar estado", err);
             }
         }
 

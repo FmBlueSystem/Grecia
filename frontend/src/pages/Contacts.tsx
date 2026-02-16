@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, Trash2 } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, Trash2, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast, toastCRUD } from '../lib';
 import { TableSkeleton, EmptyState, ConfirmDialog, useConfirmDialog } from '../components';
+import api from '../lib/api';
 
 interface Contact {
     id: string;
@@ -12,7 +13,8 @@ interface Contact {
     email?: string;
     phone?: string;
     jobTitle?: string;
-    // account?: { name: string }; // Backend currently doesn't include account name in basic fetch, might need to update include or just show placeholder
+    accountId?: string;
+    accountName?: string;
     owner: {
         firstName: string;
         lastName: string;
@@ -21,10 +23,13 @@ interface Contact {
 
 export default function Contacts() {
     const [contacts, setContacts] = useState<Contact[]>([]);
+    const [totalContacts, setTotalContacts] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [contactToDelete, setContactToDelete] = useState<string | null>(null);
+    const [page, setPage] = useState(0);
+    const PAGE_SIZE = 50;
     const confirm = useConfirmDialog();
 
     // Form Data
@@ -38,7 +43,6 @@ export default function Contacts() {
     });
 
     useEffect(() => {
-        fetchContacts();
         const user = localStorage.getItem('user');
         if (user) {
             const userData = JSON.parse(user);
@@ -46,13 +50,18 @@ export default function Contacts() {
         }
     }, []);
 
+    useEffect(() => {
+        fetchContacts();
+    }, [page]);
+
     const fetchContacts = async () => {
+        setLoading(true);
         try {
-            const res = await fetch('http://localhost:3000/api/contacts');
-            const json = await res.json();
-            if (json.data) setContacts(json.data);
+            const res = await api.get('/contacts', { params: { top: PAGE_SIZE, skip: page * PAGE_SIZE } });
+            if (res.data?.data) setContacts(res.data.data);
+            if (res.data?.total != null) setTotalContacts(res.data.total);
         } catch (err) {
-            console.error("Failed to fetch contacts", err);
+            console.error("Error al obtener contactos", err);
             toast.error('Error al cargar contactos', 'No se pudieron cargar los contactos');
         } finally {
             setLoading(false);
@@ -62,22 +71,14 @@ export default function Contacts() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:3000/api/contacts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            if (res.ok) {
-                setShowModal(false);
-                fetchContacts();
-                setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }));
-                toastCRUD.created('Contacto');
-            } else {
-                toast.error('Error', 'No se pudo crear el contacto');
-            }
+            await api.post('/contacts', formData);
+            setShowModal(false);
+            fetchContacts();
+            setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }));
+            toastCRUD.created('Contacto');
         } catch (err) {
-            console.error("Failed to create contact", err);
-            toast.error('Error', 'No se pudo crear el contacto');
+            console.error("Error al crear contacto", err);
+            toast.error('Error al crear', 'No se pudo crear el contacto');
         }
     };
 
@@ -88,30 +89,26 @@ export default function Contacts() {
 
     const handleDeleteConfirm = async () => {
         if (!contactToDelete) return;
-        
+
         try {
-            const res = await fetch(`http://localhost:3000/api/contacts/${contactToDelete}`, {
-                method: 'DELETE'
-            });
-            
-            if (res.ok) {
-                fetchContacts();
-                toastCRUD.deleted('Contacto');
-            } else {
-                toast.error('Error', 'No se pudo eliminar el contacto');
-            }
+            await api.delete(`/contacts/${contactToDelete}`);
+            fetchContacts();
+            toastCRUD.deleted('Contacto');
         } catch (err) {
-            console.error("Failed to delete contact", err);
-            toast.error('Error', 'No se pudo eliminar el contacto');
+            console.error("Error al eliminar contacto", err);
+            toast.error('Error al eliminar', 'No se pudo eliminar el contacto');
         } finally {
             setContactToDelete(null);
             confirm.close();
         }
     };
 
+    const totalPages = Math.ceil(totalContacts / PAGE_SIZE);
+
     const filteredContacts = contacts.filter(c =>
         `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.accountName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -169,6 +166,7 @@ export default function Contacts() {
                         <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Nombre Completo</th>
+                                <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Socio de Negocios</th>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Cargo</th>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Datos de Contacto</th>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Propietario</th>
@@ -186,6 +184,12 @@ export default function Contacts() {
                                             <div>
                                                 <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{contact.firstName} {contact.lastName}</div>
                                             </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                                            <span className="text-slate-700 font-medium text-sm truncate max-w-[200px]" title={contact.accountName}>{contact.accountName || '-'}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -237,6 +241,33 @@ export default function Contacts() {
                             title="No se encontraron contactos"
                             description={`No hay resultados para "${searchTerm}"`}
                         />
+                    )}
+                    {/* Paginación */}
+                    {totalContacts > PAGE_SIZE && (
+                        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-sm text-slate-500">
+                                Mostrando {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, totalContacts)} de {totalContacts} contactos
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                                    disabled={page === 0}
+                                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <span className="text-sm font-medium text-slate-700">
+                                    Página {page + 1} de {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                                    disabled={page >= totalPages - 1}
+                                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </motion.div>
             )}

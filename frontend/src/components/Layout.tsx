@@ -65,7 +65,7 @@ export default function Layout({ children }: LayoutProps) {
                             </div>
                             <div className="hidden lg:block">
                                 <h1 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-indigo-600 leading-tight">STIA</h1>
-                                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Enterprise</p>
+                                <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Empresarial</p>
                             </div>
                         </Link>
 
@@ -109,7 +109,7 @@ export default function Layout({ children }: LayoutProps) {
                         <div className="flex items-center gap-3 relative group ml-2">
                             <div className="text-right hidden md:block">
                                 <p className="text-sm font-bold text-slate-900 leading-none">{user?.firstName} {user?.lastName}</p>
-                                <p className="text-xs text-indigo-500 mt-1 font-medium">Admin</p>
+                                <p className="text-xs text-indigo-500 mt-1 font-medium">Administrador</p>
                             </div>
                             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-indigo-100">
                                 {user?.firstName?.[0]}{user?.lastName?.[0]}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
+import api from '../lib/api';
 
 interface Activity {
     id: string;
@@ -56,11 +57,10 @@ export default function Activities() {
 
     const fetchActivities = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/activities');
-            const json = await res.json();
-            if (json.data) setActivities(json.data);
+            const res = await api.get('/activities');
+            if (res.data?.data) setActivities(res.data.data);
         } catch (err) {
-            console.error("Failed to fetch activities", err);
+            console.error("Error al obtener actividades", err);
         } finally {
             setLoading(false);
         }
@@ -69,18 +69,12 @@ export default function Activities() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:3000/api/activities', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            if (res.ok) {
-                setShowModal(false);
-                fetchActivities();
-                setFormData(prev => ({ ...prev, subject: '', description: '', dueDate: '', activityType: 'Task' }));
-            }
+            await api.post('/activities', formData);
+            setShowModal(false);
+            fetchActivities();
+            setFormData(prev => ({ ...prev, subject: '', description: '', dueDate: '', activityType: 'Task' }));
         } catch (err) {
-            console.error("Failed to create activity", err);
+            console.error("Error al crear actividad", err);
         }
     };
 
@@ -89,13 +83,9 @@ export default function Activities() {
         setActivities(prev => prev.map(a => a.id === id ? { ...a, isCompleted: !current } : a));
 
         try {
-            await fetch(`http://localhost:3000/api/activities/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isCompleted: !current })
-            });
+            await api.put(`/activities/${id}`, { isCompleted: !current });
         } catch (err) {
-            console.error("Failed to update", err);
+            console.error("Error al actualizar", err);
         }
     };
 
@@ -149,7 +139,7 @@ export default function Activities() {
 
                                         <div className="flex items-center gap-3 text-xs font-bold">
                                             <span className={`px-2 py-1 rounded-lg flex items-center gap-1 ${colorClass}`}>
-                                                <Icon className="w-3 h-3" /> {activity.activityType}
+                                                <Icon className="w-3 h-3" /> {{ Call: 'Llamada', Email: 'Correo', Meeting: 'Reunión', Task: 'Tarea', Note: 'Nota' }[activity.activityType] || activity.activityType}
                                             </span>
                                             {activity.dueDate && (
                                                 <span className={`flex items-center gap-1 ${new Date(activity.dueDate) < new Date() && !activity.isCompleted ? 'text-red-500' : 'text-slate-400'}`}>
@@ -202,14 +192,19 @@ export default function Activities() {
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-2">Tipo</label>
                                     <div className="flex gap-2">
-                                        {['Call', 'Email', 'Meeting', 'Task'].map(type => (
+                                        {[
+                                            { value: 'Call', label: 'Llamada' },
+                                            { value: 'Email', label: 'Correo' },
+                                            { value: 'Meeting', label: 'Reunión' },
+                                            { value: 'Task', label: 'Tarea' },
+                                        ].map(type => (
                                             <button
-                                                key={type}
+                                                key={type.value}
                                                 type="button"
-                                                onClick={() => setFormData({ ...formData, activityType: type })}
-                                                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${formData.activityType === type ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                                                onClick={() => setFormData({ ...formData, activityType: type.value })}
+                                                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${formData.activityType === type.value ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
                                             >
-                                                {type}
+                                                {type.label}
                                             </button>
                                         ))}
                                     </div>

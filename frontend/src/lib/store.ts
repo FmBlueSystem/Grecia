@@ -6,6 +6,8 @@ interface User {
     lastName: string;
     email: string;
     role: string;
+    sapSalesPersonCode?: number | null;
+    scopeLevel?: string;
 }
 
 interface AuthState {

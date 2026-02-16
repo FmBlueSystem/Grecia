@@ -1,39 +1,67 @@
-import { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Calendar, DollarSign, User, MoreHorizontal, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FileText, Plus, Search, Calendar, MoreHorizontal, CheckCircle, Clock, AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fadeIn, slideUp, staggerContainer } from '../lib/animations';
+import { toast } from 'sonner';
+import { fadeIn, staggerContainer } from '../lib/animations';
+import api from '../lib/api';
+import Pagination from '../components/shared/Pagination';
 
 interface Quote {
     id: string;
+    sapDocNum: number;
+    sapDocEntry: number;
     quoteNumber: string;
     name: string;
     account: { name: string };
+    owner: { id: string; firstName: string; lastName: string };
     totalAmount: number;
     status: string;
     expirationDate: string;
     createdAt: string;
 }
 
+interface ClientOption { cardCode: string; name: string }
+interface ProductOption { code: string; name: string; price: number }
+interface QuoteLine { itemCode: string; itemName: string; quantity: number; unitPrice: number; discount: number }
+
 export default function Quotes() {
+    const navigate = useNavigate();
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(0);
+    const [total, setTotal] = useState(0);
+    const pageSize = 25;
+
+    // Modal form state
+    const [clientQuery, setClientQuery] = useState('');
+    const [clientOptions, setClientOptions] = useState<ClientOption[]>([]);
+    const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
+    const [showClientDropdown, setShowClientDropdown] = useState(false);
+    const [dueDate, setDueDate] = useState('');
+    const [comments, setComments] = useState('');
+    const [lines, setLines] = useState<QuoteLine[]>([]);
+    const [productSearch, setProductSearch] = useState('');
+    const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+    const [showProductDropdown, setShowProductDropdown] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const clientDebounce = useRef<ReturnType<typeof setTimeout>>();
+    const productDebounce = useRef<ReturnType<typeof setTimeout>>();
 
     useEffect(() => {
         fetchQuotes();
-    }, []);
+    }, [page]);
 
     const fetchQuotes = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:3000/api/quotes', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (data.data) setQuotes(data.data);
+            setLoading(true);
+            const res = await api.get(`/quotes?top=${pageSize}&skip=${page * pageSize}`);
+            if (res.data?.data) setQuotes(res.data.data);
+            if (res.data?.total != null) setTotal(res.data.total);
         } catch (error) {
-            console.error('Failed to fetch quotes:', error);
+            console.error('Error al obtener ofertas:', error);
         } finally {
             setLoading(false);
         }
@@ -59,19 +87,97 @@ export default function Quotes() {
         }
     };
 
-    const handleCreateQuote = async (e: React.FormEvent) => {
-        e.preventDefault();
-        // MVP: Mock creation or implement full form. For now, we'll confirm the UI flow.
-        // In a real implementation, we'd gather all form data being consistent with backend schema.
-        setIsModalOpen(false);
-        alert("Funcionalidad de creación completa en desarrollo. El backend está listo.");
+    const searchClients = (q: string) => {
+        if (q.length < 2) { setClientOptions([]); return; }
+        api.get(`/manager/clients?q=${encodeURIComponent(q)}`)
+            .then(res => { setClientOptions(res.data.data || []); setShowClientDropdown(true); })
+            .catch(() => setClientOptions([]));
     };
 
-    const filteredQuotes = quotes.filter(q =>
-        q.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.account.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const searchProducts = (q: string) => {
+        if (q.length < 2) { setProductOptions([]); return; }
+        api.get(`/products?search=${encodeURIComponent(q)}&top=10`)
+            .then(res => {
+                const items = (res.data.data || []).map((p: any) => ({ code: p.code, name: p.name, price: p.price || 0 }));
+                setProductOptions(items);
+                setShowProductDropdown(true);
+            })
+            .catch(() => setProductOptions([]));
+    };
+
+    const handleClientInput = (val: string) => {
+        setClientQuery(val);
+        setSelectedClient(null);
+        clearTimeout(clientDebounce.current);
+        clientDebounce.current = setTimeout(() => searchClients(val), 300);
+    };
+
+    const handleProductInput = (val: string) => {
+        setProductSearch(val);
+        clearTimeout(productDebounce.current);
+        productDebounce.current = setTimeout(() => searchProducts(val), 300);
+    };
+
+    const addLine = (product: ProductOption) => {
+        setLines(prev => [...prev, { itemCode: product.code, itemName: product.name, quantity: 1, unitPrice: product.price, discount: 0 }]);
+        setProductSearch('');
+        setShowProductDropdown(false);
+    };
+
+    const updateLine = (idx: number, field: keyof QuoteLine, value: number) => {
+        setLines(prev => prev.map((l, i) => i === idx ? { ...l, [field]: value } : l));
+    };
+
+    const removeLine = (idx: number) => {
+        setLines(prev => prev.filter((_, i) => i !== idx));
+    };
+
+    const resetModal = () => {
+        setClientQuery(''); setSelectedClient(null); setDueDate('');
+        setComments(''); setLines([]); setProductSearch('');
+        setShowClientDropdown(false); setShowProductDropdown(false);
+    };
+
+    const handleCreateQuote = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedClient) { toast.error('Seleccione un cliente'); return; }
+        if (lines.length === 0) { toast.error('Agregue al menos un producto'); return; }
+        if (!dueDate) { toast.error('Seleccione una fecha de validez'); return; }
+
+        setSubmitting(true);
+        try {
+            const payload = {
+                cardCode: selectedClient.cardCode,
+                docDueDate: dueDate,
+                comments,
+                lines: lines.map(l => ({
+                    itemCode: l.itemCode,
+                    quantity: l.quantity,
+                    unitPrice: l.unitPrice,
+                    discount: l.discount,
+                })),
+            };
+            const res = await api.post('/quotes', payload);
+            toast.success(`Cotización #${res.data.docNum} creada exitosamente en SAP`);
+            setIsModalOpen(false);
+            resetModal();
+            fetchQuotes();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Error al crear cotización');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const ownerName = (q: Quote) => `${q.owner?.firstName || ''} ${q.owner?.lastName || ''}`.trim();
+    const filteredQuotes = quotes.filter(q => {
+        const term = searchTerm.toLowerCase();
+        return q.name.toLowerCase().includes(term) ||
+            q.quoteNumber.toLowerCase().includes(term) ||
+            String(q.sapDocNum).includes(term) ||
+            q.account.name.toLowerCase().includes(term) ||
+            ownerName(q).toLowerCase().includes(term);
+    });
 
     return (
         <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
@@ -111,8 +217,9 @@ export default function Quotes() {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-4 font-bold text-slate-700">Referencia</th>
+                                <th className="px-6 py-4 font-bold text-slate-700"># SAP</th>
                                 <th className="px-6 py-4 font-bold text-slate-700">Cliente</th>
+                                <th className="px-6 py-4 font-bold text-slate-700">Vendedor</th>
                                 <th className="px-6 py-4 font-bold text-slate-700">Estado</th>
                                 <th className="px-6 py-4 font-bold text-slate-700 text-right">Total</th>
                                 <th className="px-6 py-4 font-bold text-slate-700">Vencimiento</th>
@@ -122,11 +229,11 @@ export default function Quotes() {
                         <tbody className="divide-y divide-slate-100">
                             {filteredQuotes.length > 0 ? (
                                 filteredQuotes.map((quote) => (
-                                    <tr key={quote.id} className="hover:bg-slate-50/80 transition-colors">
+                                    <tr key={quote.id} onClick={() => navigate(`/quotes/${quote.id}`)} className="hover:bg-slate-50/80 transition-colors cursor-pointer">
                                         <td className="px-6 py-4">
                                             <div>
-                                                <p className="font-bold text-inidigo-600">{quote.quoteNumber}</p>
-                                                <p className="text-xs text-slate-500">{quote.name}</p>
+                                                <p className="font-bold text-indigo-600">{quote.sapDocNum}</p>
+                                                <p className="text-xs text-slate-400">Entry: {quote.sapDocEntry}</p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -138,9 +245,17 @@ export default function Quotes() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-[10px] font-bold">
+                                                    {(quote.owner?.firstName?.[0] || '') + (quote.owner?.lastName?.[0] || '')}
+                                                </div>
+                                                <span className="text-sm text-slate-700">{ownerName(quote) || '-'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(quote.status)}`}>
                                                 {getStatusIcon(quote.status)}
-                                                {quote.status}
+                                                {{ DRAFT: 'Borrador', SENT: 'Enviada', ACCEPTED: 'Aceptada', REJECTED: 'Rechazada' }[quote.status] || quote.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
@@ -158,7 +273,7 @@ export default function Quotes() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                                         {loading ? 'Cargando ofertas...' : 'No se encontraron ofertas. Crea una nueva para comenzar.'}
                                     </td>
                                 </tr>
@@ -166,6 +281,7 @@ export default function Quotes() {
                         </tbody>
                     </table>
                 </div>
+                <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
             </motion.div>
 
             {/* New Quote Modal */}
@@ -192,46 +308,123 @@ export default function Quotes() {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleCreateQuote} className="p-6 space-y-6">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="col-span-2">
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Título de la Oferta</label>
-                                        <input className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ej: Renovación de Licencias 2026" />
+                            <form onSubmit={handleCreateQuote} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                                <div className="grid grid-cols-2 gap-5">
+                                    {/* Client Search */}
+                                    <div className="col-span-2 relative">
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Cliente (SAP)</label>
+                                        <input
+                                            value={clientQuery}
+                                            onChange={e => handleClientInput(e.target.value)}
+                                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            placeholder="Buscar cliente por nombre..."
+                                        />
+                                        {selectedClient && (
+                                            <span className="absolute right-3 top-[38px] text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                {selectedClient.cardCode}
+                                            </span>
+                                        )}
+                                        {showClientDropdown && clientOptions.length > 0 && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-slate-200 shadow-xl z-50 max-h-48 overflow-y-auto">
+                                                {clientOptions.map(opt => (
+                                                    <button key={opt.cardCode} type="button" onClick={() => { setSelectedClient(opt); setClientQuery(opt.name); setShowClientDropdown(false); }}
+                                                        className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 text-sm border-b border-slate-50 last:border-0">
+                                                        <span className="font-semibold text-slate-800">{opt.name}</span>
+                                                        <span className="text-xs text-slate-400 ml-2">{opt.cardCode}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Cliente (Cuenta)</label>
-                                        <select className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                            <option>Seleccionar Cliente...</option>
-                                            {/* Simulate accounts */}
-                                            <option>TechCorp Solutions</option>
-                                            <option>Global Industries</option>
-                                        </select>
-                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-bold text-slate-700 mb-2">Validez Hasta</label>
-                                        <input type="date" className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+                                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Notas</label>
+                                        <input value={comments} onChange={e => setComments(e.target.value)}
+                                            className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            placeholder="Condiciones de pago..." />
                                     </div>
 
-                                    {/* Items Section Placeholder */}
-                                    <div className="col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200 border-dashed text-center">
-                                        <p className="text-sm text-slate-500 mb-2">Detalle de Productos</p>
-                                        <button type="button" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center justify-center gap-1">
-                                            <Plus className="w-4 h-4" /> Agregar Producto
-                                        </button>
-                                    </div>
-
+                                    {/* Products */}
                                     <div className="col-span-2">
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Notas / Términos</label>
-                                        <textarea rows={3} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Condiciones de pago, entrega, etc..." />
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Productos</label>
+                                        <div className="relative mb-3">
+                                            <input value={productSearch} onChange={e => handleProductInput(e.target.value)}
+                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                placeholder="Buscar producto por nombre o código..." />
+                                            {showProductDropdown && productOptions.length > 0 && (
+                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-slate-200 shadow-xl z-50 max-h-48 overflow-y-auto">
+                                                    {productOptions.map(p => (
+                                                        <button key={p.code} type="button" onClick={() => addLine(p)}
+                                                            className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 text-sm border-b border-slate-50 last:border-0 flex justify-between">
+                                                            <span><span className="font-mono text-xs text-slate-400 mr-2">{p.code}</span><span className="font-medium text-slate-800">{p.name}</span></span>
+                                                            <span className="font-semibold text-slate-600">${p.price.toLocaleString()}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {lines.length > 0 && (
+                                            <div className="border border-slate-200 rounded-xl overflow-hidden">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-slate-50">
+                                                        <tr>
+                                                            <th className="text-left px-3 py-2 text-xs font-bold text-slate-500">Producto</th>
+                                                            <th className="text-center px-2 py-2 text-xs font-bold text-slate-500 w-20">Cant.</th>
+                                                            <th className="text-right px-2 py-2 text-xs font-bold text-slate-500 w-24">Precio</th>
+                                                            <th className="text-center px-2 py-2 text-xs font-bold text-slate-500 w-16">Desc%</th>
+                                                            <th className="text-right px-2 py-2 text-xs font-bold text-slate-500 w-24">Total</th>
+                                                            <th className="w-8"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100">
+                                                        {lines.map((line, idx) => {
+                                                            const lineTotal = line.quantity * line.unitPrice * (1 - line.discount / 100);
+                                                            return (
+                                                                <tr key={idx}>
+                                                                    <td className="px-3 py-2 text-slate-700">{line.itemName}</td>
+                                                                    <td className="px-2 py-2"><input type="number" min={1} value={line.quantity} onChange={e => updateLine(idx, 'quantity', Number(e.target.value) || 1)} className="w-full text-center border border-slate-200 rounded px-1 py-0.5 text-sm" /></td>
+                                                                    <td className="px-2 py-2"><input type="number" min={0} step={0.01} value={line.unitPrice} onChange={e => updateLine(idx, 'unitPrice', Number(e.target.value) || 0)} className="w-full text-right border border-slate-200 rounded px-1 py-0.5 text-sm" /></td>
+                                                                    <td className="px-2 py-2"><input type="number" min={0} max={100} value={line.discount} onChange={e => updateLine(idx, 'discount', Number(e.target.value) || 0)} className="w-full text-center border border-slate-200 rounded px-1 py-0.5 text-sm" /></td>
+                                                                    <td className="px-2 py-2 text-right font-semibold text-slate-800">${lineTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                                                                    <td className="px-1 py-2"><button type="button" onClick={() => removeLine(idx)} className="text-red-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button></td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                    <tfoot className="bg-slate-50">
+                                                        <tr>
+                                                            <td colSpan={4} className="px-3 py-2 text-right font-bold text-slate-700">Total</td>
+                                                            <td className="px-2 py-2 text-right font-bold text-indigo-600">
+                                                                ${lines.reduce((s, l) => s + l.quantity * l.unitPrice * (1 - l.discount / 100), 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        )}
+
+                                        {lines.length === 0 && (
+                                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 border-dashed text-center text-sm text-slate-400">
+                                                Busque y seleccione productos arriba para agregarlos
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                                    <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100">
+                                    <button type="button" onClick={() => { setIsModalOpen(false); resetModal(); }} className="px-6 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100">
                                         Cancelar
                                     </button>
-                                    <button type="submit" className="px-6 py-2 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200">
-                                        Crear Oferta
+                                    <button type="submit" disabled={submitting} className="px-6 py-2 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 disabled:opacity-50 flex items-center gap-2">
+                                        {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                        {submitting ? 'Creando...' : 'Crear en SAP'}
                                     </button>
                                 </div>
                             </form>

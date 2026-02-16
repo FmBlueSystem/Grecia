@@ -59,7 +59,7 @@ export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
           axisLine={false}
           tickLine={false}
           tick={{ fontSize: 12 }}
-          tickFormatter={(value) => `$${value / 1000}k`}
+          tickFormatter={(value) => value >= 1_000_000 ? `$${(value / 1_000_000).toFixed(0)}M` : `$${(value / 1000).toFixed(0)}k`}
         />
         <Tooltip
           contentStyle={{
@@ -77,7 +77,7 @@ export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
           dataKey="revenue"
           stroke="#10B981"
           strokeWidth={3}
-          name="Revenue Actual"
+          name="Ingresos Reales"
           dot={{ fill: '#10B981', r: 4, strokeWidth: 2, stroke: '#fff' }}
           activeDot={{ r: 6, strokeWidth: 0, onClick: (e) => onChartClick && onChartClick(e) }}
         />
@@ -87,7 +87,7 @@ export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
           stroke="#94A3B8"
           strokeWidth={2}
           strokeDasharray="4 4"
-          name="Target"
+          name="Objetivo"
           dot={false}
         />
       </LineChart>
@@ -99,9 +99,9 @@ interface PipelineChartProps extends ChartProps { }
 
 export function PipelineChart({ data, onChartClick }: PipelineChartProps) {
   const defaultData = [
-    { stage: 'Qualification', value: 85000 },
-    { stage: 'Proposal', value: 120000 },
-    { stage: 'Negotiation', value: 50000 },
+    { stage: 'Calificación', value: 85000 },
+    { stage: 'Propuesta', value: 120000 },
+    { stage: 'Negociación', value: 50000 },
   ];
 
   const chartData = data || defaultData;
@@ -118,6 +118,7 @@ export function PipelineChart({ data, onChartClick }: PipelineChartProps) {
           fill="#8884d8"
           paddingAngle={5}
           dataKey="value"
+          nameKey="stage"
           onClick={(data) => onChartClick && onChartClick(data)}
         >
           {chartData.map((_entry, index) => (
@@ -188,7 +189,7 @@ export function PerformanceChart({ data, onChartClick }: PerformanceChartProps) 
         <Bar
           dataKey="revenue"
           fill="#3B82F6"
-          name="Revenue ($)"
+          name="Ingresos ($)"
           radius={[0, 4, 4, 0]}
           onClick={(data) => onChartClick && onChartClick(data)}
           cursor="pointer"
@@ -202,11 +203,11 @@ interface ActivityChartProps extends ChartProps { }
 
 export function ActivityChart({ data, onChartClick }: ActivityChartProps) {
   const defaultData = [
-    { day: 'Lun', calls: 12, meetings: 5, emails: 28 },
-    { day: 'Mar', calls: 15, meetings: 7, emails: 32 },
-    { day: 'Mié', calls: 10, meetings: 4, emails: 25 },
-    { day: 'Jue', calls: 18, meetings: 6, emails: 35 },
-    { day: 'Vie', calls: 14, meetings: 8, emails: 30 },
+    { day: 'Lun', calls: 12, meetings: 5, tasks: 28 },
+    { day: 'Mar', calls: 15, meetings: 7, tasks: 32 },
+    { day: 'Mié', calls: 10, meetings: 4, tasks: 25 },
+    { day: 'Jue', calls: 18, meetings: 6, tasks: 35 },
+    { day: 'Vie', calls: 14, meetings: 8, tasks: 30 },
   ];
 
   const chartData = data || defaultData;
@@ -238,7 +239,7 @@ export function ActivityChart({ data, onChartClick }: ActivityChartProps) {
         <Legend wrapperStyle={{ paddingTop: '20px' }} />
         <Bar dataKey="calls" stackId="a" fill="#3B82F6" name="Llamadas" onClick={(d) => onChartClick && onChartClick(d)} />
         <Bar dataKey="meetings" stackId="a" fill="#10B981" name="Reuniones" onClick={(d) => onChartClick && onChartClick(d)} />
-        <Bar dataKey="emails" stackId="a" fill="#F59E0B" name="Emails" radius={[4, 4, 0, 0]} onClick={(d) => onChartClick && onChartClick(d)} />
+        <Bar dataKey="tasks" stackId="a" fill="#F59E0B" name="Tareas" radius={[4, 4, 0, 0]} onClick={(d) => onChartClick && onChartClick(d)} />
       </BarChart>
     </ResponsiveContainer>
   );

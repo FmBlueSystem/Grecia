@@ -33,6 +33,11 @@ import orderRoutes from './routes/orders.routes';
 import caseRoutes from './routes/cases.routes';
 import accountRoutes from './routes/accounts.routes';
 import invoiceRoutes from './routes/invoices.routes';
+import forecastRoutes from './routes/forecast.routes';
+import searchRoutes from './routes/search.routes';
+import managerRoutes from './routes/manager.routes';
+import reportsRoutes from './routes/reports.routes';
+import agingRoutes from './routes/aging.routes';
 
 
 
@@ -44,14 +49,17 @@ import cookie from '@fastify/cookie';
 // ... (existing imports)
 
 // Plugins
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
 fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
+  origin: allowedOrigins,
   credentials: true,
 });
 
 fastify.register(cookie);
 
-fastify.register(helmet);
 fastify.register(helmet);
 fastify.register(authPlugin);
 // Global Company Middleware
@@ -71,6 +79,11 @@ fastify.register(invoiceRoutes, { prefix: '/api/invoices' });
 
 fastify.register(caseRoutes, { prefix: '/api/cases' });
 fastify.register(accountRoutes, { prefix: '/api/accounts' });
+fastify.register(forecastRoutes, { prefix: '/api/forecast' });
+fastify.register(searchRoutes, { prefix: '/api/search' });
+fastify.register(managerRoutes, { prefix: '/api/manager' });
+fastify.register(reportsRoutes, { prefix: '/api/reports' });
+fastify.register(agingRoutes, { prefix: '/api/aging' });
 
 
 

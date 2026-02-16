@@ -1,12 +1,21 @@
-import { useState } from 'react';
-import { BarChart3, Building2, TrendingUp, Activity, X, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BarChart3, Building2, TrendingUp, Activity, X, Filter, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RevenueChart, PipelineChart, PerformanceChart, ActivityChart } from '../../components/Charts';
 import { staggerContainer, fadeIn, slideUp, scaleIn } from '../../lib/animations';
+import api from '../../lib/api';
+import ForecastSection from '../../components/dashboard/ForecastSection';
 
 export default function SalesDashboard() {
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedChart, setSelectedChart] = useState<string | null>(null);
+    const [stats, setStats] = useState<any>(null);
+
+    useEffect(() => {
+        api.get('/dashboard/stats')
+            .then(res => { if (res.data) setStats(res.data); })
+            .catch(err => console.error('Error al obtener estadísticas del panel', err));
+    }, []);
 
     const handleChartClick = (chartInfo: any) => {
         console.log("Chart clicked:", chartInfo);
@@ -14,12 +23,18 @@ export default function SalesDashboard() {
         setFilterModalOpen(true);
     };
 
-    // Mock Data - In real app, fetch from API
-    const kpis = [
-        { title: 'Revenue (MTD)', value: '$85,250', trend: '+12% vs last month', color: 'indigo', icon: TrendingUp },
-        { title: 'Pipeline Value', value: '$450,000', trend: '1 Active Deals', color: 'blue', icon: Building2 },
-        { title: 'Win Rate', value: '42%', trend: '+5% vs avg', color: 'emerald', icon: BarChart3 },
-        { title: 'Actividades', value: '64', trend: '12 Hoy', color: 'fuchsia', icon: Activity },
+    const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
+    const kpis = stats ? [
+        { title: 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp },
+        { title: 'Pipeline', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2 },
+        { title: 'Conversión', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3 },
+        { title: 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity },
+    ] : [
+        { title: 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp },
+        { title: 'Pipeline', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2 },
+        { title: 'Conversión', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3 },
+        { title: 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity },
     ];
 
     const getColorClasses = (color: string) => {
@@ -74,17 +89,20 @@ export default function SalesDashboard() {
                                         <option>Este Mes</option>
                                         <option>Último Trimestre</option>
                                         <option>Año Actual</option>
-                                        <option>Personalizado</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Vendedor / Equipo</label>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">País / Compañía</label>
                                     <select className="w-full px-4 py-2.5 rounded-xl border border-slate-200/60 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white/50 text-sm font-medium">
-                                        <option>Todos</option>
-                                        <option>Equipo Alpha</option>
-                                        <option>Equipo Beta</option>
+                                        <option>Todos los Países</option>
+                                        <option value="CR">Costa Rica</option>
+                                        <option value="GT">Guatemala</option>
+                                        <option value="SV">El Salvador</option>
+                                        <option value="HN">Honduras</option>
+                                        <option value="PA">Panamá</option>
                                     </select>
                                 </div>
+                                <p className="text-xs text-slate-400">Los datos se actualizan según la compañía seleccionada en el sidebar.</p>
                             </div>
 
                             <div className="p-6 border-t border-slate-100/50 bg-slate-50/50 flex justify-end gap-3">
@@ -109,8 +127,11 @@ export default function SalesDashboard() {
                     </h2>
                     <p className="text-slate-500 mt-2 text-lg">Visión general del rendimiento y proyecciones</p>
                 </div>
-                <button className="bg-white/50 backdrop-blur-sm text-indigo-600 border border-indigo-100/50 px-5 py-2.5 rounded-xl font-bold hover:bg-white hover:shadow-md transition-all active:scale-95 flex items-center gap-2">
-                    <DownloadIcon className="w-4 h-4" /> Exportar Reporte
+                <button
+                    onClick={() => window.print()}
+                    className="bg-white/50 backdrop-blur-sm text-indigo-600 border border-indigo-100/50 px-5 py-2.5 rounded-xl font-bold hover:bg-white hover:shadow-md transition-all active:scale-95 flex items-center gap-2"
+                >
+                    <Download className="w-4 h-4" /> Exportar Reporte
                 </button>
             </motion.div>
 
@@ -138,22 +159,25 @@ export default function SalesDashboard() {
                 ))}
             </div>
 
+            {/* Forecast Section */}
+            <ForecastSection />
+
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <ChartCard
-                    title="Pipeline Funnel"
+                    title="Embudo de Ventas"
                     subtitle="Conversión por etapa"
                     onClick={() => handleChartClick({ type: 'Pipeline' })}
                 >
-                    <PipelineChart onChartClick={(d) => handleChartClick({ ...d, type: 'Pipeline' })} />
+                    <PipelineChart data={stats?.charts?.pipeline} onChartClick={(d) => handleChartClick({ ...d, type: 'Pipeline' })} />
                 </ChartCard>
 
                 <ChartCard
-                    title="Revenue vs Objetivo"
+                    title="Ingresos vs Objetivo"
                     subtitle="Rendimiento mensual vs meta"
                     onClick={() => handleChartClick({ type: 'Revenue' })}
                 >
-                    <RevenueChart onChartClick={(d) => handleChartClick({ ...d, type: 'Revenue' })} />
+                    <RevenueChart data={stats?.charts?.revenue} onChartClick={(d) => handleChartClick({ ...d, type: 'Revenue' })} />
                 </ChartCard>
 
                 <ChartCard
@@ -161,15 +185,15 @@ export default function SalesDashboard() {
                     subtitle="Llamadas y reuniones (Última semana)"
                     onClick={() => handleChartClick({ type: 'Actividad' })}
                 >
-                    <ActivityChart onChartClick={(d) => handleChartClick({ ...d, type: 'Actividad' })} />
+                    <ActivityChart data={stats?.charts?.activity} onChartClick={(d) => handleChartClick({ ...d, type: 'Actividad' })} />
                 </ChartCard>
 
                 <ChartCard
-                    title="Top Performers"
+                    title="Mejores Vendedores"
                     subtitle="Líderes en ingresos generados"
                     onClick={() => handleChartClick({ type: 'Performance' })}
                 >
-                    <PerformanceChart onChartClick={(d) => handleChartClick({ ...d, type: 'Performance' })} />
+                    <PerformanceChart data={stats?.charts?.topSellers} onChartClick={(d) => handleChartClick({ ...d, type: 'Performance' })} />
                 </ChartCard>
             </div>
         </motion.div>
@@ -190,7 +214,7 @@ function ChartCard({ title, subtitle, children, onClick }: { title: string, subt
                     <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
                 </div>
                 <span className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    Doble click para filtrar
+                    Doble clic para filtrar
                 </span>
             </div>
             <div className="chart-container">
@@ -200,23 +224,3 @@ function ChartCard({ title, subtitle, children, onClick }: { title: string, subt
     );
 }
 
-function DownloadIcon(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" x2="12" y1="15" y2="3" />
-        </svg>
-    )
-}

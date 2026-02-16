@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, MapPin, Search } from 'lucide-react';
+import api from '../lib/api';
+import Pagination from '../components/shared/Pagination';
 
 interface Order {
     id: string;
@@ -21,17 +24,23 @@ const LOGISTICS_STEPS = [
 ];
 
 export default function Orders() {
+    const navigate = useNavigate();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [total, setTotal] = useState(0);
+    const pageSize = 20;
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/orders')
-            .then(res => res.json())
-            .then(data => {
-                if (data.data) setOrders(data.data);
+        setLoading(true);
+        api.get(`/orders?top=${pageSize}&skip=${page * pageSize}`)
+            .then(res => {
+                if (res.data?.data) setOrders(res.data.data);
+                if (res.data?.total != null) setTotal(res.data.total);
                 setLoading(false);
-            });
-    }, []);
+            })
+            .catch(() => setLoading(false));
+    }, [page]);
 
     const getStepStatus = (current: string, stepKey: string) => {
         const ids = LOGISTICS_STEPS.map(s => s.key);
@@ -58,7 +67,7 @@ export default function Orders() {
 
             <div className="space-y-6">
                 {orders.map((order) => (
-                    <div key={order.id} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div className="flex justify-between mb-6">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900">{order.orderNumber}</h3>
@@ -101,6 +110,8 @@ export default function Orders() {
                         </div>
                     </div>
                 ))}
+
+                <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
 
                 {orders.length === 0 && !loading && (
                     <div className="p-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">

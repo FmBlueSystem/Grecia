@@ -247,7 +247,7 @@ export default function LandingIntro({ onComplete }: { onComplete: () => void })
 
                     <div className="relative h-12 mt-4 overflow-hidden w-full flex justify-center">
                         <p className={`hero-subtitle font-orbitron text-[10px] uppercase font-bold tracking-[2.5em] text-blue-400/50 ${status === 'assemble' ? 'assemble' : ''}`}>
-                            Software Architecture
+                            Arquitectura de Software
                         </p>
 
                         <div className={`hero-line absolute bottom-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent ${status === 'assemble' ? 'assemble' : ''}`}></div>

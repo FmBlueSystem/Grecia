@@ -58,7 +58,7 @@ export default function OpportunityForm({ opportunity, onClose, onSave }: Opport
   });
 
   // Auto-update probability when stage changes
-  const selectedStage = watch('stage');
+  const _selectedStage = watch('stage');
   const handleStageChange = (stage: OpportunityFormData['stage']) => {
     const stageData = stages.find(s => s.value === stage);
     if (stageData) {
