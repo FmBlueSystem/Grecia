@@ -111,6 +111,48 @@ export default async function authRoutes(fastify: FastifyInstance) {
         }
     });
 
+    // Change password
+    const changePasswordSchema = z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    });
+
+    fastify.put('/change-password', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        const body = changePasswordSchema.safeParse(request.body);
+        if (!body.success) {
+            reply.code(400);
+            return { error: body.error.issues[0]?.message || 'Datos inválidos' };
+        }
+
+        const { currentPassword, newPassword } = body.data;
+        const { userId } = request.user as { userId: string };
+
+        try {
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) {
+                reply.code(404);
+                return { error: 'Usuario no encontrado' };
+            }
+
+            const isValid = await bcrypt.compare(currentPassword, user.password);
+            if (!isValid) {
+                reply.code(400);
+                return { error: 'La contraseña actual es incorrecta' };
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            await prisma.user.update({
+                where: { id: userId },
+                data: { password: hashedPassword },
+            });
+
+            return { success: true, message: 'Contraseña actualizada exitosamente' };
+        } catch (error) {
+            request.log.error(error);
+            reply.code(500).send({ error: 'Error interno del servidor' });
+        }
+    });
+
     fastify.post('/logout', async (request, reply) => {
         reply.clearCookie('token');
         return { success: true, message: 'Sesión cerrada exitosamente' };

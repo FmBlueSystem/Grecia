@@ -112,6 +112,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // 400 Bad Request — dejar que el componente lo maneje
+    if (error.response?.status === 400) {
+      return Promise.reject(error);
+    }
+
     // Error genérico
     toast.error(
       'Error inesperado',

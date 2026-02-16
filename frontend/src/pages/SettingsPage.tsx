@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Building2, Users, Plug, Lock, Bell, Loader2 } from 'lucide-react';
+import { User, Building2, Users, Plug, Lock, Bell, Loader2, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import { FormInput, FormSelect } from '../components/forms/FormField';
 import ToggleSwitch from '../components/forms/ToggleSwitch';
@@ -54,6 +54,41 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('perfil');
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdMessage, setPwdMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleChangePassword = async () => {
+    setPwdMessage(null);
+    if (newPassword.length < 6) {
+      setPwdMessage({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwdMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
+      return;
+    }
+    setPwdLoading(true);
+    try {
+      await api.put('/auth/change-password', { currentPassword, newPassword });
+      setPwdMessage({ type: 'success', text: 'Contraseña actualizada exitosamente' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordForm(false);
+    } catch (err: any) {
+      setPwdMessage({ type: 'error', text: err.response?.data?.error || 'Error al cambiar la contraseña' });
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   // Users tab state
   const [usersData, setUsersData] = useState<UsageUser[]>([]);
@@ -172,13 +207,96 @@ export default function SettingsPage() {
                     </div>
                     <h2 className="text-lg font-bold text-slate-900">Seguridad</h2>
                   </div>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-slate-600 mb-2">Cambiar contraseña</p>
-                      <button className="px-4 py-2 bg-slate-100 text-slate-900 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
-                        Actualizar Contraseña
-                      </button>
+
+                  {/* Password feedback message */}
+                  {pwdMessage && (
+                    <div className={`flex items-center gap-2 px-4 py-3 rounded-xl mb-4 text-sm font-medium ${
+                      pwdMessage.type === 'success'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {pwdMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
+                      {pwdMessage.text}
                     </div>
+                  )}
+
+                  <div className="space-y-4">
+                    {!showPasswordForm ? (
+                      <div>
+                        <p className="text-sm text-slate-600 mb-2">Cambiar contraseña</p>
+                        <button
+                          onClick={() => { setShowPasswordForm(true); setPwdMessage(null); }}
+                          className="px-4 py-2 bg-slate-100 text-slate-900 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+                        >
+                          Actualizar Contraseña
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña Actual</label>
+                          <div className="relative">
+                            <input
+                              type={showCurrentPwd ? 'text' : 'password'}
+                              value={currentPassword}
+                              onChange={e => setCurrentPassword(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none text-sm pr-10"
+                              placeholder="Ingresa tu contraseña actual"
+                            />
+                            <button type="button" onClick={() => setShowCurrentPwd(!showCurrentPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                              {showCurrentPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Nueva Contraseña</label>
+                          <div className="relative">
+                            <input
+                              type={showNewPwd ? 'text' : 'password'}
+                              value={newPassword}
+                              onChange={e => setNewPassword(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none text-sm pr-10"
+                              placeholder="Mínimo 6 caracteres"
+                            />
+                            <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                              {showNewPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          {newPassword.length > 0 && newPassword.length < 6 && (
+                            <p className="text-xs text-amber-600 mt-1">Mínimo 6 caracteres</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Confirmar Contraseña</label>
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none text-sm"
+                            placeholder="Repite la nueva contraseña"
+                          />
+                          {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                            <p className="text-xs text-red-600 mt-1">Las contraseñas no coinciden</p>
+                          )}
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                          <button
+                            onClick={() => { setShowPasswordForm(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setPwdMessage(null); }}
+                            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={handleChangePassword}
+                            disabled={pwdLoading || !currentPassword || newPassword.length < 6 || newPassword !== confirmPassword}
+                            className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {pwdLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                            Cambiar Contraseña
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <div className="pt-4 border-t border-slate-100">
                       <ToggleSwitch
                         label="Autenticación de dos factores (2FA)"

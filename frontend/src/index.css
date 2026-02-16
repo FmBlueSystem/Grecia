@@ -21,11 +21,11 @@
   --color-brand-light: #00A3E0;
 
   /* Sidebar Colors (theme-switchable) */
-  --color-sidebar-bg: #0E1525;
-  --color-sidebar-border: #1E3350;
-  --color-sidebar-hover: #182C42;
-  --color-sidebar-muted: #64748B;
-  --color-sidebar-inactive: #8899AA;
+  --color-sidebar-bg: #1E293B;
+  --color-sidebar-border: #334155;
+  --color-sidebar-hover: #2A3F56;
+  --color-sidebar-muted: #94A3B8;
+  --color-sidebar-inactive: #CBD5E1;
 
   /* STIA Vibrant Accents */
   --color-primary: #0F172A;
@@ -66,18 +66,18 @@
   --color-brand: #059669;
   --color-brand-hover: #047857;
   --color-brand-light: #34D399;
-  --color-sidebar-bg: #0C1F17;
-  --color-sidebar-border: #1B4332;
-  --color-sidebar-hover: #14352A;
+  --color-sidebar-bg: #1A332A;
+  --color-sidebar-border: #2D5E48;
+  --color-sidebar-hover: #244D3E;
 }
 
 [data-theme="purple"] {
   --color-brand: #7C3AED;
   --color-brand-hover: #6D28D9;
   --color-brand-light: #A78BFA;
-  --color-sidebar-bg: #130D28;
-  --color-sidebar-border: #2E1F5E;
-  --color-sidebar-hover: #221848;
+  --color-sidebar-bg: #231A42;
+  --color-sidebar-border: #42307D;
+  --color-sidebar-hover: #332660;
 }
 
 body {
