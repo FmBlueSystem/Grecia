@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, Trash2, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
-import { toast, toastCRUD } from '../lib';
-import { TableSkeleton, EmptyState, ConfirmDialog, useConfirmDialog } from '../components';
+import { toast } from '../lib';
+import { TableSkeleton, EmptyState } from '../components';
 import api from '../lib/api';
 
 interface Contact {
@@ -27,10 +27,8 @@ export default function Contacts() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [contactToDelete, setContactToDelete] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const PAGE_SIZE = 50;
-    const confirm = useConfirmDialog();
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -75,31 +73,10 @@ export default function Contacts() {
             setShowModal(false);
             fetchContacts();
             setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }));
-            toastCRUD.created('Contacto');
+            toast.success('Contacto creado', 'El contacto se creó correctamente');
         } catch (err) {
             console.error("Error al crear contacto", err);
             toast.error('Error al crear', 'No se pudo crear el contacto');
-        }
-    };
-
-    const handleDeleteClick = (contactId: string) => {
-        setContactToDelete(contactId);
-        confirm.open();
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!contactToDelete) return;
-
-        try {
-            await api.delete(`/contacts/${contactToDelete}`);
-            fetchContacts();
-            toastCRUD.deleted('Contacto');
-        } catch (err) {
-            console.error("Error al eliminar contacto", err);
-            toast.error('Error al eliminar', 'No se pudo eliminar el contacto');
-        } finally {
-            setContactToDelete(null);
-            confirm.close();
         }
     };
 
@@ -198,14 +175,14 @@ export default function Contacts() {
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1">
                                             {contact.email && (
-                                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                                <a href={`mailto:${contact.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
                                                     <Mail className="w-3 h-3" /> {contact.email}
-                                                </div>
+                                                </a>
                                             )}
                                             {contact.phone && (
-                                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                                <a href={`tel:${contact.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 transition-colors">
                                                     <Phone className="w-3 h-3" /> {contact.phone}
-                                                </div>
+                                                </a>
                                             )}
                                         </div>
                                     </td>
@@ -218,13 +195,6 @@ export default function Contacts() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button 
-                                                onClick={() => handleDeleteClick(contact.id)}
-                                                className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
-                                                title="Eliminar contacto"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
                                             <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </button>
@@ -367,16 +337,6 @@ export default function Contacts() {
             )}
         </AnimatePresence>
 
-        {/* Delete Confirmation Dialog */}
-        <ConfirmDialog
-            open={confirm.isOpen}
-            onClose={confirm.close}
-            onConfirm={handleDeleteConfirm}
-            title="¿Eliminar contacto?"
-            message="Esta acción no se puede deshacer. El contacto será eliminado permanentemente."
-            variant="danger"
-            loading={confirm.loading}
-        />
     </div>
 );
 }

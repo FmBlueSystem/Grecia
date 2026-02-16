@@ -39,7 +39,7 @@ const getAgingBadge = (days: number) => {
 };
 
 const COLUMNS: Column<AgingData['details'][0]>[] = [
-  { key: 'docNum', header: 'Factura', width: '90px', render: r => <span className="font-semibold text-[#0067B2]">INV-{r.docNum}</span> },
+  { key: 'docNum', header: 'Factura', width: '90px', render: r => <span className="font-semibold text-brand">INV-{r.docNum}</span> },
   { key: 'client', header: 'Cliente', render: r => <span className="font-medium text-slate-900 truncate">{r.client}</span> },
   { key: 'balance', header: 'Saldo', align: 'right', render: r => <span className="font-bold text-red-600">{fmt(r.balance)}</span> },
   { key: 'total', header: 'Total', align: 'right', render: r => <span className="text-sm text-slate-500">{fmt(r.total)}</span> },
@@ -62,7 +62,7 @@ export default function AgingReport() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="w-8 h-8 text-[#0067B2] animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand animate-spin" />
         <span className="ml-3 text-slate-500">Generando reporte de antigüedad...</span>
       </div>
     );

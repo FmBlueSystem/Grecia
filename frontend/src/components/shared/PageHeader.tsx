@@ -25,7 +25,7 @@ export default function PageHeader({ title, subtitle, breadcrumbs, action, badge
             <span key={i} className="flex items-center gap-1">
               {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
               {crumb.path ? (
-                <Link to={crumb.path} className="hover:text-[#0067B2] transition-colors">
+                <Link to={crumb.path} className="hover:text-brand transition-colors">
                   {crumb.label}
                 </Link>
               ) : (

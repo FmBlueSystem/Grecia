@@ -17,7 +17,7 @@ export default function AppShell() {
           <Outlet />
         </main>
       </div>
-      {helpContent && <HelpPanel content={helpContent} />}
+      <HelpPanel content={helpContent} />
     </div>
   );
 }

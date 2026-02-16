@@ -18,7 +18,7 @@ export default function StatCard({
   change,
   changeLabel = 'vs mes anterior',
   iconBg = 'bg-blue-50',
-  iconColor = 'text-[#0067B2]',
+  iconColor = 'text-brand',
 }: StatCardProps) {
   const isPositive = change !== undefined && change >= 0;
 

@@ -23,7 +23,7 @@ export default function CaseDetail() {
       actions={
         <>
           <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Escalar</button>
-          <button className="px-4 py-2 bg-[#0067B2] text-white rounded-lg text-sm font-medium hover:bg-[#005a9e]">Resolver</button>
+          <button className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover">Resolver</button>
         </>
       }
       bpfSteps={[
@@ -59,7 +59,7 @@ export default function CaseDetail() {
           <Timeline
             title="Interacciones"
             events={[
-              { id: '1', title: 'Caso abierto por el cliente', description: 'Llamada de Ricardo Solano - Gerente de Planta', date: '12 Feb 2026, 08:30', icon: Phone, iconBg: 'bg-blue-50', iconColor: 'text-[#0067B2]' },
+              { id: '1', title: 'Caso abierto por el cliente', description: 'Llamada de Ricardo Solano - Gerente de Planta', date: '12 Feb 2026, 08:30', icon: Phone, iconBg: 'bg-blue-50', iconColor: 'text-brand' },
               { id: '2', title: 'Asignado a Roberto Vargas', description: 'Técnico Senior - Especialista en sellado', date: '12 Feb 2026, 09:00', icon: UserCheck, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
               { id: '3', title: 'Diagnóstico remoto', description: 'Error E-47 indica falla en sensor de presión. Se requiere visita.', date: '12 Feb 2026, 10:15', icon: Wrench, iconBg: 'bg-amber-50', iconColor: 'text-amber-600' },
               { id: '4', title: 'Alerta SLA', description: 'Quedan 6 horas para cumplir el SLA de resolución', date: '13 Feb 2026, 02:30', icon: AlertTriangle, iconBg: 'bg-red-50', iconColor: 'text-red-600' },

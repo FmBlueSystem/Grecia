@@ -22,11 +22,12 @@ const leadSchema = z.object({
 const leadsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // GET /api/leads
-    fastify.get('/', async (request, reply) => {
-        // Here we could filter by companyCode from request.companyCode
+    fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        const { id: userId, scopeLevel } = request.user as any;
         const leads = await prisma.lead.findMany({
             where: {
-                status: { not: 'CONVERTED' } // Hide converted in main list?
+                status: { not: 'CONVERTED' },
+                ...(scopeLevel === 'OWN' && { ownerId: userId }),
             },
             orderBy: { createdAt: 'desc' },
             include: { owner: { select: { firstName: true, lastName: true } } }
@@ -35,7 +36,7 @@ const leadsRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     // POST /api/leads
-    fastify.post('/', async (request, reply) => {
+    fastify.post('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         const result = leadSchema.safeParse(request.body);
         if (!result.success) {
             return reply.status(400).send({ error: result.error });
@@ -58,7 +59,7 @@ const leadsRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     // POST /api/leads/:id/qualify (Stage 6 Conversion)
-    fastify.post('/:id/qualify', async (request, reply) => {
+    fastify.post('/:id/qualify', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         const { id } = request.params as { id: string };
         const body = request.body as { createAccount: boolean, createContact: boolean, createOpportunity: boolean };
 
@@ -135,7 +136,7 @@ const leadsRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     // PUT /api/leads/:id
-    fastify.put('/:id', async (request, reply) => {
+    fastify.put('/:id', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         const { id } = request.params as { id: string };
         const result = leadSchema.partial().safeParse(request.body);
         if (!result.success) return reply.status(400).send(result.error);

@@ -47,7 +47,7 @@ interface ClientOption { cardCode: string; name: string; phone: string; country:
 
 const TABS = [
     { id: 'client360', label: 'Ficha 360°', icon: Building2 },
-    { id: 'scorecard', label: 'Scorecard Vendedores', icon: Users },
+    { id: 'scorecard', label: 'Rendimiento del Equipo', icon: Users },
     { id: 'alerts', label: 'Alertas', icon: AlertTriangle },
 ] as const;
 
@@ -222,7 +222,7 @@ function Client360Tab() {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         {[
                             { label: 'Facturado', value: fmt(data.summary.totalRevenue), icon: DollarSign, color: 'text-emerald-600 bg-emerald-50' },
-                            { label: 'Pedidos', value: String(data.summary.totalOrders), icon: ShoppingCart, color: 'text-blue-600 bg-blue-50' },
+                            { label: 'Órdenes', value: String(data.summary.totalOrders), icon: ShoppingCart, color: 'text-blue-600 bg-blue-50' },
                             { label: 'Ticket Prom.', value: fmt(data.summary.avgOrderValue), icon: BarChart3, color: 'text-indigo-600 bg-indigo-50' },
                             { label: 'Saldo Abierto', value: fmt(data.summary.openBalance), icon: CreditCard, color: data.summary.openBalance > 0 ? 'text-red-600 bg-red-50' : 'text-slate-600 bg-slate-50' },
                             { label: 'Vencidas', value: `${data.summary.overdueCount} (${fmt(data.summary.overdueAmount)})`, icon: AlertTriangle, color: data.summary.overdueCount > 0 ? 'text-red-600 bg-red-50' : 'text-slate-600 bg-slate-50' },
@@ -273,7 +273,7 @@ function Client360Tab() {
                         {/* Open Quotes */}
                         <motion.div variants={slideUp} className="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-lg">
                             <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-amber-500" /> Cotizaciones Abiertas ({data.summary.openQuotesCount})
+                                <FileText className="w-5 h-5 text-amber-500" /> Ofertas Abiertas ({data.summary.openQuotesCount})
                                 <span className="ml-auto text-sm font-bold text-amber-600">{fmt(data.summary.openQuotesValue)}</span>
                             </h4>
                             {data.openQuotes.length > 0 ? (
@@ -289,7 +289,7 @@ function Client360Tab() {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-slate-400 text-center py-10">Sin cotizaciones abiertas</p>
+                                <p className="text-sm text-slate-400 text-center py-10">Sin ofertas abiertas</p>
                             )}
                         </motion.div>
                     </div>
@@ -298,7 +298,7 @@ function Client360Tab() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <motion.div variants={slideUp} className="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-lg">
                             <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <ShoppingCart className="w-5 h-5 text-blue-500" /> Pedidos Recientes
+                                <ShoppingCart className="w-5 h-5 text-blue-500" /> Órdenes Recientes
                             </h4>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
@@ -325,7 +325,7 @@ function Client360Tab() {
                                         ))}
                                     </tbody>
                                 </table>
-                                {data.recentOrders.length === 0 && <p className="text-sm text-slate-400 text-center py-6">Sin pedidos recientes</p>}
+                                {data.recentOrders.length === 0 && <p className="text-sm text-slate-400 text-center py-6">Sin órdenes recientes</p>}
                             </div>
                         </motion.div>
 
@@ -411,16 +411,24 @@ function Client360Tab() {
 }
 
 // ─── SCORECARD TAB ───────────────────────────────────
+const PERIOD_OPTIONS = [
+    { value: '3', label: 'Últimos 3 meses' },
+    { value: '6', label: 'Últimos 6 meses' },
+    { value: '12', label: 'Último año' },
+];
+
 function ScorecardTab() {
     const [data, setData] = useState<Scorecard | null>(null);
     const [loading, setLoading] = useState(true);
+    const [period, setPeriod] = useState('6');
 
     useEffect(() => {
-        api.get('/manager/seller-scorecard')
+        setLoading(true);
+        api.get(`/manager/seller-scorecard?months=${period}`)
             .then(res => setData(res.data))
             .catch(err => console.error('Error fetching scorecard:', err))
             .finally(() => setLoading(false));
-    }, []);
+    }, [period]);
 
     if (loading) {
         return (
@@ -443,7 +451,7 @@ function ScorecardTab() {
     const chartData = data.sellers.slice(0, 10).map(s => ({
         name: s.name.split(' ')[0],
         facturado: s.invoices.total,
-        pedidos: s.orders.total,
+        ordenes: s.orders.total,
     }));
 
     return (
@@ -454,10 +462,19 @@ function ScorecardTab() {
                     <h3 className="text-lg font-bold text-slate-800">Rendimiento del Equipo</h3>
                     <p className="text-sm text-slate-500">{data.period}</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
+                    <select
+                        value={period}
+                        onChange={(e) => setPeriod(e.target.value)}
+                        className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                        {PERIOD_OPTIONS.map(p => (
+                            <option key={p.value} value={p.value}>{p.label}</option>
+                        ))}
+                    </select>
                     {[
-                        { label: 'Cotizaciones', value: data.totals.quotes, color: 'bg-amber-50 text-amber-700' },
-                        { label: 'Pedidos', value: data.totals.orders, color: 'bg-blue-50 text-blue-700' },
+                        { label: 'Ofertas', value: data.totals.quotes, color: 'bg-amber-50 text-amber-700' },
+                        { label: 'Órdenes', value: data.totals.orders, color: 'bg-blue-50 text-blue-700' },
                         { label: 'Facturas', value: data.totals.invoices, color: 'bg-emerald-50 text-emerald-700' },
                         { label: 'Facturacion', value: fmt(data.totals.revenue), color: 'bg-indigo-50 text-indigo-700' },
                     ].map(t => (
@@ -498,9 +515,9 @@ function ScorecardTab() {
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} />
                         <YAxis tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                        <Tooltip formatter={(v: number, name: string) => [fmt(v), name === 'facturado' ? 'Facturado' : 'Pedidos']} contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                        <Tooltip formatter={(v: number, name: string) => [fmt(v), name === 'facturado' ? 'Facturado' : 'Órdenes']} contentStyle={{ borderRadius: 12, fontSize: 12 }} />
                         <Bar dataKey="facturado" fill="#6366f1" radius={[4, 4, 0, 0]} name="Facturado" />
-                        <Bar dataKey="pedidos" fill="#93c5fd" radius={[4, 4, 0, 0]} name="Pedidos" />
+                        <Bar dataKey="ordenes" fill="#93c5fd" radius={[4, 4, 0, 0]} name="Órdenes" />
                     </BarChart>
                 </ResponsiveContainer>
             </motion.div>
@@ -514,8 +531,8 @@ function ScorecardTab() {
                             <tr className="border-b border-slate-200">
                                 <th className="text-left py-3 px-3 text-xs font-bold text-slate-500 uppercase">#</th>
                                 <th className="text-left py-3 px-3 text-xs font-bold text-slate-500 uppercase">Vendedor</th>
-                                <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Cotizaciones</th>
-                                <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Pedidos</th>
+                                <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Ofertas</th>
+                                <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Órdenes</th>
                                 <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Facturado</th>
                                 <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Ticket Prom.</th>
                                 <th className="text-right py-3 px-3 text-xs font-bold text-slate-500 uppercase">Conversion</th>
@@ -616,7 +633,7 @@ function AlertsTab() {
                             <FileText className="w-5 h-5" />
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-slate-800">Cotizaciones por Vencer</p>
+                            <p className="text-sm font-bold text-slate-800">Ofertas por Vencer</p>
                             <p className="text-xs text-slate-500">Vencen en los proximos 7 dias</p>
                         </div>
                     </div>
@@ -632,7 +649,7 @@ function AlertsTab() {
                         </div>
                         <div>
                             <p className="text-sm font-bold text-slate-800">Sin Vendedor Asignado</p>
-                            <p className="text-xs text-slate-500">Cotizaciones sin propietario</p>
+                            <p className="text-xs text-slate-500">Ofertas sin propietario</p>
                         </div>
                     </div>
                     <p className={`text-3xl font-extrabold ${alerts.unassignedQuotes > 0 ? 'text-purple-600' : 'text-slate-300'}`}>

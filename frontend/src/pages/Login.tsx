@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -27,8 +27,13 @@ export default function Login() {
   };
 
   // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   if (isAuthenticated) {
-    navigate('/', { replace: true });
     return null;
   }
 
@@ -42,8 +47,8 @@ export default function Login() {
 
       login(data.token, data.user);
       navigate('/', { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.response?.data?.message || 'Credenciales inválidas');
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +203,10 @@ export default function Login() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-slate-400 font-medium tracking-wide">
-            POWERED BY <span className="text-slate-600 font-bold">BLUESYSTEM</span>
+            POWERED BY{' '}
+            <a href="https://bluesystem.io" target="_blank" rel="noopener noreferrer" className="text-slate-600 font-bold hover:text-slate-900 transition-colors">
+              BLUESYSTEM.IO
+            </a>
           </p>
         </div>
       </motion.div>

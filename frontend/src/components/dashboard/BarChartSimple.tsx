@@ -14,7 +14,7 @@ export default function BarChartSimple({
   data,
   dataKey,
   xAxisKey = 'name',
-  color = '#0067B2',
+  color = 'var(--color-brand)',
   height = 220,
 }: BarChartSimpleProps) {
   return (

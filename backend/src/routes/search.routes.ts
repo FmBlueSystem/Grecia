@@ -14,7 +14,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
                 return { accounts: [], contacts: [], opportunities: [], quotes: [], orders: [] };
             }
 
-            const { sapSalesPersonCode, scopeLevel } = request.user as any;
+            const { id: userId, sapSalesPersonCode, scopeLevel } = request.user as any;
             const spCode = scopeLevel === 'ALL' ? undefined : sapSalesPersonCode;
             const companyCode = request.companyCode;
 
@@ -42,6 +42,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
                 prisma.opportunity.findMany({
                     where: {
                         isClosed: false,
+                        ...(scopeLevel === 'OWN' && { ownerId: userId }),
                         OR: [
                             { name: { contains: q, mode: 'insensitive' } },
                             { account: { name: { contains: q, mode: 'insensitive' } } },

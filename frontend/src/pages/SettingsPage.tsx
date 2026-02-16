@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { User, Building2, Users, Plug, Lock, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Building2, Users, Plug, Lock, Bell, Loader2 } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import { FormInput, FormSelect } from '../components/forms/FormField';
 import ToggleSwitch from '../components/forms/ToggleSwitch';
-import { useAuthStore } from '../lib/store';
+import { useAuthStore, useThemeStore, THEME_META, type ThemeSkin } from '../lib/store';
+import api from '../lib/api';
 
 type TabId = 'perfil' | 'empresa' | 'usuarios' | 'integraciones';
 
@@ -29,16 +30,49 @@ const PAIS_OPTIONS = [
   { value: 'pa', label: 'Panamá' },
 ];
 
+interface UsageUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  lastLoginAt: string | null;
+  daysSinceLogin: number | null;
+  status: 'active' | 'inactive' | 'dormant' | 'never';
+}
+
+const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
+  active:   { label: 'Activo',    cls: 'bg-emerald-50 text-emerald-700' },
+  inactive: { label: 'Inactivo',  cls: 'bg-amber-50 text-amber-700' },
+  dormant:  { label: 'Inactivo',  cls: 'bg-red-50 text-red-700' },
+  never:    { label: 'Sin acceso', cls: 'bg-slate-100 text-slate-500' },
+};
+
 export default function SettingsPage() {
   const user = useAuthStore(s => s.user);
+  const theme = useThemeStore(s => s.theme);
+  const setTheme = useThemeStore(s => s.setTheme);
   const [activeTab, setActiveTab] = useState<TabId>('perfil');
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+
+  // Users tab state
+  const [usersData, setUsersData] = useState<UsageUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   const rolMap: Record<string, string> = { Admin: 'admin', Gerente: 'manager', Vendedor: 'sales' };
   const userRole = rolMap[user?.role || ''] || 'sales';
   const userInitials = `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`;
+
+  // Fetch users when tab becomes active
+  useEffect(() => {
+    if (activeTab === 'usuarios' && usersData.length === 0) {
+      setUsersLoading(true);
+      api.get('/admin/usage')
+        .then(res => setUsersData(res.data?.users || []))
+        .catch(() => {})
+        .finally(() => setUsersLoading(false));
+    }
+  }, [activeTab]);
 
   return (
     <div>
@@ -47,7 +81,7 @@ export default function SettingsPage() {
         subtitle="Gestiona tu perfil y preferencias del sistema"
         breadcrumbs={[
           { label: 'Dashboard', path: '/' },
-          { label: 'Configuración' },
+          { label: 'Configuraci\u00f3n' },
         ]}
       />
 
@@ -63,7 +97,7 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-[#0067B2] text-white'
+                      ? 'bg-brand text-white'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -124,7 +158,7 @@ export default function SettingsPage() {
                     <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                       Cancelar
                     </button>
-                    <button className="px-4 py-2 bg-[#0067B2] text-white rounded-lg hover:bg-[#005a9c] transition-colors text-sm font-medium">
+                    <button className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium">
                       Guardar Cambios
                     </button>
                   </div>
@@ -163,16 +197,16 @@ export default function SettingsPage() {
                 <div className="bg-white rounded-xl border border-slate-200 p-6">
                   <h3 className="text-sm font-semibold text-slate-900 mb-4">Foto de Perfil</h3>
                   <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-gradient-to-br from-[#0067B2] to-[#00A3E0] rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
+                    <div className="w-24 h-24 bg-gradient-to-br from-brand to-brand-light rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
                       {userInitials}
                     </div>
-                    <button className="text-sm text-[#0067B2] hover:underline font-medium">
+                    <button className="text-sm text-brand hover:underline font-medium">
                       Cambiar Foto
                     </button>
                   </div>
                 </div>
 
-                {/* Preferences */}
+                {/* Preferences — Theme Picker */}
                 <div className="bg-white rounded-xl border border-slate-200 p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
@@ -193,12 +227,24 @@ export default function SettingsPage() {
                       checked={pushNotifications}
                       onChange={setPushNotifications}
                     />
-                    <ToggleSwitch
-                      label="Modo oscuro"
-                      description="Tema visual del sistema"
-                      checked={darkMode}
-                      onChange={setDarkMode}
-                    />
+                    {/* Theme Skin Picker */}
+                    <div className="pt-3 border-t border-slate-100">
+                      <p className="text-sm font-semibold text-slate-700 mb-2">Tema de Color</p>
+                      <div className="flex gap-3">
+                        {(Object.keys(THEME_META) as ThemeSkin[]).map(t => (
+                          <button
+                            key={t}
+                            onClick={() => setTheme(t)}
+                            className={`flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl border-2 transition-all ${
+                              theme === t ? 'border-brand bg-brand/5 scale-105' : 'border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            <span className="w-6 h-6 rounded-full shadow-sm" style={{ backgroundColor: THEME_META[t].color }} />
+                            <span className="text-[11px] font-semibold text-slate-600">{THEME_META[t].label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -216,12 +262,64 @@ export default function SettingsPage() {
           )}
 
           {activeTab === 'usuarios' && (
-            <div className="bg-white rounded-xl border border-slate-200 p-12">
-              <div className="text-center">
-                <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Gestión de Usuarios</h3>
-                <p className="text-sm text-slate-500">Esta sección estará disponible próximamente</p>
+            <div className="bg-white rounded-xl border border-slate-200">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Usuarios del Sistema</h3>
+                  <p className="text-sm text-slate-500 mt-0.5">{usersData.length} usuarios registrados</p>
+                </div>
               </div>
+              {usersLoading ? (
+                <div className="flex justify-center py-16">
+                  <Loader2 className="w-8 h-8 text-brand animate-spin" />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className="text-left px-6 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Usuario</th>
+                        <th className="text-left px-6 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Rol</th>
+                        <th className="text-left px-6 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">&Uacute;ltimo Acceso</th>
+                        <th className="text-left px-6 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {usersData.map(u => {
+                        const st = STATUS_LABELS[u.status] || STATUS_LABELS.never;
+                        return (
+                          <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-light rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                  {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-slate-900">{u.name}</p>
+                                  <p className="text-xs text-slate-400">{u.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-3">
+                              <span className="text-sm font-medium text-slate-700">{u.role}</span>
+                            </td>
+                            <td className="px-6 py-3 text-slate-500">
+                              {u.lastLoginAt
+                                ? new Date(u.lastLoginAt).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'Nunca'}
+                            </td>
+                            <td className="px-6 py-3">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${st.cls}`}>
+                                {st.label}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 

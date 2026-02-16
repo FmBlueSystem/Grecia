@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Plus, Calendar as CalendarIcon, Clock, AlertCircle } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import StatCard from '../components/shared/StatCard';
 import CalendarGrid from '../components/calendar/CalendarGrid';
 import StatusBadge from '../components/shared/StatusBadge';
+import api from '../lib/api';
 
 interface CalendarEvent {
   id: string;
@@ -14,102 +16,46 @@ interface CalendarEvent {
   description?: string;
 }
 
-const MOCK_EVENTS: CalendarEvent[] = [
-  {
-    id: '1',
-    title: 'Reunión con Alimentos del Valle',
-    date: '2026-02-14',
-    time: '10:00 AM',
-    color: '#0067B2',
-    type: 'Reunión',
-    description: 'Presentación de propuesta comercial',
-  },
-  {
-    id: '2',
-    title: 'Llamada - Exportadora Tropical',
-    date: '2026-02-14',
-    time: '2:30 PM',
-    color: '#00A3E0',
-    type: 'Llamada',
-    description: 'Seguimiento de cotización',
-  },
-  {
-    id: '3',
-    title: 'Demo Sistema Logística',
-    date: '2026-02-14',
-    time: '4:00 PM',
-    color: '#4ECDC4',
-    type: 'Demo',
-    description: 'Demostración para AgroIndustrias',
-  },
-  {
-    id: '4',
-    title: 'Envío Propuesta - Frutas Premium',
-    date: '2026-02-14',
-    time: '5:30 PM',
-    color: '#95E1D3',
-    type: 'Tarea',
-    description: 'Deadline envío propuesta',
-  },
-  {
-    id: '5',
-    title: 'Workshop Productos',
-    date: '2026-02-17',
-    time: '9:00 AM',
-    color: '#0067B2',
-    type: 'Reunión',
-  },
-  {
-    id: '6',
-    title: 'Visita a Cliente - Guatemala',
-    date: '2026-02-18',
-    color: '#F38181',
-    type: 'Visita',
-  },
-  {
-    id: '7',
-    title: 'Cierre Oportunidad',
-    date: '2026-02-19',
-    time: '11:00 AM',
-    color: '#0067B2',
-    type: 'Reunión',
-  },
-  {
-    id: '8',
-    title: 'Revisión Pipelines',
-    date: '2026-02-20',
-    time: '3:00 PM',
-    color: '#00A3E0',
-    type: 'Interna',
-  },
-  {
-    id: '9',
-    title: 'Training - Nuevo Sistema',
-    date: '2026-02-21',
-    time: '10:00 AM',
-    color: '#4ECDC4',
-    type: 'Capacitación',
-  },
-  {
-    id: '10',
-    title: 'Reunión Ventas Regional',
-    date: '2026-02-24',
-    time: '2:00 PM',
-    color: '#0067B2',
-    type: 'Reunión',
-  },
-];
-
-const todayEvents = MOCK_EVENTS.filter((e) => e.date === '2026-02-14');
-const thisWeekEvents = MOCK_EVENTS.filter((e) => {
-  const eventDate = new Date(e.date);
-  const today = new Date('2026-02-14');
-  const weekEnd = new Date('2026-02-20');
-  return eventDate >= today && eventDate <= weekEnd;
-});
-const pendingEvents = MOCK_EVENTS.filter((e) => new Date(e.date) >= new Date('2026-02-14'));
+const TYPE_COLORS: Record<string, string> = {
+  'Llamada': 'var(--color-brand-light)',
+  'Reunión': 'var(--color-brand)',
+  'Tarea': '#4ECDC4',
+  'Visita': '#F38181',
+};
 
 export default function CalendarView() {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/activities?top=200')
+      .then(res => {
+        const activities = res.data?.data || [];
+        const mapped: CalendarEvent[] = activities.map((act: any) => {
+          const actType = act.activityType || 'Tarea';
+          return {
+            id: String(act.id),
+            title: act.subject || actType,
+            date: act.dueDate ? act.dueDate.split('T')[0] : '',
+            time: act.startTime || '',
+            color: TYPE_COLORS[actType] || 'var(--color-brand)',
+            type: actType,
+            description: act.account?.name || act.cardName || '',
+          };
+        });
+        setEvents(mapped);
+      })
+      .catch(err => console.error('Error cargando actividades del calendario', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const today = new Date().toISOString().split('T')[0];
+  const weekEnd = new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0];
+
+  const todayEvents = events.filter(e => e.date === today);
+  const thisWeekEvents = events.filter(e => e.date >= today && e.date <= weekEnd);
+  const pendingEvents = events.filter(e => e.date >= today);
+
   return (
     <div>
       <PageHeader
@@ -120,7 +66,7 @@ export default function CalendarView() {
           { label: 'Calendario' },
         ]}
         action={
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#0067B2] text-white rounded-lg hover:bg-[#005a9c] transition-colors text-sm font-medium">
+          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
             <Plus className="w-4 h-4" />
             Nueva Actividad
           </button>
@@ -131,21 +77,21 @@ export default function CalendarView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard
           label="Hoy"
-          value={todayEvents.length}
+          value={loading ? '-' : todayEvents.length}
           icon={CalendarIcon}
           iconBg="bg-blue-50"
-          iconColor="text-[#0067B2]"
+          iconColor="text-indigo-600"
         />
         <StatCard
           label="Esta Semana"
-          value={thisWeekEvents.length}
+          value={loading ? '-' : thisWeekEvents.length}
           icon={Clock}
           iconBg="bg-purple-50"
           iconColor="text-purple-600"
         />
         <StatCard
           label="Pendientes"
-          value={pendingEvents.length}
+          value={loading ? '-' : pendingEvents.length}
           icon={AlertCircle}
           iconBg="bg-amber-50"
           iconColor="text-amber-600"
@@ -156,7 +102,14 @@ export default function CalendarView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
         <div className="lg:col-span-2">
-          <CalendarGrid events={MOCK_EVENTS} />
+          {loading ? (
+            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4" />
+              <p className="text-slate-400">Cargando actividades...</p>
+            </div>
+          ) : (
+            <CalendarGrid events={events} />
+          )}
         </div>
 
         {/* Today's Events Sidebar */}
@@ -169,7 +122,7 @@ export default function CalendarView() {
 
             <div className="space-y-3">
               {todayEvents.length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-6">No hay eventos programados</p>
+                <p className="text-sm text-slate-400 text-center py-6">No hay eventos programados para hoy</p>
               ) : (
                 todayEvents.map((event) => (
                   <div
@@ -179,7 +132,7 @@ export default function CalendarView() {
                     <div className="flex items-start gap-3">
                       <div
                         className="w-1 h-full rounded-full shrink-0 mt-1"
-                        style={{ backgroundColor: event.color || '#0067B2', minHeight: '40px' }}
+                        style={{ backgroundColor: event.color || 'var(--color-brand)', minHeight: '40px' }}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-slate-900 text-sm">{event.title}</p>
@@ -206,7 +159,7 @@ export default function CalendarView() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-[#0067B2] to-[#00A3E0] rounded-xl p-5 text-white">
+          <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl p-5 text-white">
             <h3 className="text-sm font-semibold mb-3">Acciones Rápidas</h3>
             <div className="space-y-2">
               <button className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">

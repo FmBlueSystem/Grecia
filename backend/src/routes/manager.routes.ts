@@ -144,10 +144,12 @@ export default async function managerRoutes(fastify: FastifyInstance) {
     fastify.get('/seller-scorecard', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {
             const cc = request.companyCode as CountryCode;
+            const query = request.query as Record<string, string>;
+            const months = Math.min(Math.max(Number(query.months) || 6, 1), 24);
             const spMap = await loadSalesPersons(cc);
 
             const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - months);
             const dateFilter = sixMonthsAgo.toISOString().split('T')[0];
 
             const [quotesData, ordersData, invoicesData] = await Promise.all([

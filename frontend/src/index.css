@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @theme {
   /* Premium Slate Palette (Base) */
@@ -13,6 +14,18 @@
   --color-slate-800: #1E293B;
   --color-slate-900: #0F172A;
   --color-slate-950: #020617;
+
+  /* Brand Colors (theme-switchable) */
+  --color-brand: #0067B2;
+  --color-brand-hover: #005a9c;
+  --color-brand-light: #00A3E0;
+
+  /* Sidebar Colors (theme-switchable) */
+  --color-sidebar-bg: #0E1525;
+  --color-sidebar-border: #1E3350;
+  --color-sidebar-hover: #182C42;
+  --color-sidebar-muted: #64748B;
+  --color-sidebar-inactive: #8899AA;
 
   /* STIA Vibrant Accents */
   --color-primary: #0F172A;
@@ -46,7 +59,26 @@
   --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ── Theme Skins ── */
+/* Blue is the default (defined in @theme above) */
+
+[data-theme="green"] {
+  --color-brand: #059669;
+  --color-brand-hover: #047857;
+  --color-brand-light: #34D399;
+  --color-sidebar-bg: #0C1F17;
+  --color-sidebar-border: #1B4332;
+  --color-sidebar-hover: #14352A;
+}
+
+[data-theme="purple"] {
+  --color-brand: #7C3AED;
+  --color-brand-hover: #6D28D9;
+  --color-brand-light: #A78BFA;
+  --color-sidebar-bg: #130D28;
+  --color-sidebar-border: #2E1F5E;
+  --color-sidebar-hover: #221848;
+}
 
 body {
   background-color: var(--color-background);

@@ -46,6 +46,12 @@ export default async function authRoutes(fastify: FastifyInstance) {
                 { expiresIn: '24h' }
             );
 
+            // Record login timestamp
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { lastLoginAt: new Date() },
+            });
+
             // Set Cookie
             reply.setCookie('token', token, {
                 path: '/',

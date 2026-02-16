@@ -46,7 +46,7 @@ export default function InvoiceDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-[#0067B2] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-brand border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function InvoiceDetail() {
     return (
       <div className="text-center py-16">
         <p className="text-slate-500">No se pudo cargar la factura</p>
-        <button onClick={() => window.history.back()} className="mt-4 text-[#0067B2] text-sm font-medium">Volver</button>
+        <button onClick={() => window.history.back()} className="mt-4 text-brand text-sm font-medium">Volver</button>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function InvoiceDetail() {
 
   return (
     <DetailLayout
-      title={invoice.invoiceNumber || `FAC-${id}`}
+      title={`Factura #${invoice.sapDocNum || invoice.id}`}
       subtitle={invoice.account?.name || '-'}
       backPath="/invoices"
       badges={<StatusBadge label={statusInfo.label} variant={statusInfo.variant} />}
@@ -135,7 +135,7 @@ export default function InvoiceDetail() {
           title="Información"
           fields={[
             { label: 'Cliente', value: invoice.account?.name || '-' },
-            { label: 'Factura SAP', value: `#${invoice.id}` },
+            { label: 'N° Documento SAP', value: String(invoice.sapDocNum || invoice.id) },
             { label: 'Fecha Emisión', value: fmtDate(invoice.createdAt) },
             { label: 'Fecha Vencimiento', value: fmtDate(invoice.dueDate) },
             { label: 'Moneda', value: 'USD' },

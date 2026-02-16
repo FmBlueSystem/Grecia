@@ -11,8 +11,11 @@ import Pagination from '../components/shared/Pagination';
 
 interface Invoice {
     id: string;
+    sapDocNum: number;
+    sapDocEntry: number;
     invoiceNumber: string;
     amount: number;
+    paidAmount: number;
     status: string; // UNPAID, PAID, OVERDUE, PARTIAL
     dueDate: string;
     accountId: string;
@@ -29,11 +32,18 @@ export default function Invoices() {
     const [refreshing, setRefreshing] = useState(false);
     const [page, setPage] = useState(0);
     const [total, setTotal] = useState(0);
+    const [globalStats, setGlobalStats] = useState<{ paid: number; pending: number; overdue: number } | null>(null);
     const pageSize = 25;
 
     useEffect(() => {
         fetchInvoices();
     }, [page]);
+
+    useEffect(() => {
+        api.get('/invoices/stats')
+            .then(res => { if (res.data) setGlobalStats(res.data); })
+            .catch(err => console.error('Error al obtener stats de facturas', err));
+    }, []);
 
     const fetchInvoices = async () => {
         try {
@@ -71,15 +81,11 @@ export default function Invoices() {
         }
     };
 
-    const stats = invoices.reduce((acc, inv) => {
-        if (inv.status === 'PAID') acc.paid += inv.amount;
-        else if (inv.status === 'UNPAID') acc.pending += inv.amount;
-        else if (inv.status === 'OVERDUE') acc.overdue += inv.amount;
-        return acc;
-    }, { paid: 0, pending: 0, overdue: 0 });
+    const stats = globalStats || { paid: 0, pending: 0, overdue: 0 };
 
     const filteredInvoices = invoices.filter(i => {
         const matchesSearch =
+            String(i.sapDocNum).includes(searchTerm) ||
             i.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
             i.account?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             i.accountId.toLowerCase().includes(searchTerm.toLowerCase());
@@ -212,14 +218,9 @@ export default function Invoices() {
                                         className="hover:bg-indigo-50/30 transition-colors group cursor-pointer"
                                     >
                                         <td className="px-8 py-5">
-                                            <div className="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
-                                                {invoice.invoiceNumber}
+                                            <div className="font-bold text-indigo-600 group-hover:text-indigo-700 transition-colors">
+                                                {invoice.sapDocNum}
                                             </div>
-                                            {invoice.sapInvoiceId && (
-                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 mt-1">
-                                                    SAP: {invoice.sapInvoiceId}
-                                                </span>
-                                            )}
                                         </td>
                                         <td className="px-8 py-5 text-slate-600 font-medium">
                                             {invoice.account?.name || <span className="text-slate-400 italic">Sin Cuenta</span>}

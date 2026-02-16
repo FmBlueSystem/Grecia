@@ -15,7 +15,7 @@ interface NotificationItemProps {
 export default function NotificationItem({
   icon: Icon,
   iconBg = 'bg-blue-50',
-  iconColor = 'text-[#0067B2]',
+  iconColor = 'text-brand',
   title,
   description,
   time,
@@ -38,7 +38,7 @@ export default function NotificationItem({
           <p className={cn('text-sm', read ? 'text-slate-700' : 'text-slate-900 font-semibold')}>
             {title}
           </p>
-          {!read && <span className="w-2 h-2 rounded-full bg-[#0067B2] mt-1.5 shrink-0" />}
+          {!read && <span className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />}
         </div>
         <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{description}</p>
         <p className="text-[11px] text-slate-400 mt-1">{time}</p>

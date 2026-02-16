@@ -20,9 +20,12 @@ export default async function opportunityRoutes(fastify: FastifyInstance) {
     // GET /api/opportunities
     fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {
+            const { id: userId, scopeLevel } = request.user as any;
             const opportunities = await prisma.opportunity.findMany({
-                where: { isClosed: false }, // Default filter, maybe? Or all? Let's return all for MVP list usually. All active.
-                // Actually, let's just return all for the table, maybe sort by updatedAt
+                where: {
+                    isClosed: false,
+                    ...(scopeLevel === 'OWN' && { ownerId: userId }),
+                },
                 orderBy: { updatedAt: 'desc' },
                 include: {
                     account: { select: { name: true } },

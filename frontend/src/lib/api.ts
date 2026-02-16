@@ -48,10 +48,9 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
-      toast.error('Sesión expirada', 'Por favor inicia sesión nuevamente');
-
-      // Evitar loop de redirects
+      // Solo mostrar toast si NO estamos en la página de login (evita "Sesión expirada" al poner credenciales incorrectas)
       if (window.location.pathname !== '/login') {
+        toast.error('Sesión expirada', 'Por favor inicia sesión nuevamente');
         window.location.href = '/login';
       }
 
@@ -168,7 +167,7 @@ export async function apiWithRetry<T>(
       const delay = retryDelay * Math.pow(2, i);
       await new Promise((resolve) => setTimeout(resolve, delay));
 
-      console.log(`Retry attempt ${i + 1}/${retries} after ${delay}ms`);
+      // Retry silently in production
     }
   }
 

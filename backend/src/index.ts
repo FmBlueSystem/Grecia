@@ -38,6 +38,7 @@ import searchRoutes from './routes/search.routes';
 import managerRoutes from './routes/manager.routes';
 import reportsRoutes from './routes/reports.routes';
 import agingRoutes from './routes/aging.routes';
+import adminRoutes from './routes/admin.routes';
 
 
 
@@ -84,6 +85,7 @@ fastify.register(searchRoutes, { prefix: '/api/search' });
 fastify.register(managerRoutes, { prefix: '/api/manager' });
 fastify.register(reportsRoutes, { prefix: '/api/reports' });
 fastify.register(agingRoutes, { prefix: '/api/aging' });
+fastify.register(adminRoutes, { prefix: '/api/admin' });
 
 
 

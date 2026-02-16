@@ -8,7 +8,7 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   error: 'bg-red-50 text-red-700 border-red-200',
   info: 'bg-blue-50 text-blue-700 border-blue-200',
   neutral: 'bg-slate-50 text-slate-600 border-slate-200',
-  primary: 'bg-[#0067B2]/10 text-[#0067B2] border-[#0067B2]/20',
+  primary: 'bg-brand/10 text-brand border-brand/20',
 };
 
 interface StatusBadgeProps {
@@ -35,7 +35,7 @@ export default function StatusBadge({ label, variant = 'neutral', dot = false, c
           variant === 'error' && 'bg-red-500',
           variant === 'info' && 'bg-blue-500',
           variant === 'neutral' && 'bg-slate-400',
-          variant === 'primary' && 'bg-[#0067B2]',
+          variant === 'primary' && 'bg-brand',
         )} />
       )}
       {label}

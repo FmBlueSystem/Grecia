@@ -22,7 +22,7 @@ export default function BPF({ steps }: BPFProps) {
                 className={cn(
                   'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
                   step.status === 'completed' && 'bg-emerald-500 text-white',
-                  step.status === 'active' && 'bg-[#0067B2] text-white ring-4 ring-[#0067B2]/20',
+                  step.status === 'active' && 'bg-brand text-white ring-4 ring-brand/20',
                   step.status === 'pending' && 'bg-slate-100 text-slate-400 border border-slate-200'
                 )}
               >
@@ -36,7 +36,7 @@ export default function BPF({ steps }: BPFProps) {
                 className={cn(
                   'text-xs font-medium whitespace-nowrap',
                   step.status === 'completed' && 'text-emerald-600',
-                  step.status === 'active' && 'text-[#0067B2] font-semibold',
+                  step.status === 'active' && 'text-brand font-semibold',
                   step.status === 'pending' && 'text-slate-400'
                 )}
               >

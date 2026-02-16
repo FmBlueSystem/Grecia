@@ -16,8 +16,9 @@ import {
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, DollarSign, Calendar, MoreHorizontal } from 'lucide-react';
+import { Plus, DollarSign, Calendar, MoreHorizontal, AlertTriangle } from 'lucide-react';
 import api from '../lib/api';
+import { useAuthStore } from '../lib/store';
 // Stage colors handled via COLUMNS config
 
 interface Opportunity {
@@ -36,6 +37,7 @@ const COLUMNS = [
     { id: 'FOLLOW_UP', title: 'Seguimiento', color: 'bg-amber-500' },
     { id: 'NEGOTIATION', title: 'Negociación', color: 'bg-orange-500' },
     { id: 'CLOSED_WON', title: 'Cierre Ganado', color: 'bg-emerald-500' },
+    { id: 'CLOSED_LOST', title: 'Cierre Perdido', color: 'bg-red-500' },
 ];
 
 // Sortable Item Component
@@ -61,7 +63,10 @@ function SortableItem({ opp }: { id: string, opp: Opportunity }) {
             style={style}
             {...attributes}
             {...listeners}
-            className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing mb-3 group"
+            className={`bg-white p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing mb-3 group ${
+                (Date.now() - new Date(opp.closeDate).getTime()) / 86400000 > 14 && opp.stage !== 'CLOSED_WON' && opp.stage !== 'CLOSED_LOST'
+                    ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'
+            }`}
         >
             <div className="flex justify-between items-start mb-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded-full">{opp.accountName}</span>
@@ -70,6 +75,11 @@ function SortableItem({ opp }: { id: string, opp: Opportunity }) {
                 </button>
             </div>
             <h4 className="font-bold text-slate-900 leading-tight mb-2">{opp.name}</h4>
+            {(Date.now() - new Date(opp.closeDate).getTime()) / 86400000 > 14 && opp.stage !== 'CLOSED_WON' && opp.stage !== 'CLOSED_LOST' && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded mb-1">
+                    <AlertTriangle className="w-2.5 h-2.5" /> Estancada
+                </span>
+            )}
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
                 <DollarSign className="w-3.5 h-3.5 text-slate-400" />
                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(opp.amount)}
@@ -91,6 +101,8 @@ export default function Pipeline() {
     const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [sellerFilter, setSellerFilter] = useState<string>('ALL');
+    const { user } = useAuthStore();
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), // Prevent accidental drag on click
@@ -137,18 +149,45 @@ export default function Pipeline() {
         setActiveId(null);
     };
 
+    // Unique sellers for filter
+    const sellers = [...new Set(opportunities.map(o => o.accountName))].sort();
+
+    // Filter by seller
+    const filteredOpps = sellerFilter === 'ALL'
+        ? opportunities
+        : opportunities.filter(o => o.accountName === sellerFilter);
+
+    // Stale deals: no change in 14+ days
+    const isStale = (opp: Opportunity) => {
+        const updated = new Date(opp.closeDate);
+        const diff = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24);
+        return diff > 14 && opp.stage !== 'CLOSED_WON' && opp.stage !== 'CLOSED_LOST';
+    };
+
     if (loading) return <div>Cargando Pipeline...</div>;
 
     return (
         <div className="h-[calc(100vh-140px)] flex flex-col">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold text-slate-900">Pipeline de Ventas</h2>
-                    <p className="text-slate-500">Gestión visual del flujo de oportunidades (Etapas 6-10)</p>
+                    <h2 className="text-3xl font-bold text-slate-900">Embudo de Ventas</h2>
+                    <p className="text-slate-500">Gestión visual del flujo de oportunidades</p>
                 </div>
-                <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors">
-                    <Plus className="w-4 h-4" /> Nueva Oportunidad
-                </button>
+                <div className="flex items-center gap-3">
+                    {(user?.role === 'Admin' || user?.role === 'Gerente') && (
+                        <select
+                            value={sellerFilter}
+                            onChange={(e) => setSellerFilter(e.target.value)}
+                            className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                            <option value="ALL">Todas las cuentas</option>
+                            {sellers.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    )}
+                    <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors">
+                        <Plus className="w-4 h-4" /> Nueva Oportunidad
+                    </button>
+                </div>
             </div>
 
             <DndContext
@@ -160,7 +199,7 @@ export default function Pipeline() {
                 <div className="flex-1 overflow-x-auto pb-4">
                     <div className="flex gap-4 min-w-[1200px] h-full">
                         {COLUMNS.map(col => {
-                            const items = opportunities.filter(o => o.stage === col.id);
+                            const items = filteredOpps.filter(o => o.stage === col.id);
                             const totalValue = items.reduce((acc, curr) => acc + curr.amount, 0);
 
                             return (

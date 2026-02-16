@@ -36,6 +36,9 @@ export default function Activities() {
     const [activities, setActivities] = useState<Activity[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [typeFilter, setTypeFilter] = useState<string>('ALL');
+    const [ownerFilter, setOwnerFilter] = useState<string>('ALL');
+    const [showCompleted, setShowCompleted] = useState(true);
 
     // Form
     const [formData, setFormData] = useState({
@@ -105,6 +108,45 @@ export default function Activities() {
                 </button>
             </div>
 
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="flex gap-2">
+                    {[
+                        { value: 'ALL', label: 'Todas' },
+                        { value: 'Call', label: 'Llamadas' },
+                        { value: 'Email', label: 'Correos' },
+                        { value: 'Meeting', label: 'Reuniones' },
+                        { value: 'Task', label: 'Tareas' },
+                    ].map(opt => (
+                        <button
+                            key={opt.value}
+                            onClick={() => setTypeFilter(opt.value)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${typeFilter === opt.value ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+                <select
+                    value={ownerFilter}
+                    onChange={(e) => setOwnerFilter(e.target.value)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                    <option value="ALL">Todos los responsables</option>
+                    {[...new Set(activities.map(a => `${a.owner.firstName} ${a.owner.lastName}`.trim()).filter(Boolean))].sort().map(name => (
+                        <option key={name} value={name}>{name}</option>
+                    ))}
+                </select>
+                <div className="ml-auto">
+                    <button
+                        onClick={() => setShowCompleted(prev => !prev)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${showCompleted ? 'bg-white text-slate-600 border border-slate-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}
+                    >
+                        {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
+                    </button>
+                </div>
+            </div>
+
             {/* List of Activities */}
             {loading ? (
                 <div className="text-center py-12 text-slate-400">Cargando actividades...</div>
@@ -115,7 +157,12 @@ export default function Activities() {
                     animate="visible"
                     className="grid gap-4"
                 >
-                    {activities.map((activity) => {
+                    {activities.filter(a => {
+                        if (typeFilter !== 'ALL' && a.activityType !== typeFilter) return false;
+                        if (ownerFilter !== 'ALL' && `${a.owner.firstName} ${a.owner.lastName}`.trim() !== ownerFilter) return false;
+                        if (!showCompleted && a.isCompleted) return false;
+                        return true;
+                    }).map((activity) => {
                         const Icon = ICONS[activity.activityType as keyof typeof ICONS] || CheckCircle;
                         const colorClass = COLORS[activity.activityType as keyof typeof COLORS] || 'bg-slate-100 text-slate-600';
 
@@ -164,6 +211,16 @@ export default function Activities() {
                     {activities.length === 0 && (
                         <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 border-dashed">
                             No hay actividades pendientes.
+                        </div>
+                    )}
+                    {activities.length > 0 && activities.filter(a => {
+                        if (typeFilter !== 'ALL' && a.activityType !== typeFilter) return false;
+                        if (ownerFilter !== 'ALL' && `${a.owner.firstName} ${a.owner.lastName}`.trim() !== ownerFilter) return false;
+                        if (!showCompleted && a.isCompleted) return false;
+                        return true;
+                    }).length === 0 && (
+                        <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+                            No hay actividades que coincidan con los filtros seleccionados.
                         </div>
                     )}
                 </motion.div>

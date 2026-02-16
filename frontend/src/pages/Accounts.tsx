@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Building2, Plus, Search, Globe, MoreHorizontal, Filter, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Building2, Plus, Search, Globe, MoreHorizontal, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
-import { toast, toastCRUD } from '../lib';
-import { TableSkeleton, EmptyState, ConfirmDialog, useConfirmDialog } from '../components';
+import { toast } from '../lib';
+import { TableSkeleton, EmptyState } from '../components';
 import api from '../lib/api';
 
 interface Account {
@@ -23,13 +24,11 @@ interface Account {
 }
 
 export default function Accounts() {
+    const navigate = useNavigate();
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
-    const confirm = useConfirmDialog();
-
     // New Account Form State
     const [formData, setFormData] = useState({
         name: '',
@@ -68,31 +67,10 @@ export default function Accounts() {
             setShowModal(false);
             fetchAccounts();
             setFormData(prev => ({ ...prev, name: '', industry: '', website: '', phone: '' }));
-            toastCRUD.created('Cuenta');
+            toast.success('Cuenta creada', 'La cuenta se creó correctamente');
         } catch (err) {
             console.error("Error al crear cuenta", err);
             toast.error('Error al crear', 'No se pudo crear la cuenta');
-        }
-    };
-
-    const handleDeleteClick = (accountId: string) => {
-        setAccountToDelete(accountId);
-        confirm.open();
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!accountToDelete) return;
-
-        try {
-            await api.delete(`/accounts/${accountToDelete}`);
-            fetchAccounts();
-            toastCRUD.deleted('Cuenta');
-        } catch (err) {
-            console.error("Error al eliminar cuenta", err);
-            toast.error('Error al eliminar', 'No se pudo eliminar la cuenta');
-        } finally {
-            setAccountToDelete(null);
-            confirm.close();
         }
     };
 
@@ -157,14 +135,14 @@ export default function Accounts() {
                             <tr>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Nombre de Cuenta</th>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Industria</th>
-                                <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Contacto Principal</th>
-                                <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Propietario</th>
+                                <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Teléfono</th>
+                                <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider">Vendedor</th>
                                 <th className="px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wider"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredAccounts.map((account) => (
-                                <motion.tr variants={fadeIn} key={account.id} className="hover:bg-slate-50/50 transition-colors group">
+                                <motion.tr variants={fadeIn} key={account.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => navigate(`/accounts/${account.id}`)}>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -187,20 +165,14 @@ export default function Accounts() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                                                {account.owner.firstName[0]}{account.owner.lastName[0]}
+                                            <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                                                {(account.owner.firstName || '?')[0]}{(account.owner.lastName || '')[0]}
                                             </div>
+                                            <span className="text-sm text-slate-600">{account.owner.firstName} {account.owner.lastName}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button 
-                                                onClick={() => handleDeleteClick(account.id)}
-                                                className="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
-                                                title="Eliminar cuenta"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
                                             <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </button>
@@ -307,16 +279,6 @@ export default function Accounts() {
             )}
         </AnimatePresence>
 
-        {/* Delete Confirmation Dialog */}
-        <ConfirmDialog
-            open={confirm.isOpen}
-            onClose={confirm.close}
-            onConfirm={handleDeleteConfirm}
-            title="¿Eliminar cuenta?"
-            message="Esta acción no se puede deshacer. La cuenta y todos sus datos relacionados serán eliminados permanentemente."
-            variant="danger"
-            loading={confirm.loading}
-        />
     </div>
 );
 }

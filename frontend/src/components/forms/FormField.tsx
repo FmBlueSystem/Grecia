@@ -33,7 +33,7 @@ export function FormInput({ label, error, required, className, ...props }: Input
       <input
         className={cn(
           'w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900 placeholder:text-slate-400',
-          'focus:outline-none focus:ring-2 focus:ring-[#0067B2]/20 focus:border-[#0067B2] transition-all',
+          'focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all',
           error ? 'border-red-300' : 'border-slate-200',
           className
         )}
@@ -56,7 +56,7 @@ export function FormSelect({ label, error, required, options, className, ...prop
       <select
         className={cn(
           'w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900',
-          'focus:outline-none focus:ring-2 focus:ring-[#0067B2]/20 focus:border-[#0067B2] transition-all',
+          'focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all',
           error ? 'border-red-300' : 'border-slate-200',
           className
         )}

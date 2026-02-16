@@ -3,10 +3,10 @@ import {
   BarChart3, Building2, Users, UserPlus, TrendingUp,
   FileText, ShoppingCart, Receipt, Calendar, Package,
   Truck, LogOut, Settings, ChevronDown, Award,
-  Clock, PieChart
+  Clock, PieChart, Activity, Palette
 } from 'lucide-react';
 import { useState } from 'react';
-import { useAuthStore } from '../../lib/store';
+import { useAuthStore, useThemeStore, THEME_META, type ThemeSkin } from '../../lib/store';
 
 const COMPANIES = [
   { code: 'CR', name: 'Costa Rica', flag: '🇨🇷' },
@@ -38,8 +38,8 @@ const NAV_SECTIONS = [
   {
     label: 'COMERCIAL',
     items: [
-      { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-      { id: 'orders', label: 'Pedidos', icon: ShoppingCart, path: '/orders' },
+      { id: 'quotes', label: 'Ofertas', icon: FileText, path: '/quotes' },
+      { id: 'orders', label: 'Órdenes', icon: ShoppingCart, path: '/orders' },
       { id: 'invoices', label: 'Facturas', icon: Receipt, path: '/invoices' },
       { id: 'activities', label: 'Actividades', icon: Calendar, path: '/activities' },
       { id: 'products', label: 'Productos', icon: Package, path: '/products' },
@@ -57,13 +57,17 @@ const NAV_SECTIONS = [
       { id: 'logistics', label: 'Logística', icon: Truck, path: '/logistics' },
       { id: 'aging', label: 'Antigüedad', icon: Clock, path: '/aging' },
       { id: 'reports', label: 'Reportes', icon: PieChart, path: '/reports' },
+      { id: 'usage', label: 'Adopción', icon: Activity, path: '/usage' },
     ],
   },
 ];
 
 export default function Sidebar() {
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore(s => s.user);
+  const logout = useAuthStore(s => s.logout);
+  const theme = useThemeStore(s => s.theme);
+  const setTheme = useThemeStore(s => s.setTheme);
   const [showCompanyMenu, setShowCompanyMenu] = useState(false);
   const [currentCompany, setCurrentCompany] = useState(() => {
     const saved = localStorage.getItem('company');
@@ -78,41 +82,41 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#0A0F1A] flex flex-col z-40">
+    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar-bg flex flex-col z-40">
       {/* Logo */}
-      <div className="h-14 flex items-center px-5 border-b border-[#1A2D47]">
-        <div className="w-8 h-8 bg-[#0067B2] rounded-lg flex items-center justify-center mr-3">
+      <div className="h-14 flex items-center px-5 border-b border-sidebar-border shrink-0">
+        <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center mr-3">
           <span className="text-white font-bold text-sm">S</span>
         </div>
         <div>
           <h1 className="text-white font-bold text-sm leading-tight">STIA CRM</h1>
-          <p className="text-[#64748B] text-[10px] font-medium">Empresarial</p>
+          <p className="text-sidebar-muted text-[10px] font-medium">Empresarial</p>
         </div>
       </div>
 
       {/* Company Selector */}
-      <div className="px-3 py-3 border-b border-[#1A2D47]">
+      <div className="px-3 py-3 border-b border-sidebar-border shrink-0">
         <div className="relative">
           <button
             onClick={() => setShowCompanyMenu(!showCompanyMenu)}
-            className="w-full flex items-center justify-between px-3 py-2 bg-[#142238] hover:bg-[#1A2D47] rounded-lg transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2 bg-sidebar-hover hover:bg-sidebar-border rounded-lg transition-colors"
           >
             <span className="flex items-center gap-2 text-sm text-white">
               <span>{currentCompany.flag}</span>
               <span className="font-medium">{currentCompany.name}</span>
             </span>
-            <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${showCompanyMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-sidebar-muted transition-transform ${showCompanyMenu ? 'rotate-180' : ''}`} />
           </button>
           {showCompanyMenu && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-[#142238] rounded-lg border border-[#1A2D47] overflow-hidden z-50">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-sidebar-hover rounded-lg border border-sidebar-border overflow-hidden z-50">
               {COMPANIES.map(c => (
                 <button
                   key={c.code}
                   onClick={() => handleSwitchCompany(c)}
                   className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
                     currentCompany.code === c.code
-                      ? 'bg-[#0067B2] text-white'
-                      : 'text-[#8899AA] hover:bg-[#1A2D47] hover:text-white'
+                      ? 'bg-brand text-white'
+                      : 'text-sidebar-inactive hover:bg-sidebar-border hover:text-white'
                   }`}
                 >
                   <span>{c.flag}</span>
@@ -131,7 +135,7 @@ export default function Sidebar() {
           return !allowed || allowed.includes(user?.role || '');
         }).map(section => (
           <div key={section.label}>
-            <p className="text-[#64748B] text-[10px] font-bold tracking-widest uppercase px-3 mb-2">
+            <p className="text-sidebar-muted text-[10px] font-bold tracking-widest uppercase px-3 mb-2">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -144,8 +148,8 @@ export default function Sidebar() {
                     to={item.path}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-[#0067B2] text-white'
-                        : 'text-[#8899AA] hover:bg-[#142238] hover:text-white'
+                        ? 'bg-brand text-white'
+                        : 'text-sidebar-inactive hover:bg-sidebar-hover hover:text-white'
                     }`}
                   >
                     <item.icon className="w-4 h-4 shrink-0" />
@@ -159,12 +163,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <div className="border-t border-[#1A2D47] p-3 space-y-1">
+      <div className="border-t border-sidebar-border p-3 space-y-1 shrink-0">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-              isActive ? 'bg-[#0067B2] text-white' : 'text-[#8899AA] hover:bg-[#142238] hover:text-white'
+              isActive ? 'bg-brand text-white' : 'text-sidebar-inactive hover:bg-sidebar-hover hover:text-white'
             }`
           }
         >
@@ -172,18 +176,37 @@ export default function Sidebar() {
           Configuración
         </NavLink>
 
+        {/* Theme Switcher */}
+        <div className="flex items-center gap-3 px-3 py-2">
+          <Palette className="w-4 h-4 text-sidebar-muted" />
+          <span className="text-sm font-medium text-sidebar-inactive">Tema</span>
+          <div className="ml-auto flex gap-2">
+            {(Object.keys(THEME_META) as ThemeSkin[]).map(t => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                title={THEME_META[t].label}
+                className={`w-5 h-5 rounded-full transition-all ${
+                  theme === t ? 'ring-2 ring-white ring-offset-1 ring-offset-sidebar-bg scale-110' : 'opacity-50 hover:opacity-80 hover:scale-110'
+                }`}
+                style={{ backgroundColor: THEME_META[t].color }}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* User */}
         <div className="flex items-center gap-3 px-3 py-2 mt-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-light rounded-full flex items-center justify-center text-white text-xs font-bold">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-[#64748B] text-xs truncate">{user?.email}</p>
+            <p className="text-sidebar-muted text-xs truncate">{user?.email}</p>
           </div>
           <button
             onClick={logout}
-            className="p-1.5 text-[#64748B] hover:text-red-400 transition-colors"
+            className="p-1.5 text-sidebar-muted hover:text-red-400 transition-colors"
             title="Cerrar sesión"
           >
             <LogOut className="w-4 h-4" />

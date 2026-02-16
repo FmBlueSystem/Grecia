@@ -21,7 +21,7 @@ export default function ToggleSwitch({ label, description, checked, onChange }: 
         onClick={() => onChange(!checked)}
         className={cn(
           'relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0',
-          checked ? 'bg-[#0067B2]' : 'bg-slate-200'
+          checked ? 'bg-brand' : 'bg-slate-200'
         )}
       >
         <span

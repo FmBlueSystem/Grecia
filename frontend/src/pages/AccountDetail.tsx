@@ -44,7 +44,7 @@ const fmt = (v: number) => new Intl.NumberFormat('es-CR', { style: 'currency', c
 const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
 
 const ORDER_COLS: Column<Client360['recentOrders'][0]>[] = [
-  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-[#0067B2]">{r.docNum}</span> },
+  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-brand">{r.docNum}</span> },
   { key: 'date', header: 'Fecha', render: r => <span className="text-sm text-slate-500">{fmtDate(r.date)}</span> },
   { key: 'total', header: 'Total', align: 'right', render: r => <span className="font-semibold">{fmt(r.total)}</span> },
   { key: 'status', header: 'Estado', render: r => <StatusBadge label={r.status} variant={r.status === 'Abierta' ? 'warning' : 'success'} /> },
@@ -52,7 +52,7 @@ const ORDER_COLS: Column<Client360['recentOrders'][0]>[] = [
 ];
 
 const INVOICE_COLS: Column<Client360['recentInvoices'][0]>[] = [
-  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-[#0067B2]">{r.docNum}</span> },
+  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-brand">{r.docNum}</span> },
   { key: 'date', header: 'Fecha', render: r => <span className="text-sm text-slate-500">{fmtDate(r.date)}</span> },
   { key: 'total', header: 'Total', align: 'right', render: r => <span className="font-semibold">{fmt(r.total)}</span> },
   { key: 'balance', header: 'Saldo', align: 'right', render: r => <span className={r.balance > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}>{fmt(r.balance)}</span> },
@@ -60,7 +60,7 @@ const INVOICE_COLS: Column<Client360['recentInvoices'][0]>[] = [
 ];
 
 const QUOTE_COLS: Column<Client360['openQuotes'][0]>[] = [
-  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-[#0067B2]">{r.docNum}</span> },
+  { key: 'docNum', header: '#', width: '80px', render: r => <span className="font-semibold text-brand">{r.docNum}</span> },
   { key: 'date', header: 'Fecha', render: r => <span className="text-sm text-slate-500">{fmtDate(r.date)}</span> },
   { key: 'total', header: 'Total', align: 'right', render: r => <span className="font-semibold">{fmt(r.total)}</span> },
   { key: 'validUntil', header: 'Válida hasta', render: r => <span className="text-sm text-slate-500">{fmtDate(r.validUntil)}</span> },
@@ -93,7 +93,7 @@ export default function AccountDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="w-8 h-8 text-[#0067B2] animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand animate-spin" />
         <span className="ml-3 text-slate-500">Cargando ficha del cliente...</span>
       </div>
     );
@@ -111,14 +111,14 @@ export default function AccountDetail() {
   const { client, summary } = data;
 
   const TABS = [
-    { id: 'orders' as const, label: 'Pedidos', count: data.recentOrders.length },
+    { id: 'orders' as const, label: 'Órdenes', count: data.recentOrders.length },
     { id: 'invoices' as const, label: 'Facturas', count: data.recentInvoices.length },
-    { id: 'quotes' as const, label: 'Cotizaciones', count: data.openQuotes.length },
+    { id: 'quotes' as const, label: 'Ofertas', count: data.openQuotes.length },
     { id: 'products' as const, label: 'Top Productos', count: data.topProducts.length },
   ];
 
   const actTypeIcon: Record<string, { icon: typeof Mail; bg: string; color: string }> = {
-    'Email': { icon: Mail, bg: 'bg-blue-50', color: 'text-[#0067B2]' },
+    'Email': { icon: Mail, bg: 'bg-blue-50', color: 'text-brand' },
     'Llamada': { icon: Phone, bg: 'bg-purple-50', color: 'text-purple-600' },
     'Reunión': { icon: Calendar, bg: 'bg-green-50', color: 'text-green-600' },
     'Tarea': { icon: FileText, bg: 'bg-amber-50', color: 'text-amber-600' },
@@ -133,7 +133,7 @@ export default function AccountDetail() {
       badges={
         <>
           {summary.overdueCount > 0 && <StatusBadge label={`${summary.overdueCount} vencidas`} variant="error" dot />}
-          {summary.openQuotesCount > 0 && <StatusBadge label={`${summary.openQuotesCount} cotiz. abiertas`} variant="info" />}
+          {summary.openQuotesCount > 0 && <StatusBadge label={`${summary.openQuotesCount} ofertas abiertas`} variant="info" />}
         </>
       }
       left={
@@ -142,7 +142,7 @@ export default function AccountDetail() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: 'Ingresos (12m)', value: fmt(summary.totalRevenue), icon: DollarSign, color: 'text-green-600', bg: 'bg-green-50' },
-              { label: 'Pedidos', value: summary.totalOrders.toString(), icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'Órdenes', value: summary.totalOrders.toString(), icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
               { label: 'Saldo Abierto', value: fmt(summary.openBalance), icon: Receipt, color: summary.openBalance > 0 ? 'text-red-600' : 'text-green-600', bg: summary.openBalance > 0 ? 'bg-red-50' : 'bg-green-50' },
               { label: 'Ticket Promedio', value: fmt(summary.avgOrderValue), icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50' },
             ].map(kpi => (
@@ -167,7 +167,7 @@ export default function AccountDetail() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`pb-3 px-1 border-b-2 transition-colors ${
                     activeTab === tab.id
-                      ? 'border-[#0067B2] text-[#0067B2] font-semibold'
+                      ? 'border-brand text-brand font-semibold'
                       : 'border-transparent text-slate-500 hover:text-slate-700'
                   }`}
                 >
@@ -180,9 +180,9 @@ export default function AccountDetail() {
 
           {/* Tab Content */}
           <div>
-            {activeTab === 'orders' && <DataTable columns={ORDER_COLS} data={data.recentOrders} emptyMessage="Sin pedidos recientes" />}
+            {activeTab === 'orders' && <DataTable columns={ORDER_COLS} data={data.recentOrders} emptyMessage="Sin órdenes recientes" />}
             {activeTab === 'invoices' && <DataTable columns={INVOICE_COLS} data={data.recentInvoices} emptyMessage="Sin facturas recientes" />}
-            {activeTab === 'quotes' && <DataTable columns={QUOTE_COLS} data={data.openQuotes} emptyMessage="Sin cotizaciones abiertas" />}
+            {activeTab === 'quotes' && <DataTable columns={QUOTE_COLS} data={data.openQuotes} emptyMessage="Sin ofertas abiertas" />}
             {activeTab === 'products' && <DataTable columns={PRODUCT_COLS} data={data.topProducts} emptyMessage="Sin productos registrados" />}
           </div>
         </>
@@ -216,7 +216,7 @@ export default function AccountDetail() {
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-slate-400" />
                     {client.website ? (
-                      <a href={client.website.startsWith('http') ? client.website : `https://${client.website}`} target="_blank" rel="noopener noreferrer" className="text-[#0067B2] hover:underline">
+                      <a href={client.website.startsWith('http') ? client.website : `https://${client.website}`} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
                         {client.website}
                       </a>
                     ) : <span className="text-slate-400">-</span>}

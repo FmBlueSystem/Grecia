@@ -1,7 +1,20 @@
 import { FastifyInstance } from 'fastify';
-import { getInvoices, getInvoiceById, PaginationParams } from '../services/sap-proxy.service';
+import { getInvoices, getInvoiceById, getInvoiceStats, PaginationParams } from '../services/sap-proxy.service';
 
 export default async function invoiceRoutes(fastify: FastifyInstance) {
+    // GET /api/invoices/stats — Aggregated stats over full dataset
+    fastify.get('/stats', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        try {
+            const { sapSalesPersonCode, scopeLevel } = request.user as any;
+            return await getInvoiceStats(request.companyCode,
+                scopeLevel === 'ALL' ? undefined : sapSalesPersonCode
+            );
+        } catch (error) {
+            request.log.error(error);
+            reply.code(500).send({ error: 'Failed to fetch invoice stats' });
+        }
+    });
+
     // GET /api/invoices
     fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {

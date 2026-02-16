@@ -36,7 +36,7 @@ const STATUS_LABELS: Record<string, string> = {
 export default function ServiceDashboard() {
     const [cases, setCases] = useState<Case[]>([]);
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ open: 0, critical: 0, avgTime: '4h 12m' });
+    const [stats, setStats] = useState({ open: 0, critical: 0, avgTime: 'En Desarrollo' });
 
     useEffect(() => {
         fetchCases();
@@ -109,7 +109,7 @@ export default function ServiceDashboard() {
                         </div>
                         <div>
                             <p className="text-sm font-bold text-slate-500">SLA Cumplido</p>
-                            <h3 className="text-2xl font-bold text-slate-900">98%</h3>
+                            <h3 className="text-2xl font-bold text-slate-400">En Desarrollo</h3>
                         </div>
                     </div>
                 </motion.div>

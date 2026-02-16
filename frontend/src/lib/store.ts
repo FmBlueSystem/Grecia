@@ -20,7 +20,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
     token: localStorage.getItem('token'),
-    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    user: (() => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; } })(),
     isAuthenticated: !!localStorage.getItem('token'),
     login: (token, user) => {
         localStorage.setItem('token', token);
@@ -31,5 +31,40 @@ export const useAuthStore = create<AuthState>((set) => ({
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         set({ token: null, user: null, isAuthenticated: false });
+    },
+}));
+
+// ── Theme Store ──
+export type ThemeSkin = 'blue' | 'green' | 'purple';
+
+export const THEME_META: Record<ThemeSkin, { label: string; color: string }> = {
+    blue:   { label: 'Azul STIA',  color: '#0067B2' },
+    green:  { label: 'Verde',      color: '#059669' },
+    purple: { label: 'Violeta',    color: '#7C3AED' },
+};
+
+interface ThemeState {
+    theme: ThemeSkin;
+    setTheme: (theme: ThemeSkin) => void;
+}
+
+// Apply theme on load
+const savedTheme = (localStorage.getItem('theme') as ThemeSkin) || 'blue';
+if (savedTheme !== 'blue') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+} else {
+    document.documentElement.removeAttribute('data-theme');
+}
+
+export const useThemeStore = create<ThemeState>((set) => ({
+    theme: savedTheme,
+    setTheme: (theme) => {
+        localStorage.setItem('theme', theme);
+        if (theme === 'blue') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        set({ theme });
     },
 }));

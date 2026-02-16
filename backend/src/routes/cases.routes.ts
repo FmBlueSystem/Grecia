@@ -19,7 +19,11 @@ export default async function caseRoutes(fastify: FastifyInstance) {
     // GET /api/cases
     fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {
+            const { id: userId, scopeLevel } = request.user as any;
             const cases = await prisma.case.findMany({
+                where: {
+                    ...(scopeLevel === 'OWN' && { ownerId: userId }),
+                },
                 orderBy: { updatedAt: 'desc' },
                 include: {
                     account: { select: { name: true } },

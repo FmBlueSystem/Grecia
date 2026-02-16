@@ -37,7 +37,7 @@ export default function DetailLayout({
       <div className="mb-6">
         <button
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-1 text-sm text-slate-500 hover:text-[#0067B2] transition-colors mb-3"
+          className="flex items-center gap-1 text-sm text-slate-500 hover:text-brand transition-colors mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver

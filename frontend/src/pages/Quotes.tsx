@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, Search, Calendar, MoreHorizontal, CheckCircle, Clock, AlertTriangle, Trash2, Loader2 } from 'lucide-react';
+import { FileText, Plus, Search, Calendar, MoreHorizontal, CheckCircle, Clock, AlertTriangle, Trash2, Loader2, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { fadeIn, staggerContainer } from '../lib/animations';
@@ -31,6 +31,8 @@ export default function Quotes() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [dateFilter, setDateFilter] = useState('ALL');
     const [page, setPage] = useState(0);
     const [total, setTotal] = useState(0);
     const pageSize = 25;
@@ -52,12 +54,30 @@ export default function Quotes() {
 
     useEffect(() => {
         fetchQuotes();
-    }, [page]);
+    }, [page, statusFilter, dateFilter]);
 
     const fetchQuotes = async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/quotes?top=${pageSize}&skip=${page * pageSize}`);
+            const filters: string[] = [];
+            // Status filter via SAP DocumentStatus
+            if (statusFilter === 'OPEN') filters.push("DocumentStatus eq 'bost_Open'");
+            else if (statusFilter === 'CLOSED') filters.push("DocumentStatus eq 'bost_Close'");
+            // Date filter
+            if (dateFilter !== 'ALL') {
+                const now = new Date();
+                let startDate: string;
+                if (dateFilter === 'MONTH') {
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                } else if (dateFilter === 'QUARTER') {
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString().split('T')[0];
+                } else {
+                    startDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+                }
+                filters.push(`DocDate ge '${startDate}'`);
+            }
+            const filterStr = filters.length > 0 ? `&filter=${encodeURIComponent(filters.join(' and '))}` : '';
+            const res = await api.get(`/quotes?top=${pageSize}&skip=${page * pageSize}${filterStr}`);
             if (res.data?.data) setQuotes(res.data.data);
             if (res.data?.total != null) setTotal(res.data.total);
         } catch (error) {
@@ -158,12 +178,12 @@ export default function Quotes() {
                 })),
             };
             const res = await api.post('/quotes', payload);
-            toast.success(`Cotización #${res.data.docNum} creada exitosamente en SAP`);
+            toast.success(`Oferta #${res.data.docNum} creada exitosamente en SAP`);
             setIsModalOpen(false);
             resetModal();
             fetchQuotes();
         } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Error al crear cotización');
+            toast.error(err.response?.data?.error || 'Error al crear oferta');
         } finally {
             setSubmitting(false);
         }
@@ -184,7 +204,7 @@ export default function Quotes() {
             <motion.div variants={fadeIn} className="flex justify-between items-center">
                 <div>
                     <h2 className="text-3xl font-bold text-slate-900">Ofertas de Ventas</h2>
-                    <p className="text-slate-500 mt-1">Gestión de cotizaciones y propuestas comerciales</p>
+                    <p className="text-slate-500 mt-1">Gestión de ofertas y propuestas comerciales</p>
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
@@ -195,8 +215,8 @@ export default function Quotes() {
             </motion.div>
 
             {/* Filters */}
-            <motion.div variants={fadeIn} className="flex gap-4">
-                <div className="relative flex-1">
+            <motion.div variants={fadeIn} className="flex gap-3 flex-wrap">
+                <div className="relative flex-1 min-w-[200px]">
                     <Search className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" />
                     <input
                         type="text"
@@ -206,9 +226,25 @@ export default function Quotes() {
                         className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                 </div>
-                <button className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 flex items-center gap-2">
-                    <Calendar className="w-4 h-4" /> Este Mes
-                </button>
+                <select
+                    value={statusFilter}
+                    onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                >
+                    <option value="ALL">Todos los estados</option>
+                    <option value="OPEN">Abiertas</option>
+                    <option value="CLOSED">Cerradas</option>
+                </select>
+                <select
+                    value={dateFilter}
+                    onChange={(e) => { setDateFilter(e.target.value); setPage(0); }}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                >
+                    <option value="ALL">Todas las fechas</option>
+                    <option value="MONTH">Este Mes</option>
+                    <option value="QUARTER">Último Trimestre</option>
+                    <option value="YEAR">Este Año</option>
+                </select>
             </motion.div>
 
             {/* List */}
@@ -231,10 +267,7 @@ export default function Quotes() {
                                 filteredQuotes.map((quote) => (
                                     <tr key={quote.id} onClick={() => navigate(`/quotes/${quote.id}`)} className="hover:bg-slate-50/80 transition-colors cursor-pointer">
                                         <td className="px-6 py-4">
-                                            <div>
-                                                <p className="font-bold text-indigo-600">{quote.sapDocNum}</p>
-                                                <p className="text-xs text-slate-400">Entry: {quote.sapDocEntry}</p>
-                                            </div>
+                                            <p className="font-bold text-indigo-600">{quote.sapDocNum}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
@@ -436,47 +469,3 @@ export default function Quotes() {
     );
 }
 
-function Building2(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
-            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
-            <path d="M10 6h4" />
-            <path d="M10 10h4" />
-            <path d="M10 14h4" />
-            <path d="M10 18h4" />
-        </svg>
-    )
-}
-
-function X(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 18 18" />
-        </svg>
-    )
-}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Copy, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import DetailLayout from '../components/detail/DetailLayout';
 import InfoCard from '../components/detail/InfoCard';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -29,6 +30,7 @@ export default function QuoteDetail() {
   const [quote, setQuote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [copying, setCopying] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -50,7 +52,7 @@ export default function QuoteDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-[#0067B2] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-brand border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -58,8 +60,8 @@ export default function QuoteDetail() {
   if (error || !quote) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-500">No se pudo cargar la cotización</p>
-        <button onClick={() => window.history.back()} className="mt-4 text-[#0067B2] text-sm font-medium">Volver</button>
+        <p className="text-slate-500">No se pudo cargar la oferta</p>
+        <button onClick={() => window.history.back()} className="mt-4 text-brand text-sm font-medium">Volver</button>
       </div>
     );
   }
@@ -108,14 +110,33 @@ export default function QuoteDetail() {
 
   return (
     <DetailLayout
-      title={quote.quoteNumber || `COT-${id}`}
+      title={`Oferta #${quote.sapDocNum || quote.id}`}
       subtitle={quote.account?.name || '-'}
       backPath="/quotes"
       badges={<StatusBadge label={statusInfo.label} variant={statusInfo.variant} />}
       actions={
         <>
+          <button
+            disabled={copying || quote.status === 'ACCEPTED'}
+            onClick={async () => {
+              setCopying(true);
+              try {
+                const res = await api.post(`/quotes/${id}/copy-to-order`);
+                toast.success(`Orden #${res.data.docNum || ''} creada desde oferta`);
+                navigate(`/orders/${res.data.id || res.data.docEntry}`);
+              } catch (err: any) {
+                toast.error(err.response?.data?.error || 'Error al copiar a orden');
+              } finally {
+                setCopying(false);
+              }
+            }}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center gap-2 disabled:opacity-50"
+          >
+            {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+            Copiar a Orden
+          </button>
           <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Duplicar</button>
-          <button className="px-4 py-2 bg-[#0067B2] text-white rounded-lg text-sm font-medium hover:bg-[#005a9e]">Enviar al Cliente</button>
+          <button className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover">Enviar al Cliente</button>
         </>
       }
       bpfSteps={bpfMap[quote.status] || bpfMap.SENT}
@@ -145,7 +166,7 @@ export default function QuoteDetail() {
           />
           {quote.linkedOrders && quote.linkedOrders.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Pedidos Derivados</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Órdenes Derivadas</h3>
               <div className="space-y-2">
                 {quote.linkedOrders.map((o: any) => (
                   <button
@@ -154,7 +175,7 @@ export default function QuoteDetail() {
                     className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
                   >
                     <div>
-                      <span className="text-sm font-semibold text-[#0067B2]">ORD-{o.docNum}</span>
+                      <span className="text-sm font-semibold text-brand">Orden #{o.docNum}</span>
                       <p className="text-xs text-slate-500">{fmtDate(o.date)}</p>
                     </div>
                     <div className="flex items-center gap-2">

@@ -303,6 +303,8 @@ export async function getOrderById(companyCode: CountryCode, docEntry: string): 
 function mapOrder(o: any, spMap: Map<number, string>): any {
     return {
         id: String(o.DocEntry),
+        sapDocNum: o.DocNum,
+        sapDocEntry: o.DocEntry,
         orderNumber: `ORD-${o.DocNum}`,
         sapOrderId: String(o.DocEntry),
         totalAmount: Number(o.DocTotal) || 0,
@@ -332,6 +334,27 @@ export async function getInvoices(companyCode: CountryCode, params: PaginationPa
     return { data: items, total: items.length };
 }
 
+export async function getInvoiceStats(companyCode: CountryCode, salesPersonCode?: number): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const spFilter = salesPersonCode != null ? ` and SalesPersonCode eq ${salesPersonCode}` : '';
+    // Fetch all open/recent invoices to compute real stats
+    const res = await client.get(
+        `Invoices?$select=DocTotal,PaidToDate,DocDueDate&$filter=DocDate ge '${new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]}'${spFilter}&$top=1000`
+    ).catch(() => ({ data: { value: [] } }));
+    const invoices: any[] = res.data.value || [];
+    const now = new Date();
+    let paid = 0, pending = 0, overdue = 0;
+    for (const inv of invoices) {
+        const amount = Number(inv.DocTotal) || 0;
+        const paidAmt = Number(inv.PaidToDate) || 0;
+        const due = inv.DocDueDate ? new Date(inv.DocDueDate) : now;
+        if (paidAmt >= amount && amount > 0) paid += amount;
+        else if (due < now) overdue += amount;
+        else pending += amount;
+    }
+    return { paid, pending, overdue, count: invoices.length };
+}
+
 export async function getInvoiceById(companyCode: CountryCode, docEntry: string): Promise<any> {
     const data = await sapGet(companyCode, `Invoices(${docEntry})`);
     const invoice = mapInvoice(data);
@@ -351,6 +374,8 @@ function mapInvoice(inv: any): any {
 
     return {
         id: String(inv.DocEntry),
+        sapDocNum: inv.DocNum,
+        sapDocEntry: inv.DocEntry,
         invoiceNumber: `INV-${inv.DocNum}`,
         sapInvoiceId: String(inv.DocEntry),
         amount,
@@ -436,11 +461,11 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
     const fmtD = (d: Date) => d.toISOString().split('T')[0];
 
     const [openOrdersRes, openQuotesRes, closedOrdersRes, invoicesRes, activitiesRes, salesPersonsRes] = await Promise.all([
-        client.get(`Orders?$select=DocTotal,DocEntry&$filter=DocumentStatus eq 'bost_Open'${spFilter}`).catch(() => ({ data: { value: [] } })),
-        client.get(`Quotations?$select=DocTotal,DocEntry&$filter=DocumentStatus eq 'bost_Open'${spFilter}`).catch(() => ({ data: { value: [] } })),
+        client.get(`Orders?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc`).catch(() => ({ data: { value: [] } })),
+        client.get(`Quotations?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc`).catch(() => ({ data: { value: [] } })),
         client.get(`Orders?$select=DocEntry&$filter=DocumentStatus eq 'bost_Close'${spFilter}&$top=0&$inlinecount=allpages`).catch(() => ({ data: {} })),
-        client.get(`Invoices?$select=DocTotal,DocDate,SalesPersonCode&$filter=DocDate ge '${fmtD(sixMonthsAgo)}'${spFilter}&$orderby=DocDate desc&$top=500`).catch(() => ({ data: { value: [] } })),
-        client.get(`Activities?$select=ActivityDate,ActivityType,Status&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
+        client.get(`Invoices?$select=DocTotal,DocDate,SalesPersonCode,DocEntry,DocNum,CardName&$filter=DocDate ge '${fmtD(sixMonthsAgo)}'${spFilter}&$orderby=DocDate desc&$top=500`).catch(() => ({ data: { value: [] } })),
+        client.get(`Activities?$select=ActivityDate,ActivityType,Status,CardName,Subject&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
         client.get(`SalesPersons?$select=SalesEmployeeCode,SalesEmployeeName&$top=500`).catch(() => ({ data: { value: [] } })),
     ]);
 
@@ -488,7 +513,7 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
     const trendPct = prevRevenue > 0 ? Math.round(((revenueMTD - prevRevenue) / prevRevenue) * 100) : 0;
     const trendStr = trendPct >= 0 ? `+${trendPct}%` : `${trendPct}%`;
 
-    // Conversion rate: open orders / (open orders + open quotes) — current pipeline
+    // Mix pipeline: pedidos / (pedidos + cotizaciones) — composición del pipeline actual
     const winDenom = openOrders.length + openQuotes.length;
     const winRate = winDenom > 0 ? Math.round((openOrders.length / winDenom) * 100) : 0;
 
@@ -536,11 +561,94 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
 
     const openActivitiesCount = activities.filter(a => a.Status === 'cn_Open' || a.Status === '-2').length;
 
+    // ─── Drill-down documents for KPI cards ─────────────────────
+    const curMonth = now.getMonth();
+    const curYear = now.getFullYear();
+    const currentMonthInvoices = invoices
+        .filter(inv => { const d = new Date(inv.DocDate); return d.getMonth() === curMonth && d.getFullYear() === curYear; })
+        .slice(0, 20)
+        .map(inv => ({ docEntry: inv.DocEntry, docNum: inv.DocNum, client: inv.CardName || '-', amount: Number(inv.DocTotal) || 0, date: inv.DocDate, type: 'invoice' }));
+
+    const topQuotes = openQuotes.slice(0, 20).map(q => ({
+        docEntry: q.DocEntry, docNum: q.DocNum, client: q.CardName || '-', amount: Number(q.DocTotal) || 0, date: q.DocDate, type: 'quote',
+    }));
+    const topOrders = openOrders.slice(0, 20).map(o => ({
+        docEntry: o.DocEntry, docNum: o.DocNum, client: o.CardName || '-', amount: Number(o.DocTotal) || 0, date: o.DocDate, type: 'order',
+    }));
+
+    const activityTypeLabel = (t: string) => {
+        if (t === 'cn_PhoneCall' || t.includes('Phone')) return 'Llamada';
+        if (t === 'cn_Meeting' || t.includes('Meeting')) return 'Reunión';
+        return 'Tarea';
+    };
+    const topActivities = activities.slice(0, 20).map(a => ({
+        subject: a.Subject || activityTypeLabel(String(a.ActivityType || '')),
+        client: a.CardName || '-',
+        date: a.ActivityDate,
+        activityType: activityTypeLabel(String(a.ActivityType || '')),
+        status: a.Status === 'cn_Open' || a.Status === '-2' ? 'Abierta' : 'Cerrada',
+    }));
+
     return {
         revenue: { mtd: revenueMTD, target, percentage: target > 0 ? (revenueMTD / target) * 100 : 0, trend: trendStr },
         pipeline: { value: openOrders.length, weighted: Math.round(pipelineOrdersValue + pipelineQuotesValue), deals: openQuotes.length },
-        winRate: { percentage: winRate, trend: `${openOrders.length} de ${winDenom} convertidas` },
+        winRate: { percentage: winRate, trend: `${openOrders.length} pedidos de ${winDenom} docs` },
         activities: { today: openActivitiesCount, thisWeek: activities.length, overdue: 0 },
         charts: { revenue: revenueChart, pipeline: pipelineChart, activity: activityChart, topSellers },
+        drilldown: {
+            revenue: currentMonthInvoices,
+            quotes: topQuotes,
+            orders: topOrders,
+            activities: topActivities,
+        },
     };
+}
+
+// ─── "Mi Día" — Resumen diario para vendedores ─────────
+export async function getMyDay(companyCode: CountryCode, salesPersonCode?: number): Promise<any> {
+    const client = await sapService.getClient(companyCode);
+    const spFilter = salesPersonCode != null ? ` and SalesPersonCode eq ${salesPersonCode}` : '';
+    const handledByFilter = salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : '';
+    const now = new Date();
+    const fmtD = (d: Date) => d.toISOString().split('T')[0];
+    const today = fmtD(now);
+    const in7Days = fmtD(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+
+    const [overdueInvRes, expiringQuotesRes, todayActivitiesRes] = await Promise.all([
+        // Facturas vencidas (DocDueDate < hoy, no pagadas completamente)
+        client.get(`Invoices?$select=DocEntry,DocNum,CardName,DocTotal,DocDueDate,DocumentStatus&$filter=DocDueDate lt '${today}' and DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDueDate asc&$top=10`)
+            .catch(() => ({ data: { value: [] } })),
+        // Cotizaciones que vencen en los próximos 7 días
+        client.get(`Quotations?$select=DocEntry,DocNum,CardName,DocTotal,DocDueDate&$filter=DocumentStatus eq 'bost_Open' and DocDueDate ge '${today}' and DocDueDate le '${in7Days}'${spFilter}&$orderby=DocDueDate asc&$top=10`)
+            .catch(() => ({ data: { value: [] } })),
+        // Actividades de hoy
+        client.get(`Activities?$select=ActivityCode,ActivityDate,ActivityType,Status,CardName,Subject,StartTime&$filter=ActivityDate eq '${today}'${handledByFilter}&$top=20`)
+            .catch(() => ({ data: { value: [] } })),
+    ]);
+
+    const overdueInvoices = (overdueInvRes.data.value || []).map((inv: any) => ({
+        docEntry: inv.DocEntry, docNum: inv.DocNum, client: inv.CardName || '-',
+        amount: Number(inv.DocTotal) || 0, dueDate: inv.DocDueDate,
+        daysOverdue: Math.ceil((now.getTime() - new Date(inv.DocDueDate).getTime()) / 86400000),
+    }));
+
+    const expiringQuotes = (expiringQuotesRes.data.value || []).map((q: any) => ({
+        docEntry: q.DocEntry, docNum: q.DocNum, client: q.CardName || '-',
+        amount: Number(q.DocTotal) || 0, dueDate: q.DocDueDate,
+        daysLeft: Math.ceil((new Date(q.DocDueDate).getTime() - now.getTime()) / 86400000),
+    }));
+
+    const actTypeLabel = (t: string) => {
+        if (t === 'cn_PhoneCall' || t?.includes('Phone')) return 'Llamada';
+        if (t === 'cn_Meeting' || t?.includes('Meeting')) return 'Reunión';
+        return 'Tarea';
+    };
+    const todayActivities = (todayActivitiesRes.data.value || []).map((a: any) => ({
+        id: a.ActivityCode, subject: a.Subject || actTypeLabel(String(a.ActivityType || '')),
+        client: a.CardName || '-', type: actTypeLabel(String(a.ActivityType || '')),
+        time: a.StartTime ? String(a.StartTime).substring(0, 5) : '',
+        status: a.Status === 'cn_Open' || a.Status === '-2' ? 'Pendiente' : 'Completada',
+    }));
+
+    return { overdueInvoices, expiringQuotes, todayActivities };
 }

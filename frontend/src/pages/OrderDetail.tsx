@@ -48,7 +48,7 @@ export default function OrderDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-[#0067B2] border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-brand border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -56,8 +56,8 @@ export default function OrderDetail() {
   if (error || !order) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-500">No se pudo cargar el pedido</p>
-        <button onClick={() => window.history.back()} className="mt-4 text-[#0067B2] text-sm font-medium">Volver</button>
+        <p className="text-slate-500">No se pudo cargar la orden</p>
+        <button onClick={() => window.history.back()} className="mt-4 text-brand text-sm font-medium">Volver</button>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function OrderDetail() {
 
   return (
     <DetailLayout
-      title={order.orderNumber || `PED-${id}`}
+      title={`Orden #${order.sapDocNum || order.id}`}
       subtitle={order.account?.name || '-'}
       backPath="/orders"
       badges={<StatusBadge label={statusLabel} variant={statusVariant} />}
@@ -115,10 +115,10 @@ export default function OrderDetail() {
       right={
         <>
           <InfoCard
-            title="Detalles del Pedido"
+            title="Detalles de la Orden"
             fields={[
               { label: 'Cliente', value: order.account?.name || '-' },
-              { label: 'Pedido SAP', value: `#${order.id}` },
+              { label: 'N° Documento SAP', value: String(order.sapDocNum || order.id) },
               { label: 'Fecha', value: fmtDate(order.createdAt) },
               { label: 'Entrega Estimada', value: fmtDate(order.dueDate) },
               { label: 'Vendedor', value: order.owner ? `${order.owner.firstName} ${order.owner.lastName}`.trim() || '-' : '-' },
@@ -127,13 +127,13 @@ export default function OrderDetail() {
           />
           {order.linkedQuote && (
             <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Cotización Origen</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Oferta Origen</h3>
               <button
                 onClick={() => navigate(`/quotes/${order.linkedQuote.docEntry}`)}
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
               >
                 <div>
-                  <span className="text-sm font-semibold text-[#0067B2]">QT-{order.linkedQuote.docNum}</span>
+                  <span className="text-sm font-semibold text-brand">Oferta #{order.linkedQuote.docNum}</span>
                   <p className="text-xs text-slate-500">{fmtDate(order.linkedQuote.date)}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function OrderDetail() {
                     className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
                   >
                     <div>
-                      <span className="text-sm font-semibold text-[#0067B2]">INV-{inv.docNum}</span>
+                      <span className="text-sm font-semibold text-brand">Factura #{inv.docNum}</span>
                       <p className="text-xs text-slate-500">{fmtDate(inv.date)}</p>
                     </div>
                     <div className="flex items-center gap-2">

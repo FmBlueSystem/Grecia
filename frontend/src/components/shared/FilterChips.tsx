@@ -22,7 +22,7 @@ export default function FilterChips({ options, selected, onChange }: FilterChips
           className={cn(
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all border',
             selected === opt.id
-              ? 'bg-[#0067B2] text-white border-[#0067B2]'
+              ? 'bg-brand text-white border-brand'
               : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
           )}
         >

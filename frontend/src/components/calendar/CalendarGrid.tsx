@@ -94,7 +94,7 @@ export default function CalendarGrid({ events = [], onDayClick, onEventClick }: 
             >
               <span className={cn(
                 'inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full',
-                isToday ? 'bg-[#0067B2] text-white' : 'text-slate-600'
+                isToday ? 'bg-brand text-white' : 'text-slate-600'
               )}>
                 {day}
               </span>
@@ -104,7 +104,7 @@ export default function CalendarGrid({ events = [], onDayClick, onEventClick }: 
                     key={ev.id}
                     onClick={e => { e.stopPropagation(); onEventClick?.(ev); }}
                     className="text-[10px] px-1 py-0.5 rounded truncate font-medium"
-                    style={{ backgroundColor: (ev.color || '#0067B2') + '20', color: ev.color || '#0067B2' }}
+                    style={{ backgroundColor: (ev.color || 'var(--color-brand)') + '20', color: ev.color || 'var(--color-brand)' }}
                   >
                     {ev.title}
                   </div>

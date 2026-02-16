@@ -73,7 +73,7 @@ export default function ForecastSection() {
             <div className="space-y-6">
                 <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                     <Target className="w-6 h-6 text-indigo-600" />
-                    Forecast de Ventas
+                    Proyección de Ventas
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map(i => (
@@ -91,11 +91,14 @@ export default function ForecastSection() {
 
     const { summary, byStage, byMonth } = data;
 
+    // P0: No mostrar sección si no hay datos reales de Opportunity
+    if (summary.dealsInPipeline === 0 && summary.totalPipeline === 0 && summary.winRate === 0) return null;
+
     const forecastKpis = [
-        { label: 'Pipeline Total', value: fmt(summary.totalPipeline), icon: DollarSign, color: 'blue', sub: `${summary.dealsInPipeline} deals` },
-        { label: 'Pipeline Ponderado', value: fmt(summary.weightedPipeline), icon: Target, color: 'indigo', sub: 'Weighted' },
-        { label: 'Win Rate', value: `${summary.winRate}%`, icon: Award, color: 'emerald', sub: 'Historico' },
-        { label: 'Deal Promedio', value: fmt(summary.avgDealSize), icon: BarChart3, color: 'fuchsia', sub: `~${summary.avgCloseTime}d cierre` },
+        { label: 'Cartera Total', value: fmt(summary.totalPipeline), icon: DollarSign, color: 'blue', sub: `${summary.dealsInPipeline} negocios` },
+        { label: 'Cartera Ponderada', value: fmt(summary.weightedPipeline), icon: Target, color: 'indigo', sub: 'Ponderado' },
+        { label: 'Tasa de Cierre', value: `${summary.winRate}%`, icon: Award, color: 'emerald', sub: 'Histórico' },
+        { label: 'Negocio Promedio', value: fmt(summary.avgDealSize), icon: BarChart3, color: 'fuchsia', sub: `~${summary.avgCloseTime}d cierre` },
     ];
 
     const colorMap: Record<string, string> = {
@@ -118,7 +121,7 @@ export default function ForecastSection() {
             <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                     <Target className="w-6 h-6 text-indigo-600" />
-                    Forecast de Ventas
+                    Proyección de Ventas
                 </h3>
                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
                     Datos en vivo
@@ -153,7 +156,7 @@ export default function ForecastSection() {
                     className="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-lg"
                 >
                     <h4 className="text-lg font-bold text-slate-800 mb-1">Proyeccion por Mes</h4>
-                    <p className="text-sm text-slate-500 mb-4">Pipeline total vs ponderado por fecha de cierre</p>
+                    <p className="text-sm text-slate-500 mb-4">Cartera total vs ponderada por fecha de cierre</p>
                     {chartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={260}>
                             <BarChart data={chartData} barCategoryGap="20%">
@@ -181,7 +184,7 @@ export default function ForecastSection() {
                     variants={slideUp}
                     className="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-lg"
                 >
-                    <h4 className="text-lg font-bold text-slate-800 mb-1">Pipeline por Etapa</h4>
+                    <h4 className="text-lg font-bold text-slate-800 mb-1">Cartera por Etapa</h4>
                     <p className="text-sm text-slate-500 mb-4">Desglose de oportunidades abiertas</p>
                     {byStage.length > 0 ? (
                         <div className="overflow-x-auto">
@@ -189,7 +192,7 @@ export default function ForecastSection() {
                                 <thead>
                                     <tr className="border-b border-slate-100">
                                         <th className="text-left py-2.5 px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Etapa</th>
-                                        <th className="text-right py-2.5 px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Deals</th>
+                                        <th className="text-right py-2.5 px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Negocios</th>
                                         <th className="text-right py-2.5 px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Valor</th>
                                         <th className="text-right py-2.5 px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Ponderado</th>
                                     </tr>

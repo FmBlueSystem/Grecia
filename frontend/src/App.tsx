@@ -29,6 +29,7 @@ import LogisticsDashboard from './pages/dashboards/LogisticsDashboard';
 import ServiceDashboard from './pages/dashboards/ServiceDashboard';
 import SalesManager from './pages/SalesManager';
 import AgingReport from './pages/AgingReport';
+import UsagePage from './pages/UsagePage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore(s => s.isAuthenticated);
@@ -78,6 +79,7 @@ function App() {
           <Route path="/sales-manager" element={<SalesManager />} />
 
           {/* SYSTEM */}
+          <Route path="/usage" element={<UsagePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
         </Route>

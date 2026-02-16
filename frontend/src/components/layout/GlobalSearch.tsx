@@ -30,8 +30,8 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: typeof Building2; c
     account: { label: 'Cuentas', icon: Building2, color: 'text-blue-600 bg-blue-50', path: '/accounts' },
     contact: { label: 'Contactos', icon: User, color: 'text-emerald-600 bg-emerald-50', path: '/contacts' },
     opportunity: { label: 'Oportunidades', icon: Target, color: 'text-indigo-600 bg-indigo-50', path: '/pipeline' },
-    quote: { label: 'Cotizaciones', icon: FileText, color: 'text-amber-600 bg-amber-50', path: '/quotes' },
-    order: { label: 'Pedidos', icon: ShoppingCart, color: 'text-fuchsia-600 bg-fuchsia-50', path: '/orders' },
+    quote: { label: 'Ofertas', icon: FileText, color: 'text-amber-600 bg-amber-50', path: '/quotes' },
+    order: { label: 'Órdenes', icon: ShoppingCart, color: 'text-fuchsia-600 bg-fuchsia-50', path: '/orders' },
 };
 
 function fmt(n: number): string {
@@ -183,7 +183,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                             value={query}
                             onChange={e => handleInputChange(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Buscar clientes, contactos, cotizaciones..."
+                            placeholder="Buscar clientes, contactos, ofertas..."
                             className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
                         />
                         {query && (

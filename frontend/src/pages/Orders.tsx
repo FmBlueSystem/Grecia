@@ -6,6 +6,8 @@ import Pagination from '../components/shared/Pagination';
 
 interface Order {
     id: string;
+    sapDocNum: number;
+    sapDocEntry: number;
     orderNumber: string;
     account: { name: string };
     totalAmount: number;
@@ -27,6 +29,7 @@ export default function Orders() {
     const navigate = useNavigate();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [total, setTotal] = useState(0);
     const pageSize = 20;
@@ -56,21 +59,32 @@ export default function Orders() {
         <div className="space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-bold text-slate-900">Pedidos y Logística</h2>
+                    <h2 className="text-3xl font-bold text-slate-900">Órdenes y Logística</h2>
                     <p className="text-slate-500 mt-1">Rastreo de envíos y estado de órdenes</p>
                 </div>
                 <div className="relative">
                     <Search className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" />
-                    <input placeholder="Buscar pedido..." className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    <input
+                        placeholder="Buscar orden..."
+                        className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
 
             <div className="space-y-6">
-                {orders.map((order) => (
+                {orders.filter(o =>
+                    !searchTerm ||
+                    String(o.sapDocNum).includes(searchTerm) ||
+                    o.account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    o.trackingNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+                ).map((order) => (
                     <div key={order.id} onClick={() => navigate(`/orders/${order.id}`)} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         <div className="flex justify-between mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">{order.orderNumber}</h3>
+                                <h3 className="text-xl font-bold text-slate-900">Orden #{order.sapDocNum}</h3>
                                 <p className="text-slate-500 text-sm">{order.account.name}</p>
                             </div>
                             <div className="text-right">
@@ -113,9 +127,20 @@ export default function Orders() {
 
                 <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
 
-                {orders.length === 0 && !loading && (
+                {orders.length > 0 && searchTerm && orders.filter(o =>
+                    String(o.sapDocNum).includes(searchTerm) ||
+                    o.account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    o.trackingNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+                ).length === 0 && (
+                    <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+                        No se encontraron órdenes para "{searchTerm}"
+                    </div>
+                )}
+
+                {orders.length === 0 && !loading && !searchTerm && (
                     <div className="p-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        No hay pedidos activos. <br /><span className="text-sm">Mueve una oportunidad a "Ganada" para generar uno automáticamente.</span>
+                        No hay órdenes activas. <br /><span className="text-sm">Mueve una oportunidad a "Ganada" para generar una automáticamente.</span>
                     </div>
                 )}
             </div>

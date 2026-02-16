@@ -4,12 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RevenueChart, PipelineChart, PerformanceChart, ActivityChart } from '../../components/Charts';
 import { staggerContainer, fadeIn, slideUp, scaleIn } from '../../lib/animations';
 import api from '../../lib/api';
+import { useAuthStore } from '../../lib/store';
 import ForecastSection from '../../components/dashboard/ForecastSection';
+import KpiDrilldownModal from '../../components/dashboard/KpiDrilldownModal';
+import MyDaySection from '../../components/dashboard/MyDaySection';
+
+type KpiType = 'revenue' | 'pipeline' | 'conversion' | 'activities';
 
 export default function SalesDashboard() {
+    const scopeLevel = useAuthStore(s => s.user?.scopeLevel);
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedChart, setSelectedChart] = useState<string | null>(null);
     const [stats, setStats] = useState<any>(null);
+    const [drilldownOpen, setDrilldownOpen] = useState(false);
+    const [drilldownType, setDrilldownType] = useState<KpiType>('revenue');
 
     useEffect(() => {
         api.get('/dashboard/stats')
@@ -18,23 +26,27 @@ export default function SalesDashboard() {
     }, []);
 
     const handleChartClick = (chartInfo: any) => {
-        console.log("Chart clicked:", chartInfo);
         setSelectedChart(chartInfo?.type || 'Gráfico');
         setFilterModalOpen(true);
     };
 
     const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
+    const handleKpiClick = (type: KpiType) => {
+        setDrilldownType(type);
+        setDrilldownOpen(true);
+    };
+
     const kpis = stats ? [
-        { title: 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp },
-        { title: 'Pipeline', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2 },
-        { title: 'Conversión', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3 },
-        { title: 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity },
+        { title: 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
+        { title: 'Cartera Abierta', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
+        { title: 'Proporción', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
+        { title: 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
     ] : [
-        { title: 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp },
-        { title: 'Pipeline', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2 },
-        { title: 'Conversión', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3 },
-        { title: 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity },
+        { title: 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
+        { title: 'Cartera Abierta', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
+        { title: 'Proporción', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
+        { title: 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
     ];
 
     const getColorClasses = (color: string) => {
@@ -141,7 +153,8 @@ export default function SalesDashboard() {
                     <motion.div
                         key={idx}
                         variants={slideUp}
-                        className="bg-white/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 shadow-xl shadow-slate-200/50 flex items-start justify-between hover:transform hover:scale-[1.02] transition-all duration-300"
+                        onClick={() => stats && handleKpiClick(kpi.kpiKey)}
+                        className="bg-white/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 shadow-xl shadow-slate-200/50 flex items-start justify-between hover:transform hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
                     >
                         <div>
                             <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">{kpi.title}</p>
@@ -151,6 +164,7 @@ export default function SalesDashboard() {
                                     {kpi.trend}
                                 </span>
                             </div>
+                            <span className="text-[10px] font-medium text-slate-400 mt-2 block opacity-0 group-hover:opacity-100 transition-opacity">Clic para ver detalle</span>
                         </div>
                         <div className={`p-4 rounded-2xl ${getColorClasses(kpi.color)} shadow-sm`}>
                             <kpi.icon className="w-6 h-6" />
@@ -158,6 +172,17 @@ export default function SalesDashboard() {
                     </motion.div>
                 ))}
             </div>
+
+            {/* KPI Drilldown Modal */}
+            <KpiDrilldownModal
+                open={drilldownOpen}
+                onClose={() => setDrilldownOpen(false)}
+                kpiType={drilldownType}
+                drilldown={stats?.drilldown || null}
+            />
+
+            {/* Mi Día — Resumen accionable */}
+            <MyDaySection />
 
             {/* Forecast Section */}
             <ForecastSection />
@@ -188,13 +213,15 @@ export default function SalesDashboard() {
                     <ActivityChart data={stats?.charts?.activity} onChartClick={(d) => handleChartClick({ ...d, type: 'Actividad' })} />
                 </ChartCard>
 
-                <ChartCard
-                    title="Mejores Vendedores"
-                    subtitle="Líderes en ingresos generados"
-                    onClick={() => handleChartClick({ type: 'Performance' })}
-                >
-                    <PerformanceChart data={stats?.charts?.topSellers} onChartClick={(d) => handleChartClick({ ...d, type: 'Performance' })} />
-                </ChartCard>
+                {scopeLevel !== 'OWN' && (
+                    <ChartCard
+                        title="Mejores Vendedores"
+                        subtitle="Líderes en ingresos generados"
+                        onClick={() => handleChartClick({ type: 'Performance' })}
+                    >
+                        <PerformanceChart data={stats?.charts?.topSellers} onChartClick={(d) => handleChartClick({ ...d, type: 'Performance' })} />
+                    </ChartCard>
+                )}
             </div>
         </motion.div>
     );

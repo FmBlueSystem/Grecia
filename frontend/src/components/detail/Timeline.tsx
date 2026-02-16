@@ -30,10 +30,10 @@ export default function Timeline({ events, title = 'Historial' }: TimelineProps)
                   'w-7 h-7 rounded-full flex items-center justify-center shrink-0',
                   event.iconBg || 'bg-blue-50'
                 )}>
-                  <event.icon className={cn('w-3.5 h-3.5', event.iconColor || 'text-[#0067B2]')} />
+                  <event.icon className={cn('w-3.5 h-3.5', event.iconColor || 'text-brand')} />
                 </div>
               ) : (
-                <div className="w-2.5 h-2.5 rounded-full bg-[#0067B2] mt-1.5 shrink-0" />
+                <div className="w-2.5 h-2.5 rounded-full bg-brand mt-1.5 shrink-0" />
               )}
               {i < events.length - 1 && (
                 <div className="w-px flex-1 bg-slate-200 my-1" />
