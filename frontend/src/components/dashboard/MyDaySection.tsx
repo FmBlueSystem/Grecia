@@ -99,7 +99,7 @@ export default function MyDaySection() {
                             <span className="ml-auto text-xs font-bold text-red-500 bg-red-100 px-2 py-0.5 rounded-full">{overdueInvoices.length}</span>
                         </div>
                         <div className="divide-y divide-slate-100">
-                            {overdueInvoices.map((inv) => (
+                            {overdueInvoices.slice(0, 5).map((inv) => (
                                 <div
                                     key={inv.docEntry}
                                     className="px-4 py-2.5 hover:bg-red-50/30 cursor-pointer group flex items-center gap-3 transition-colors"
@@ -116,6 +116,19 @@ export default function MyDaySection() {
                                 </div>
                             ))}
                         </div>
+                        {overdueInvoices.length > 5 && (
+                            <div className="px-4 py-2.5 border-t border-red-100/50 bg-red-50/30 flex items-center justify-between">
+                                <span className="text-xs font-semibold text-red-600">
+                                    Total pendiente: {fmt(overdueInvoices.reduce((s, i) => s + i.amount, 0))}
+                                </span>
+                                <button
+                                    onClick={() => navigate('/invoices')}
+                                    className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+                                >
+                                    Ver todas ({overdueInvoices.length}) <ArrowRight className="w-3 h-3" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 

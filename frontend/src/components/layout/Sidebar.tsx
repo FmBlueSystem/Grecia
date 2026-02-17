@@ -82,14 +82,14 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar-bg flex flex-col z-40">
+    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar-bg border-r border-sidebar-border flex flex-col z-40">
       {/* Logo */}
       <div className="h-14 flex items-center px-5 border-b border-sidebar-border shrink-0">
         <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center mr-3">
           <span className="text-white font-bold text-sm">S</span>
         </div>
         <div>
-          <h1 className="text-white font-bold text-sm leading-tight">STIA CRM</h1>
+          <h1 className="text-sidebar-text font-bold text-sm leading-tight">STIA CRM</h1>
           <p className="text-sidebar-muted text-[10px] font-medium">Empresarial</p>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function Sidebar() {
             onClick={() => setShowCompanyMenu(!showCompanyMenu)}
             className="w-full flex items-center justify-between px-3 py-2 bg-sidebar-hover hover:bg-sidebar-border rounded-lg transition-colors"
           >
-            <span className="flex items-center gap-2 text-sm text-white">
+            <span className="flex items-center gap-2 text-sm text-sidebar-text">
               <span>{currentCompany.flag}</span>
               <span className="font-medium">{currentCompany.name}</span>
             </span>
@@ -116,7 +116,7 @@ export default function Sidebar() {
                   className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
                     currentCompany.code === c.code
                       ? 'bg-brand text-white'
-                      : 'text-sidebar-inactive hover:bg-sidebar-border hover:text-white'
+                      : 'text-sidebar-inactive hover:bg-sidebar-border hover:text-sidebar-text'
                   }`}
                 >
                   <span>{c.flag}</span>
@@ -146,10 +146,10 @@ export default function Sidebar() {
                   <NavLink
                     key={item.id}
                     to={item.path}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                       isActive
-                        ? 'bg-brand text-white'
-                        : 'text-sidebar-inactive hover:bg-sidebar-hover hover:text-white'
+                        ? 'bg-brand/10 text-brand font-semibold'
+                        : 'text-sidebar-inactive font-medium hover:bg-sidebar-hover hover:text-sidebar-text'
                     }`}
                   >
                     <item.icon className="w-4 h-4 shrink-0" />
@@ -168,7 +168,7 @@ export default function Sidebar() {
           to="/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-              isActive ? 'bg-brand text-white' : 'text-sidebar-inactive hover:bg-sidebar-hover hover:text-white'
+              isActive ? 'bg-brand/10 text-brand font-semibold' : 'text-sidebar-inactive font-medium hover:bg-sidebar-hover hover:text-sidebar-text'
             }`
           }
         >
@@ -187,7 +187,7 @@ export default function Sidebar() {
                 onClick={() => setTheme(t)}
                 title={THEME_META[t].label}
                 className={`w-5 h-5 rounded-full transition-all ${
-                  theme === t ? 'ring-2 ring-white ring-offset-1 ring-offset-sidebar-bg scale-110' : 'opacity-50 hover:opacity-80 hover:scale-110'
+                  theme === t ? 'ring-2 ring-sidebar-text ring-offset-1 ring-offset-sidebar-bg scale-110' : 'opacity-50 hover:opacity-80 hover:scale-110'
                 }`}
                 style={{ backgroundColor: THEME_META[t].color }}
               />
@@ -201,7 +201,7 @@ export default function Sidebar() {
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-sidebar-text text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
             <p className="text-sidebar-muted text-xs truncate">{user?.email}</p>
           </div>
           <button

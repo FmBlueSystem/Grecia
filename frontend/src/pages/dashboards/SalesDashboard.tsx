@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Building2, TrendingUp, Activity, X, Filter, Download } from 'lucide-react';
+import { BarChart3, Building2, TrendingUp, Activity, X, Filter, Download, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { RevenueChart, PipelineChart, PerformanceChart, ActivityChart } from '../../components/Charts';
 import { staggerContainer, fadeIn, slideUp, scaleIn } from '../../lib/animations';
 import api from '../../lib/api';
@@ -13,6 +14,8 @@ type KpiType = 'revenue' | 'pipeline' | 'conversion' | 'activities';
 
 export default function SalesDashboard() {
     const scopeLevel = useAuthStore(s => s.user?.scopeLevel);
+    const navigate = useNavigate();
+    const isOwn = scopeLevel === 'OWN';
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [selectedChart, setSelectedChart] = useState<string | null>(null);
     const [stats, setStats] = useState<any>(null);
@@ -38,15 +41,15 @@ export default function SalesDashboard() {
     };
 
     const kpis = stats ? [
-        { title: 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
-        { title: 'Cartera Abierta', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
-        { title: 'Proporción', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
-        { title: 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
+        { title: isOwn ? 'Mis Ingresos (Mes)' : 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
+        { title: isOwn ? 'Mis Ofertas Abiertas' : 'Cartera Abierta', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
+        { title: isOwn ? 'Mi Proporción' : 'Proporción', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
+        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
     ] : [
-        { title: 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
-        { title: 'Cartera Abierta', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
-        { title: 'Proporción', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
-        { title: 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
+        { title: isOwn ? 'Mis Ingresos (Mes)' : 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
+        { title: isOwn ? 'Mis Ofertas Abiertas' : 'Cartera Abierta', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
+        { title: isOwn ? 'Mi Proporción' : 'Proporción', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
+        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
     ];
 
     const getColorClasses = (color: string) => {
@@ -134,17 +137,29 @@ export default function SalesDashboard() {
             <motion.div variants={fadeIn} className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
                 <div>
                     <h2 className="text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                        Dashboard Comercial
+                        {isOwn ? 'Mi Dashboard' : 'Dashboard Comercial'}
                         <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full border border-indigo-100">LIVE</span>
                     </h2>
-                    <p className="text-slate-500 mt-2 text-lg">Visión general del rendimiento y proyecciones</p>
+                    <p className="text-slate-500 mt-2 text-lg">
+                        {isOwn ? 'Tu rendimiento personal y pendientes del día' : 'Visión general del rendimiento y proyecciones'}
+                    </p>
                 </div>
-                <button
-                    onClick={() => window.print()}
-                    className="bg-white/50 backdrop-blur-sm text-indigo-600 border border-indigo-100/50 px-5 py-2.5 rounded-xl font-bold hover:bg-white hover:shadow-md transition-all active:scale-95 flex items-center gap-2"
-                >
-                    <Download className="w-4 h-4" /> Exportar Reporte
-                </button>
+                <div className="flex items-center gap-3">
+                    {isOwn && (
+                        <button
+                            onClick={() => navigate('/quotes')}
+                            className="bg-white/50 backdrop-blur-sm text-brand border border-brand/20 px-5 py-2.5 rounded-xl font-bold hover:bg-brand/5 hover:shadow-md transition-all active:scale-95 flex items-center gap-2"
+                        >
+                            <FileText className="w-4 h-4" /> Mis Ofertas
+                        </button>
+                    )}
+                    <button
+                        onClick={() => window.print()}
+                        className="bg-white/50 backdrop-blur-sm text-indigo-600 border border-indigo-100/50 px-5 py-2.5 rounded-xl font-bold hover:bg-white hover:shadow-md transition-all active:scale-95 flex items-center gap-2"
+                    >
+                        <Download className="w-4 h-4" /> Exportar
+                    </button>
+                </div>
             </motion.div>
 
             {/* KPI Cards */}
@@ -181,7 +196,7 @@ export default function SalesDashboard() {
                 drilldown={stats?.drilldown || null}
             />
 
-            {/* Mi Día — Resumen accionable */}
+            {/* Mi Día — Resumen accionable (prioridad para vendedores) */}
             <MyDaySection />
 
             {/* Forecast Section */}
@@ -190,24 +205,24 @@ export default function SalesDashboard() {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <ChartCard
-                    title="Embudo de Ventas"
-                    subtitle="Conversión por etapa"
+                    title={isOwn ? 'Mi Embudo' : 'Embudo de Ventas'}
+                    subtitle={isOwn ? 'Ofertas y órdenes abiertas' : 'Conversión por etapa'}
                     onClick={() => handleChartClick({ type: 'Pipeline' })}
                 >
                     <PipelineChart data={stats?.charts?.pipeline} onChartClick={(d) => handleChartClick({ ...d, type: 'Pipeline' })} />
                 </ChartCard>
 
                 <ChartCard
-                    title="Ingresos vs Objetivo"
-                    subtitle="Rendimiento mensual vs meta"
+                    title={isOwn ? 'Mis Ingresos vs Objetivo' : 'Ingresos vs Objetivo'}
+                    subtitle={isOwn ? 'Tu rendimiento mensual vs meta' : 'Rendimiento mensual vs meta'}
                     onClick={() => handleChartClick({ type: 'Revenue' })}
                 >
                     <RevenueChart data={stats?.charts?.revenue} onChartClick={(d) => handleChartClick({ ...d, type: 'Revenue' })} />
                 </ChartCard>
 
                 <ChartCard
-                    title="Actividad del Equipo"
-                    subtitle="Llamadas y reuniones (Última semana)"
+                    title={isOwn ? 'Mi Actividad' : 'Actividad del Equipo'}
+                    subtitle={isOwn ? 'Tus llamadas y reuniones (esta semana)' : 'Llamadas y reuniones (Última semana)'}
                     onClick={() => handleChartClick({ type: 'Actividad' })}
                 >
                     <ActivityChart data={stats?.charts?.activity} onChartClick={(d) => handleChartClick({ ...d, type: 'Actividad' })} />

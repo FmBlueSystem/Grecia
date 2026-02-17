@@ -61,7 +61,7 @@ class SapService {
             baseURL: this.baseUrl,
             headers: {
                 'Cookie': `B1SESSION=${sessionId}`,
-                'Prefer': 'odata.maxpagesize=20'
+                'Prefer': 'odata.maxpagesize=500'
             },
             // Disable SSL verification for self-signed certs if needed (common in dev/private SAP)
             httpsAgent: new (require('https').Agent)({

@@ -14,10 +14,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-// Conductor Premium Palette (Slate/Blue/Teal)
-const COLORS = ['#334155', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
-const GRID_COLOR = '#E2E8F0';
-const TEXT_COLOR = '#64748B';
+// Neutral Gray Palette
+const COLORS = ['#374151', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+const GRID_COLOR = '#E5E7EB';
+const TEXT_COLOR = '#6B7280';
 
 // Common Interactivity Props
 interface ChartProps {
@@ -63,7 +63,7 @@ export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1E293B',
+            backgroundColor: '#1F2937',
             border: 'none',
             borderRadius: '8px',
             color: '#F8FAFC',
@@ -84,7 +84,7 @@ export function RevenueChart({ data, onChartClick }: RevenueChartProps) {
         <Line
           type="monotone"
           dataKey="target"
-          stroke="#94A3B8"
+          stroke="#9CA3AF"
           strokeWidth={2}
           strokeDasharray="4 4"
           name="Objetivo"
@@ -128,7 +128,7 @@ export function PipelineChart({ data, onChartClick }: PipelineChartProps) {
         <Tooltip
           formatter={(value: any) => `$${Number(value).toLocaleString()}`}
           contentStyle={{
-            backgroundColor: '#1E293B',
+            backgroundColor: '#1F2937',
             border: 'none',
             borderRadius: '8px',
             color: '#F8FAFC'
@@ -179,7 +179,7 @@ export function PerformanceChart({ data, onChartClick }: PerformanceChartProps) 
         <Tooltip
           cursor={{ fill: '#F1F5F9' }}
           contentStyle={{
-            backgroundColor: '#1E293B',
+            backgroundColor: '#1F2937',
             border: 'none',
             borderRadius: '8px',
             color: '#F8FAFC'
@@ -230,7 +230,7 @@ export function ActivityChart({ data, onChartClick }: ActivityChartProps) {
         <Tooltip
           cursor={{ fill: '#F1F5F9' }}
           contentStyle={{
-            backgroundColor: '#1E293B',
+            backgroundColor: '#1F2937',
             border: 'none',
             borderRadius: '8px',
             color: '#F8FAFC'

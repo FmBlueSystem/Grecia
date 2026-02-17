@@ -461,8 +461,8 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
     const fmtD = (d: Date) => d.toISOString().split('T')[0];
 
     const [openOrdersRes, openQuotesRes, closedOrdersRes, invoicesRes, activitiesRes, salesPersonsRes] = await Promise.all([
-        client.get(`Orders?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc`).catch(() => ({ data: { value: [] } })),
-        client.get(`Quotations?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc`).catch(() => ({ data: { value: [] } })),
+        client.get(`Orders?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc&$top=500&$inlinecount=allpages`).catch(() => ({ data: { value: [] } })),
+        client.get(`Quotations?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc&$top=500&$inlinecount=allpages`).catch(() => ({ data: { value: [] } })),
         client.get(`Orders?$select=DocEntry&$filter=DocumentStatus eq 'bost_Close'${spFilter}&$top=0&$inlinecount=allpages`).catch(() => ({ data: {} })),
         client.get(`Invoices?$select=DocTotal,DocDate,SalesPersonCode,DocEntry,DocNum,CardName&$filter=DocDate ge '${fmtD(sixMonthsAgo)}'${spFilter}&$orderby=DocDate desc&$top=500`).catch(() => ({ data: { value: [] } })),
         client.get(`Activities?$select=ActivityDate,ActivityType,Status,CardName,Subject&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
@@ -471,6 +471,8 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
 
     const openOrders: any[] = openOrdersRes.data.value || [];
     const openQuotes: any[] = openQuotesRes.data.value || [];
+    const openOrdersCount = Number(openOrdersRes.data['odata.count'] || openOrders.length);
+    const openQuotesCount = Number(openQuotesRes.data['odata.count'] || openQuotes.length);
     const closedOrdersCount = Number(closedOrdersRes.data['odata.count'] || 0);
     const invoices: any[] = invoicesRes.data.value || [];
     const activities: any[] = activitiesRes.data.value || [];
@@ -514,8 +516,8 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
     const trendStr = trendPct >= 0 ? `+${trendPct}%` : `${trendPct}%`;
 
     // Mix pipeline: pedidos / (pedidos + cotizaciones) — composición del pipeline actual
-    const winDenom = openOrders.length + openQuotes.length;
-    const winRate = winDenom > 0 ? Math.round((openOrders.length / winDenom) * 100) : 0;
+    const winDenom = openOrdersCount + openQuotesCount;
+    const winRate = winDenom > 0 ? Math.round((openOrdersCount / winDenom) * 100) : 0;
 
     // Pipeline chart (embudo)
     const pipelineChart = [
@@ -591,8 +593,8 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
 
     return {
         revenue: { mtd: revenueMTD, target, percentage: target > 0 ? (revenueMTD / target) * 100 : 0, trend: trendStr },
-        pipeline: { value: openOrders.length, weighted: Math.round(pipelineOrdersValue + pipelineQuotesValue), deals: openQuotes.length },
-        winRate: { percentage: winRate, trend: `${openOrders.length} pedidos de ${winDenom} docs` },
+        pipeline: { value: openOrdersCount, weighted: Math.round(pipelineOrdersValue + pipelineQuotesValue), deals: openQuotesCount },
+        winRate: { percentage: winRate, trend: `${openOrdersCount} pedidos de ${winDenom} docs` },
         activities: { today: openActivitiesCount, thisWeek: activities.length, overdue: 0 },
         charts: { revenue: revenueChart, pipeline: pipelineChart, activity: activityChart, topSellers },
         drilldown: {
