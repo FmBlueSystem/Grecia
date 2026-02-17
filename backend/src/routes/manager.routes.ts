@@ -262,7 +262,8 @@ export default async function managerRoutes(fastify: FastifyInstance) {
         try {
             const { q } = request.query as { q?: string };
             const cc = request.companyCode as CountryCode;
-            const filter = q ? `contains(CardName,'${q}') and CardType eq 'cCustomer'` : "CardType eq 'cCustomer'";
+            const qUpper = q ? q.toUpperCase() : '';
+            const filter = qUpper ? `contains(CardName,'${qUpper}') and CardType eq 'cCustomer'` : "CardType eq 'cCustomer'";
             const data = await sapGet(cc, `BusinessPartners?$filter=${filter}&$select=CardCode,CardName,Phone1,Country&$top=20&$orderby=CardName`);
             return { data: (data.value || []).map((bp: any) => ({ cardCode: bp.CardCode, name: bp.CardName, phone: bp.Phone1, country: bp.Country })) };
         } catch (error) {
