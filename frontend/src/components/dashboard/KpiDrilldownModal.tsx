@@ -32,7 +32,7 @@ const KPI_CONFIG: Record<KpiType, { title: string; icon: typeof FileText; color:
   revenue: { title: 'Facturas del Mes', icon: Receipt, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
   pipeline: { title: 'Cartera Abierta', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50' },
   conversion: { title: 'Proporción: Órdenes vs Ofertas', icon: ShoppingCart, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-  activities: { title: 'Actividades de la Semana', icon: CalendarCheck, color: 'text-fuchsia-600', bgColor: 'bg-fuchsia-50' },
+  activities: { title: 'Actividades de la Semana', icon: CalendarCheck, color: 'text-teal-600', bgColor: 'bg-teal-50' },
 };
 
 const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -120,7 +120,7 @@ export default function KpiDrilldownModal({ open, onClose, kpiType, drilldown }:
                       <tr key={i} className="hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-3 text-sm font-medium text-slate-900 max-w-[200px] truncate">{item.subject || '-'}</td>
                         <td className="px-5 py-3 text-sm text-slate-600 max-w-[180px] truncate">{item.client}</td>
-                        <td className="px-5 py-3"><span className="text-xs font-medium px-2 py-0.5 rounded-full bg-fuchsia-50 text-fuchsia-700">{item.activityType}</span></td>
+                        <td className="px-5 py-3"><span className="text-xs font-medium px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">{item.activityType}</span></td>
                         <td className="px-5 py-3 text-sm text-slate-500">{fmtDate(item.date)}</td>
                         <td className="px-5 py-3 text-center">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${item.status === 'Abierta' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>

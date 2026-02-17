@@ -327,8 +327,8 @@ export default function SettingsPage() {
                 {/* Preferences — Theme Picker */}
                 <div className="bg-white rounded-xl border border-slate-200 p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
-                      <Bell className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center">
+                      <Bell className="w-4 h-4 text-sky-600" />
                     </div>
                     <h3 className="text-sm font-semibold text-slate-900">Preferencias</h3>
                   </div>

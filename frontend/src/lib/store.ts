@@ -40,7 +40,7 @@ export type ThemeSkin = 'blue' | 'green' | 'purple';
 export const THEME_META: Record<ThemeSkin, { label: string; color: string }> = {
     blue:   { label: 'Azul STIA',  color: '#0067B2' },
     green:  { label: 'Verde',      color: '#059669' },
-    purple: { label: 'Violeta',    color: '#7C3AED' },
+    purple: { label: 'Sky',        color: '#0369A1' },
 };
 
 interface ThemeState {

@@ -36,8 +36,8 @@
   --color-accent: #3B82F6;
   --color-accent-hover: #2563EB;
   --color-indigo-500: #6366f1;
-  --color-violet-500: #8b5cf6;
-  --color-fuchsia-500: #d946ef;
+  --color-sky-500: #0ea5e9;
+  --color-teal-500: #14b8a6;
   --color-cyan-500: #06b6d4;
   --color-teal-500: #14b8a6;
 
@@ -70,9 +70,9 @@
 }
 
 [data-theme="purple"] {
-  --color-brand: #7C3AED;
-  --color-brand-hover: #6D28D9;
-  --color-brand-light: #A78BFA;
+  --color-brand: #0369A1;
+  --color-brand-hover: #075985;
+  --color-brand-light: #38BDF8;
 }
 
 body {

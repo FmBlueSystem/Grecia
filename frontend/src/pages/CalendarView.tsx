@@ -86,8 +86,8 @@ export default function CalendarView() {
           label="Esta Semana"
           value={loading ? '-' : thisWeekEvents.length}
           icon={Clock}
-          iconBg="bg-purple-50"
-          iconColor="text-purple-600"
+          iconBg="bg-sky-50"
+          iconColor="text-sky-600"
         />
         <StatCard
           label="Pendientes"

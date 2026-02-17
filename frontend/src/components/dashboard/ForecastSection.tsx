@@ -98,14 +98,14 @@ export default function ForecastSection() {
         { label: 'Cartera Total', value: fmt(summary.totalPipeline), icon: DollarSign, color: 'blue', sub: `${summary.dealsInPipeline} negocios` },
         { label: 'Cartera Ponderada', value: fmt(summary.weightedPipeline), icon: Target, color: 'indigo', sub: 'Ponderado' },
         { label: 'Tasa de Cierre', value: `${summary.winRate}%`, icon: Award, color: 'emerald', sub: 'Histórico' },
-        { label: 'Negocio Promedio', value: fmt(summary.avgDealSize), icon: BarChart3, color: 'fuchsia', sub: `~${summary.avgCloseTime}d cierre` },
+        { label: 'Negocio Promedio', value: fmt(summary.avgDealSize), icon: BarChart3, color: 'teal', sub: `~${summary.avgCloseTime}d cierre` },
     ];
 
     const colorMap: Record<string, string> = {
         blue: 'bg-blue-50/50 text-blue-600',
         indigo: 'bg-indigo-50/50 text-indigo-600',
         emerald: 'bg-emerald-50/50 text-emerald-600',
-        fuchsia: 'bg-fuchsia-50/50 text-fuchsia-600',
+        teal: 'bg-teal-50/50 text-teal-600',
     };
 
     const chartData = byMonth.map(m => ({

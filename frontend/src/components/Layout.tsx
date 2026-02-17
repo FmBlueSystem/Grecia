@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Dynamic Background Mesh */}
             <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
                 <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob"></div>
-                <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob animation-delay-2000"></div>
+                <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-sky-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob animation-delay-2000"></div>
                 <div className="absolute -bottom-8 left-1/3 w-[500px] h-[500px] bg-indigo-400/20 rounded-full blur-[100px] mix-blend-multiply animate-blob animation-delay-4000"></div>
             </div>
 
@@ -58,7 +58,7 @@ export default function Layout({ children }: LayoutProps) {
                     <div className="flex items-center gap-6 md:gap-8 flex-1 min-w-0">
                         <Link to="/" className="flex items-center gap-3 shrink-0">
                             <div className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl opacity-75 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl opacity-75 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                                 <div className="relative w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
                                     <span className="text-white font-bold text-xl tracking-tighter">S</span>
                                 </div>
@@ -111,7 +111,7 @@ export default function Layout({ children }: LayoutProps) {
                                 <p className="text-sm font-bold text-slate-900 leading-none">{user?.firstName} {user?.lastName}</p>
                                 <p className="text-xs text-indigo-500 mt-1 font-medium">Administrador</p>
                             </div>
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-indigo-100">
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-indigo-100">
                                 {user?.firstName?.[0]}{user?.lastName?.[0]}
                             </div>
 

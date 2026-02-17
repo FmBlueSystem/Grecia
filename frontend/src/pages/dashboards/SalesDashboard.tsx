@@ -44,12 +44,12 @@ export default function SalesDashboard() {
         { title: isOwn ? 'Mis Ingresos (Mes)' : 'Ingresos (Mes)', value: fmt(stats.revenue?.mtd || 0), trend: stats.revenue?.trend || '', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
         { title: isOwn ? 'Mis Ofertas Abiertas' : 'Cartera Abierta', value: `${stats.pipeline?.deals || 0} Ofertas`, trend: `${stats.pipeline?.value || 0} Órdenes abiertas`, color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
         { title: isOwn ? 'Mi Proporción' : 'Proporción', value: `${stats.winRate?.percentage || 0}%`, trend: stats.winRate?.trend || '', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
-        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
+        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: `${stats.activities?.today || 0}`, trend: `${stats.activities?.thisWeek || 0} esta semana`, color: 'teal', icon: Activity, kpiKey: 'activities' as KpiType },
     ] : [
         { title: isOwn ? 'Mis Ingresos (Mes)' : 'Ingresos (Mes)', value: '--', trend: 'Cargando...', color: 'indigo', icon: TrendingUp, kpiKey: 'revenue' as KpiType },
         { title: isOwn ? 'Mis Ofertas Abiertas' : 'Cartera Abierta', value: '--', trend: 'Cargando...', color: 'blue', icon: Building2, kpiKey: 'pipeline' as KpiType },
         { title: isOwn ? 'Mi Proporción' : 'Proporción', value: '--%', trend: 'Cargando...', color: 'emerald', icon: BarChart3, kpiKey: 'conversion' as KpiType },
-        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: '--', trend: 'Cargando...', color: 'fuchsia', icon: Activity, kpiKey: 'activities' as KpiType },
+        { title: isOwn ? 'Mis Actividades' : 'Actividades', value: '--', trend: 'Cargando...', color: 'teal', icon: Activity, kpiKey: 'activities' as KpiType },
     ];
 
     const getColorClasses = (color: string) => {
@@ -57,7 +57,7 @@ export default function SalesDashboard() {
             indigo: 'bg-indigo-50/50 text-indigo-600',
             blue: 'bg-blue-50/50 text-blue-600',
             emerald: 'bg-emerald-50/50 text-emerald-600',
-            fuchsia: 'bg-fuchsia-50/50 text-fuchsia-600',
+            teal: 'bg-teal-50/50 text-teal-600',
         };
         return classes[color] || 'bg-slate-50 text-slate-600';
     };

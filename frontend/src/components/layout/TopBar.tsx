@@ -93,7 +93,7 @@ export default function TopBar({ notificationCount = 0 }: TopBarProps) {
             <p className="text-sm font-semibold text-slate-900 leading-none">{user?.firstName} {user?.lastName}</p>
             <p className="text-[11px] text-slate-500 mt-0.5">{user?.role || 'Administrador'}</p>
           </div>
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
         </div>

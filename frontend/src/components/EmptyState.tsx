@@ -35,8 +35,8 @@ export function EmptyState({
       {/* Illustration o Icon */}
       {illustration || (
         <div className="relative mb-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full blur-2xl opacity-60" />
-          <div className="relative bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full p-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-sky-100 rounded-full blur-2xl opacity-60" />
+          <div className="relative bg-gradient-to-br from-indigo-50 to-sky-50 rounded-full p-8">
             <Icon className="w-16 h-16 text-indigo-600" strokeWidth={1.5} />
           </div>
         </div>

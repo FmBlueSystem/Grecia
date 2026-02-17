@@ -119,7 +119,7 @@ export default function AccountDetail() {
 
   const actTypeIcon: Record<string, { icon: typeof Mail; bg: string; color: string }> = {
     'Email': { icon: Mail, bg: 'bg-blue-50', color: 'text-brand' },
-    'Llamada': { icon: Phone, bg: 'bg-purple-50', color: 'text-purple-600' },
+    'Llamada': { icon: Phone, bg: 'bg-sky-50', color: 'text-sky-600' },
     'Reunión': { icon: Calendar, bg: 'bg-green-50', color: 'text-green-600' },
     'Tarea': { icon: FileText, bg: 'bg-amber-50', color: 'text-amber-600' },
     'Nota': { icon: FileText, bg: 'bg-slate-50', color: 'text-slate-600' },
@@ -144,7 +144,7 @@ export default function AccountDetail() {
               { label: 'Ingresos (12m)', value: fmt(summary.totalRevenue), icon: DollarSign, color: 'text-green-600', bg: 'bg-green-50' },
               { label: 'Órdenes', value: summary.totalOrders.toString(), icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
               { label: 'Saldo Abierto', value: fmt(summary.openBalance), icon: Receipt, color: summary.openBalance > 0 ? 'text-red-600' : 'text-green-600', bg: summary.openBalance > 0 ? 'bg-red-50' : 'bg-green-50' },
-              { label: 'Ticket Promedio', value: fmt(summary.avgOrderValue), icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50' },
+              { label: 'Ticket Promedio', value: fmt(summary.avgOrderValue), icon: FileText, color: 'text-sky-600', bg: 'bg-sky-50' },
             ].map(kpi => (
               <div key={kpi.label} className="bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center gap-2 mb-2">

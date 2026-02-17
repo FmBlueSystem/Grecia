@@ -151,8 +151,8 @@ export default function Reports() {
           label="Conversión"
           value={`${data.kpis.conversionRate}%`}
           icon={TrendingUp}
-          iconBg="bg-purple-50"
-          iconColor="text-purple-600"
+          iconBg="bg-sky-50"
+          iconColor="text-sky-600"
         />
         <StatCard
           label="Ticket Promedio"

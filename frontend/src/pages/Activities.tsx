@@ -26,7 +26,7 @@ const ICONS = {
 
 const COLORS = {
     Call: 'bg-blue-100 text-blue-600',
-    Email: 'bg-purple-100 text-purple-600',
+    Email: 'bg-sky-100 text-sky-600',
     Meeting: 'bg-orange-100 text-orange-600',
     Task: 'bg-emerald-100 text-emerald-600',
     Note: 'bg-slate-100 text-slate-600'

@@ -63,7 +63,7 @@ export default function CaseDetail() {
               { id: '2', title: 'Asignado a Roberto Vargas', description: 'Técnico Senior - Especialista en sellado', date: '12 Feb 2026, 09:00', icon: UserCheck, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
               { id: '3', title: 'Diagnóstico remoto', description: 'Error E-47 indica falla en sensor de presión. Se requiere visita.', date: '12 Feb 2026, 10:15', icon: Wrench, iconBg: 'bg-amber-50', iconColor: 'text-amber-600' },
               { id: '4', title: 'Alerta SLA', description: 'Quedan 6 horas para cumplir el SLA de resolución', date: '13 Feb 2026, 02:30', icon: AlertTriangle, iconBg: 'bg-red-50', iconColor: 'text-red-600' },
-              { id: '5', title: 'Nota del técnico', description: 'Visita programada para hoy 14 Feb. Llevando repuesto sensor presión SP-200.', date: '14 Feb 2026, 07:00', icon: MessageSquare, iconBg: 'bg-purple-50', iconColor: 'text-purple-600' },
+              { id: '5', title: 'Nota del técnico', description: 'Visita programada para hoy 14 Feb. Llevando repuesto sensor presión SP-200.', date: '14 Feb 2026, 07:00', icon: MessageSquare, iconBg: 'bg-sky-50', iconColor: 'text-sky-600' },
             ]}
           />
         </>

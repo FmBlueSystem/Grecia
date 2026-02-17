@@ -31,7 +31,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: typeof Building2; c
     contact: { label: 'Contactos', icon: User, color: 'text-emerald-600 bg-emerald-50', path: '/contacts' },
     opportunity: { label: 'Oportunidades', icon: Target, color: 'text-indigo-600 bg-indigo-50', path: '/pipeline' },
     quote: { label: 'Ofertas', icon: FileText, color: 'text-amber-600 bg-amber-50', path: '/quotes' },
-    order: { label: 'Órdenes', icon: ShoppingCart, color: 'text-fuchsia-600 bg-fuchsia-50', path: '/orders' },
+    order: { label: 'Órdenes', icon: ShoppingCart, color: 'text-teal-600 bg-teal-50', path: '/orders' },
 };
 
 function fmt(n: number): string {

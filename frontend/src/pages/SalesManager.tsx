@@ -64,7 +64,7 @@ function fmtDate(d: string | null): string {
     return new Date(d).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-const COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'];
+const COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'];
 
 // ─── Main Component ──────────────────────────────────
 export default function SalesManager() {
@@ -369,7 +369,7 @@ function Client360Tab() {
                     {/* Activities */}
                     <motion.div variants={slideUp} className="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-lg">
                         <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-fuchsia-500" /> Actividades Recientes
+                            <Calendar className="w-5 h-5 text-teal-500" /> Actividades Recientes
                         </h4>
                         {data.recentActivities.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -378,7 +378,7 @@ function Client360Tab() {
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
                                                 act.type === 'Llamada' ? 'bg-blue-100 text-blue-700' :
-                                                act.type === 'Reunion' || act.type === 'Reunión' ? 'bg-purple-100 text-purple-700' :
+                                                act.type === 'Reunion' || act.type === 'Reunión' ? 'bg-sky-100 text-sky-700' :
                                                 act.type === 'Email' ? 'bg-emerald-100 text-emerald-700' :
                                                 'bg-slate-100 text-slate-700'
                                             }`}>{act.type}</span>
@@ -642,9 +642,9 @@ function AlertsTab() {
                     </p>
                 </motion.div>
 
-                <motion.div variants={slideUp} className={`p-6 rounded-2xl border shadow-lg ${alerts.unassignedQuotes > 0 ? 'bg-purple-50 border-purple-100' : 'bg-white/70 border-white/20'}`}>
+                <motion.div variants={slideUp} className={`p-6 rounded-2xl border shadow-lg ${alerts.unassignedQuotes > 0 ? 'bg-sky-50 border-sky-100' : 'bg-white/70 border-white/20'}`}>
                     <div className="flex items-center gap-3 mb-3">
-                        <div className={`p-3 rounded-xl ${alerts.unassignedQuotes > 0 ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-400'}`}>
+                        <div className={`p-3 rounded-xl ${alerts.unassignedQuotes > 0 ? 'bg-sky-100 text-sky-600' : 'bg-slate-100 text-slate-400'}`}>
                             <Users className="w-5 h-5" />
                         </div>
                         <div>
@@ -652,7 +652,7 @@ function AlertsTab() {
                             <p className="text-xs text-slate-500">Ofertas sin propietario</p>
                         </div>
                     </div>
-                    <p className={`text-3xl font-extrabold ${alerts.unassignedQuotes > 0 ? 'text-purple-600' : 'text-slate-300'}`}>
+                    <p className={`text-3xl font-extrabold ${alerts.unassignedQuotes > 0 ? 'text-sky-600' : 'text-slate-300'}`}>
                         {alerts.unassignedQuotes}
                     </p>
                 </motion.div>
