@@ -39,6 +39,9 @@ import managerRoutes from './routes/manager.routes';
 import reportsRoutes from './routes/reports.routes';
 import agingRoutes from './routes/aging.routes';
 import adminRoutes from './routes/admin.routes';
+import traceabilityRoutes from './routes/traceability.routes';
+import lostDealsRoutes from './routes/lost-deals.routes';
+import notificationsRoutes from './routes/notifications.routes';
 
 
 
@@ -86,6 +89,9 @@ fastify.register(managerRoutes, { prefix: '/api/manager' });
 fastify.register(reportsRoutes, { prefix: '/api/reports' });
 fastify.register(agingRoutes, { prefix: '/api/aging' });
 fastify.register(adminRoutes, { prefix: '/api/admin' });
+fastify.register(traceabilityRoutes, { prefix: '/api/traceability' });
+fastify.register(lostDealsRoutes, { prefix: '/api/lost-deals' });
+fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
 
 
 

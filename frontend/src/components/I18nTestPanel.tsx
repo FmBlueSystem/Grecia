@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Globe, Languages } from 'lucide-react';
+import { CheckCircle2, Languages } from 'lucide-react';
 
 export function I18nTestPanel() {
   const { t, i18n } = useTranslation(['common', 'auth', 'dashboard', 'contacts']);

@@ -47,7 +47,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
     const [selectedIdx, setSelectedIdx] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     // Flatten results into a single list for keyboard nav
     const flatResults: SearchResult[] = results

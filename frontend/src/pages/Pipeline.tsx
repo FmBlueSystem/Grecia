@@ -157,13 +157,6 @@ export default function Pipeline() {
         ? opportunities
         : opportunities.filter(o => o.accountName === sellerFilter);
 
-    // Stale deals: no change in 14+ days
-    const isStale = (opp: Opportunity) => {
-        const updated = new Date(opp.closeDate);
-        const diff = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24);
-        return diff > 14 && opp.stage !== 'CLOSED_WON' && opp.stage !== 'CLOSED_LOST';
-    };
-
     if (loading) return <div>Cargando Pipeline...</div>;
 
     return (

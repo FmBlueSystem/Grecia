@@ -41,7 +41,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const _originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    void (error.config as AxiosRequestConfig & { _retry?: boolean });
 
     // 401 Unauthorized - Redirect a login
     if (error.response?.status === 401) {
@@ -194,7 +194,7 @@ export async function apiWithLoading<T>(
     loading: messages.loading,
     success: messages.success,
     error: messages.error || 'Ocurrió un error',
-  }) as Promise<T>;
+  }) as unknown as Promise<T>;
 }
 
 export default api;

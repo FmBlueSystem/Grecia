@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { ButtonLoading } from './ButtonLoading';
 
@@ -28,13 +28,13 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
+  static getDerivedStateFromError(_error: Error): Partial<State> {
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('Error Boundary caught an error:', error, errorInfo);
     }
 
@@ -143,7 +143,7 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
             </div>
 
             {/* Debug info (only in development) */}
-            {process.env.NODE_ENV === 'development' && error?.stack && (
+            {import.meta.env.DEV && error?.stack && (
               <details className="mt-6">
                 <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-700">
                   Ver detalles técnicos

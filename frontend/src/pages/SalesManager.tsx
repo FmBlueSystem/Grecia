@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
     Search, Users, Target, AlertTriangle, Building2, Phone, Globe,
     TrendingUp, DollarSign, FileText, ShoppingCart, Receipt, Calendar,
-    Award, Percent, CreditCard, Clock, ChevronRight, BarChart3, ArrowUpRight, ArrowDownRight
+    Award, CreditCard, Clock, ChevronRight, BarChart3, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -119,7 +119,7 @@ function Client360Tab() {
     const [data, setData] = useState<Client360 | null>(null);
     const [loading, setLoading] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     const searchClients = useCallback((q: string) => {
         if (q.length < 2) { setOptions([]); return; }
@@ -252,7 +252,7 @@ function Client360Tab() {
                                             <Pie data={data.topProducts} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                                                 {data.topProducts.map((_, idx) => <Cell key={idx} fill={COLORS[idx % COLORS.length]} />)}
                                             </Pie>
-                                            <Tooltip formatter={(v: number) => fmt(v)} />
+                                            <Tooltip formatter={(v: number | undefined) => fmt(v ?? 0)} />
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="flex-1 space-y-1.5 max-h-[200px] overflow-y-auto">
@@ -515,7 +515,7 @@ function ScorecardTab() {
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} />
                         <YAxis tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                        <Tooltip formatter={(v: number, name: string) => [fmt(v), name === 'facturado' ? 'Facturado' : 'Órdenes']} contentStyle={{ borderRadius: 12, fontSize: 12 }} />
+                        <Tooltip formatter={(v: number | undefined, name?: string) => [fmt(v ?? 0), name === 'facturado' ? 'Facturado' : 'Órdenes']} contentStyle={{ borderRadius: 12, fontSize: 12 }} />
                         <Bar dataKey="facturado" fill="#6366f1" radius={[4, 4, 0, 0]} name="Facturado" />
                         <Bar dataKey="ordenes" fill="#93c5fd" radius={[4, 4, 0, 0]} name="Órdenes" />
                     </BarChart>

@@ -105,7 +105,7 @@ export function useKeyPress(targetKey: string, handler: (e: KeyboardEvent) => vo
  * Hook para detectar clicks fuera de un elemento
  */
 export function useClickOutside(
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   handler: () => void
 ) {
   useEffect(() => {

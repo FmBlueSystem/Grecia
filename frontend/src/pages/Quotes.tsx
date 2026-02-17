@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, Search, Calendar, MoreHorizontal, CheckCircle, Clock, AlertTriangle, Trash2, Loader2, Building2, X } from 'lucide-react';
+import { FileText, Plus, Search, MoreHorizontal, CheckCircle, Clock, AlertTriangle, Trash2, Loader2, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { fadeIn, staggerContainer } from '../lib/animations';
@@ -49,8 +49,8 @@ export default function Quotes() {
     const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
     const [showProductDropdown, setShowProductDropdown] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const clientDebounce = useRef<ReturnType<typeof setTimeout>>();
-    const productDebounce = useRef<ReturnType<typeof setTimeout>>();
+    const clientDebounce = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const productDebounce = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     useEffect(() => {
         fetchQuotes();
