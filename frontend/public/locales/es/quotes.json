@@ -1,0 +1,31 @@
+{
+  "title": "Ofertas",
+  "subtitle": "Cotizaciones y propuestas comerciales",
+  "search": "Buscar ofertas...",
+  "columns": {
+    "number": "Oferta #",
+    "client": "Cliente",
+    "total": "Total",
+    "status": "Estado",
+    "date": "Fecha",
+    "dueDate": "Fecha de Vencimiento",
+    "seller": "Vendedor"
+  },
+  "status": {
+    "open": "Abierta",
+    "closed": "Cerrada",
+    "cancelled": "Cancelada"
+  },
+  "detail": {
+    "lineItems": "Lineas del Documento",
+    "subtotal": "Subtotal",
+    "tax": "Impuesto",
+    "total": "Total",
+    "notes": "Notas",
+    "terms": "Terminos y Condiciones"
+  },
+  "empty": {
+    "title": "Sin ofertas",
+    "description": "Las ofertas de SAP apareceran aqui"
+  }
+}

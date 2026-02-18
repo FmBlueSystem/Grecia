@@ -1,0 +1,28 @@
+{
+  "title": "Productos",
+  "subtitle": "Catalogo de productos e inventario",
+  "search": "Buscar productos...",
+  "columns": {
+    "code": "Codigo",
+    "name": "Nombre del Producto",
+    "group": "Grupo",
+    "price": "Precio",
+    "stock": "Stock",
+    "status": "Estado"
+  },
+  "detail": {
+    "generalInfo": "Informacion General",
+    "pricing": "Precios",
+    "inventory": "Inventario",
+    "description": "Descripcion"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "discontinued": "Descontinuado"
+  },
+  "empty": {
+    "title": "Sin productos",
+    "description": "Los productos de SAP apareceran aqui"
+  }
+}

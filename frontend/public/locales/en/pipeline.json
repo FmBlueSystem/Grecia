@@ -1,0 +1,34 @@
+{
+  "title": "Sales Pipeline",
+  "subtitle": "Visual pipeline management with drag and drop",
+  "stages": {
+    "opportunity": "Opportunity",
+    "proposal": "Proposal",
+    "follow_up": "Follow Up",
+    "negotiation": "Negotiation",
+    "closed_won": "Closed Won",
+    "closed_lost": "Closed Lost"
+  },
+  "card": {
+    "amount": "Amount",
+    "probability": "Probability",
+    "closeDate": "Close Date",
+    "account": "Account",
+    "owner": "Owner"
+  },
+  "summary": {
+    "totalValue": "Total Pipeline Value",
+    "weightedValue": "Weighted Value",
+    "deals": "deals",
+    "avgDealSize": "Avg Deal Size"
+  },
+  "actions": {
+    "moveToStage": "Move to Stage",
+    "viewDetails": "View Details",
+    "addNote": "Add Note"
+  },
+  "empty": {
+    "title": "Empty stage",
+    "description": "Drag an opportunity here or create a new one"
+  }
+}

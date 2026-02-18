@@ -1,0 +1,53 @@
+{
+  "title": "Leads",
+  "subtitle": "Prospecting and qualification pipeline",
+  "new": "New Lead",
+  "search": "Search by name, company...",
+  "columns": {
+    "name": "Name",
+    "company": "Company",
+    "source": "Source",
+    "status": "Status",
+    "rating": "Rating",
+    "owner": "Owner"
+  },
+  "status": {
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "disqualified": "Disqualified"
+  },
+  "rating": {
+    "hot": "Hot",
+    "warm": "Warm",
+    "cold": "Cold"
+  },
+  "sources": {
+    "web": "Web",
+    "referral": "Referral",
+    "partner": "Partner",
+    "event": "Event",
+    "cold_call": "Cold Call",
+    "social": "Social Media"
+  },
+  "form": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "source": "Source",
+    "budget": "Budget",
+    "notes": "Notes"
+  },
+  "actions": {
+    "convert": "Convert to Opportunity",
+    "qualify": "Qualify",
+    "disqualify": "Disqualify",
+    "assign": "Assign"
+  },
+  "empty": {
+    "title": "No leads",
+    "description": "Create your first lead to start building your sales pipeline"
+  }
+}

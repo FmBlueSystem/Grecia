@@ -1,0 +1,37 @@
+{
+  "title": "Opportunities",
+  "subtitle": "Active sales opportunities",
+  "new": "New Opportunity",
+  "search": "Search opportunities...",
+  "columns": {
+    "name": "Opportunity",
+    "account": "Account",
+    "amount": "Amount",
+    "stage": "Stage",
+    "probability": "Probability",
+    "closeDate": "Close Date",
+    "owner": "Owner"
+  },
+  "stages": {
+    "opportunity": "Opportunity",
+    "proposal": "Proposal",
+    "follow_up": "Follow Up",
+    "negotiation": "Negotiation",
+    "closed_won": "Closed Won",
+    "closed_lost": "Closed Lost"
+  },
+  "form": {
+    "name": "Name",
+    "account": "Account",
+    "contact": "Contact",
+    "amount": "Amount",
+    "stage": "Stage",
+    "probability": "Probability",
+    "closeDate": "Expected Close Date",
+    "notes": "Notes"
+  },
+  "empty": {
+    "title": "No opportunities",
+    "description": "Create your first opportunity to start tracking deals"
+  }
+}

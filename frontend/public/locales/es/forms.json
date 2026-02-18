@@ -1,0 +1,36 @@
+{
+  "labels": {
+    "required": "Requerido",
+    "optional": "Opcional",
+    "select": "Seleccionar...",
+    "selectOption": "Selecciona una opcion",
+    "noOptions": "Sin opciones disponibles",
+    "searchOptions": "Buscar opciones..."
+  },
+  "placeholders": {
+    "text": "Ingresa texto...",
+    "email": "correo@ejemplo.com",
+    "phone": "+506 1234 5678",
+    "url": "https://ejemplo.com",
+    "number": "Ingresa un numero",
+    "date": "Selecciona una fecha",
+    "search": "Buscar...",
+    "notes": "Agregar notas..."
+  },
+  "buttons": {
+    "submit": "Enviar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "reset": "Restablecer",
+    "clear": "Limpiar",
+    "addMore": "Agregar Mas",
+    "remove": "Eliminar"
+  },
+  "fileUpload": {
+    "dragDrop": "Arrastra y suelta archivos aqui",
+    "or": "o",
+    "browse": "Seleccionar Archivos",
+    "maxSize": "Tamano maximo: {{size}}",
+    "allowedTypes": "Tipos permitidos: {{types}}"
+  }
+}

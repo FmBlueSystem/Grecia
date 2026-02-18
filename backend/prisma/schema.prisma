@@ -495,3 +495,37 @@ model Activity {
   @@index([opportunityId])
   @@index([dueDate])
 }
+
+// ==================== AUDIT LOG ====================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+
+  // Who performed the action
+  userId      String
+  userName    String
+  userEmail   String
+
+  // What action was performed
+  action      String   // CREATE, UPDATE, DELETE, EXPORT, LOGIN, LOGOUT
+  entity      String   // Account, Contact, Quote, Order, Invoice, Activity, etc.
+  entityId    String?  // SAP DocEntry or Prisma UUID
+
+  // Details
+  description String   // Human-readable description
+  changes     Json?    // { field: { old: x, new: y } } for updates
+  metadata    Json?    // Additional context (IP, company, etc.)
+
+  // Context
+  companyCode String   // CR, GT, SV, HN, PA
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([entityId])
+  @@index([companyCode])
+  @@index([createdAt])
+}

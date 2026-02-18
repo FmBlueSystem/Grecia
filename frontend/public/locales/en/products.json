@@ -1,0 +1,28 @@
+{
+  "title": "Products",
+  "subtitle": "Product catalog and inventory",
+  "search": "Search products...",
+  "columns": {
+    "code": "Code",
+    "name": "Product Name",
+    "group": "Group",
+    "price": "Price",
+    "stock": "Stock",
+    "status": "Status"
+  },
+  "detail": {
+    "generalInfo": "General Information",
+    "pricing": "Pricing",
+    "inventory": "Inventory",
+    "description": "Description"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "discontinued": "Discontinued"
+  },
+  "empty": {
+    "title": "No products",
+    "description": "Products from SAP will appear here"
+  }
+}

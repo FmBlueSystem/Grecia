@@ -1,0 +1,53 @@
+{
+  "title": "Leads",
+  "subtitle": "Prospeccion y calificacion de leads",
+  "new": "Nuevo Lead",
+  "search": "Buscar por nombre, empresa...",
+  "columns": {
+    "name": "Nombre",
+    "company": "Empresa",
+    "source": "Fuente",
+    "status": "Estado",
+    "rating": "Calificacion",
+    "owner": "Propietario"
+  },
+  "status": {
+    "new": "Nuevo",
+    "contacted": "Contactado",
+    "qualified": "Calificado",
+    "disqualified": "Descalificado"
+  },
+  "rating": {
+    "hot": "Caliente",
+    "warm": "Tibio",
+    "cold": "Frio"
+  },
+  "sources": {
+    "web": "Web",
+    "referral": "Referencia",
+    "partner": "Socio",
+    "event": "Evento",
+    "cold_call": "Llamada en frio",
+    "social": "Redes Sociales"
+  },
+  "form": {
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "company": "Empresa",
+    "email": "Correo",
+    "phone": "Telefono",
+    "source": "Fuente",
+    "budget": "Presupuesto",
+    "notes": "Notas"
+  },
+  "actions": {
+    "convert": "Convertir a Oportunidad",
+    "qualify": "Calificar",
+    "disqualify": "Descalificar",
+    "assign": "Asignar"
+  },
+  "empty": {
+    "title": "Sin leads",
+    "description": "Crea tu primer lead para comenzar a construir tu pipeline de ventas"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Actividades",
+  "subtitle": "Llamadas, correos, reuniones y tareas",
+  "new": "Nueva Actividad",
+  "search": "Buscar actividades...",
+  "types": {
+    "call": "Llamada",
+    "email": "Correo",
+    "meeting": "Reunion",
+    "task": "Tarea",
+    "note": "Nota"
+  },
+  "columns": {
+    "type": "Tipo",
+    "subject": "Asunto",
+    "account": "Cuenta",
+    "date": "Fecha",
+    "status": "Estado",
+    "owner": "Propietario"
+  },
+  "status": {
+    "planned": "Planificada",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
+  },
+  "form": {
+    "type": "Tipo de Actividad",
+    "subject": "Asunto",
+    "notes": "Notas",
+    "account": "Cuenta",
+    "contact": "Contacto",
+    "date": "Fecha"
+  },
+  "empty": {
+    "title": "Sin actividades",
+    "description": "Las actividades de SAP apareceran aqui"
+  }
+}

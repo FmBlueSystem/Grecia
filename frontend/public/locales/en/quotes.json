@@ -1,0 +1,31 @@
+{
+  "title": "Quotes",
+  "subtitle": "Sales quotations and proposals",
+  "search": "Search quotes...",
+  "columns": {
+    "number": "Quote #",
+    "client": "Client",
+    "total": "Total",
+    "status": "Status",
+    "date": "Date",
+    "dueDate": "Due Date",
+    "seller": "Seller"
+  },
+  "status": {
+    "open": "Open",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
+  },
+  "detail": {
+    "lineItems": "Line Items",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "total": "Total",
+    "notes": "Notes",
+    "terms": "Terms & Conditions"
+  },
+  "empty": {
+    "title": "No quotes",
+    "description": "Quotes from SAP will appear here"
+  }
+}

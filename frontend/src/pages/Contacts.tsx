@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast } from '../lib';
 import { TableSkeleton, EmptyState } from '../components';
+import PaginationControls from '../components/shared/PaginationControls';
 import api from '../lib/api';
 
 interface Contact {
@@ -21,6 +22,11 @@ interface Contact {
     };
 }
 
+interface AccountOption {
+    id: string;
+    name: string;
+}
+
 export default function Contacts() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [totalContacts, setTotalContacts] = useState(0);
@@ -28,7 +34,12 @@ export default function Contacts() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [page, setPage] = useState(0);
-    const PAGE_SIZE = 50;
+    const [pageSize, setPageSize] = useState(50);
+
+    // Account filter
+    const [accountFilter, setAccountFilter] = useState('');
+    const [accountOptions, setAccountOptions] = useState<AccountOption[]>([]);
+    const [showFilters, setShowFilters] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -48,14 +59,27 @@ export default function Contacts() {
         }
     }, []);
 
+    // Fetch account options for filter
+    useEffect(() => {
+        api.get('/accounts', { params: { top: 200 } })
+            .then(r => {
+                const accs = (r.data?.data || []).map((a: any) => ({
+                    id: a.id || a.cardCode,
+                    name: a.name || a.cardName || a.CardName || '',
+                }));
+                setAccountOptions(accs.sort((a: AccountOption, b: AccountOption) => a.name.localeCompare(b.name)));
+            })
+            .catch(() => {});
+    }, []);
+
     useEffect(() => {
         fetchContacts();
-    }, [page]);
+    }, [page, pageSize]);
 
     const fetchContacts = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/contacts', { params: { top: PAGE_SIZE, skip: page * PAGE_SIZE } });
+            const res = await api.get('/contacts', { params: { top: pageSize, skip: page * pageSize } });
             if (res.data?.data) setContacts(res.data.data);
             if (res.data?.total != null) setTotalContacts(res.data.total);
         } catch (err) {
@@ -73,14 +97,12 @@ export default function Contacts() {
             setShowModal(false);
             fetchContacts();
             setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }));
-            toast.success('Contacto creado', 'El contacto se creó correctamente');
+            toast.success('Contacto creado', 'El contacto se creo correctamente');
         } catch (err) {
             console.error("Error al crear contacto", err);
             toast.error('Error al crear', 'No se pudo crear el contacto');
         }
     };
-
-    const totalPages = Math.ceil(totalContacts / PAGE_SIZE);
 
     const logActivity = (contact: Contact, type: 'Call' | 'Email') => {
         const subject = type === 'Call'
@@ -93,16 +115,24 @@ export default function Contacts() {
             notes: type === 'Call' ? `Tel: ${contact.phone}` : `Email: ${contact.email}`,
         }).then(() => {
             toast.success('Actividad registrada', `${type === 'Call' ? 'Llamada' : 'Email'} registrado en SAP`);
-        }).catch(() => {
-            // Silent fail — the call/email action already happened
-        });
+        }).catch(() => {});
     };
 
-    const filteredContacts = contacts.filter(c =>
-        `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.accountName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize);
+        setPage(0);
+    };
+
+    const filteredContacts = contacts.filter(c => {
+        const matchesSearch = !searchTerm ||
+            `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.accountName?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesAccount = !accountFilter ||
+            c.accountName?.toLowerCase().includes(accountFilter.toLowerCase()) ||
+            c.accountId === accountFilter;
+        return matchesSearch && matchesAccount;
+    });
 
     return (
         <div className="space-y-6">
@@ -132,10 +162,50 @@ export default function Contacts() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold flex items-center gap-2 hover:bg-slate-50">
+                <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`px-4 py-2 border rounded-xl font-bold flex items-center gap-2 transition-colors ${showFilters || accountFilter ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                >
                     <Filter className="w-4 h-4" /> Filtros
+                    {accountFilter && <span className="w-2 h-2 bg-indigo-500 rounded-full" />}
                 </button>
             </div>
+
+            {/* Account Filter Panel */}
+            <AnimatePresence>
+                {showFilters && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-4 flex items-center gap-4">
+                            <div className="flex items-center gap-2 flex-1">
+                                <Building2 className="w-4 h-4 text-slate-400" />
+                                <select
+                                    value={accountFilter}
+                                    onChange={(e) => setAccountFilter(e.target.value)}
+                                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                >
+                                    <option value="">Todas las cuentas</option>
+                                    {accountOptions.map(acc => (
+                                        <option key={acc.id} value={acc.name}>{acc.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {accountFilter && (
+                                <button
+                                    onClick={() => setAccountFilter('')}
+                                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* List */}
             {loading ? (
@@ -228,37 +298,18 @@ export default function Contacts() {
                             description={`No hay resultados para "${searchTerm}"`}
                         />
                     )}
-                    {/* Paginación */}
-                    {totalContacts > PAGE_SIZE && (
-                        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-                            <span className="text-sm text-slate-500">
-                                Mostrando {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, totalContacts)} de {totalContacts} contactos
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                                    disabled={page === 0}
-                                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                </button>
-                                <span className="text-sm font-medium text-slate-700">
-                                    Página {page + 1} de {totalPages}
-                                </span>
-                                <button
-                                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                                    disabled={page >= totalPages - 1}
-                                    className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <PaginationControls
+                        page={page}
+                        pageSize={pageSize}
+                        total={totalContacts}
+                        onPageChange={setPage}
+                        onPageSizeChange={handlePageSizeChange}
+                        label="contactos"
+                    />
                 </motion.div>
             )}
 
-            {/* Modal - Simplified for MVP without Account linkage dropdown for speed */}
+            {/* Modal */}
             <AnimatePresence>
                 {showModal && (
                     <motion.div
@@ -313,7 +364,7 @@ export default function Contacts() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">Correo Electrónico</label>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Correo Electronico</label>
                                     <input
                                         type="email"
                                         className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
@@ -323,7 +374,7 @@ export default function Contacts() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">Teléfono</label>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Telefono</label>
                                     <input
                                         type="text"
                                         className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"

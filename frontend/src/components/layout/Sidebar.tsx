@@ -3,7 +3,7 @@ import {
   BarChart3, Building2, Users, UserPlus, TrendingUp,
   FileText, ShoppingCart, Receipt, Calendar, Package,
   Truck, LogOut, Settings, ChevronDown, Award,
-  Clock, PieChart, Activity, Palette
+  Clock, PieChart, Activity, Palette, Shield
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore, useThemeStore, THEME_META, type ThemeSkin } from '../../lib/store';
@@ -57,7 +57,8 @@ const NAV_SECTIONS = [
       { id: 'logistics', label: 'Logística', icon: Truck, path: '/logistics' },
       { id: 'aging', label: 'Antigüedad', icon: Clock, path: '/aging' },
       { id: 'reports', label: 'Reportes', icon: PieChart, path: '/reports' },
-      { id: 'usage', label: 'Adopción', icon: Activity, path: '/usage' },
+      { id: 'usage', label: 'Adopcion', icon: Activity, path: '/usage' },
+      { id: 'audit-log', label: 'Auditoria', icon: Shield, path: '/audit-log' },
     ],
   },
 ];

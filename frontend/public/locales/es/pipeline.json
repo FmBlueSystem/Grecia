@@ -1,0 +1,34 @@
+{
+  "title": "Pipeline de Ventas",
+  "subtitle": "Gestion visual del pipeline con drag and drop",
+  "stages": {
+    "opportunity": "Oportunidad",
+    "proposal": "Propuesta",
+    "follow_up": "Seguimiento",
+    "negotiation": "Negociacion",
+    "closed_won": "Cerrada Ganada",
+    "closed_lost": "Cerrada Perdida"
+  },
+  "card": {
+    "amount": "Monto",
+    "probability": "Probabilidad",
+    "closeDate": "Fecha de Cierre",
+    "account": "Cuenta",
+    "owner": "Propietario"
+  },
+  "summary": {
+    "totalValue": "Valor Total del Pipeline",
+    "weightedValue": "Valor Ponderado",
+    "deals": "negocios",
+    "avgDealSize": "Tamano Promedio"
+  },
+  "actions": {
+    "moveToStage": "Mover a Etapa",
+    "viewDetails": "Ver Detalles",
+    "addNote": "Agregar Nota"
+  },
+  "empty": {
+    "title": "Etapa vacia",
+    "description": "Arrastra una oportunidad aqui o crea una nueva"
+  }
+}

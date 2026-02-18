@@ -42,6 +42,7 @@ import adminRoutes from './routes/admin.routes';
 import traceabilityRoutes from './routes/traceability.routes';
 import lostDealsRoutes from './routes/lost-deals.routes';
 import notificationsRoutes from './routes/notifications.routes';
+import auditRoutes from './routes/audit.routes';
 
 
 
@@ -92,6 +93,7 @@ fastify.register(adminRoutes, { prefix: '/api/admin' });
 fastify.register(traceabilityRoutes, { prefix: '/api/traceability' });
 fastify.register(lostDealsRoutes, { prefix: '/api/lost-deals' });
 fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
+fastify.register(auditRoutes, { prefix: '/api/audit' });
 
 
 

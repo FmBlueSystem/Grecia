@@ -1,0 +1,38 @@
+{
+  "title": "Activities",
+  "subtitle": "Calls, emails, meetings and tasks",
+  "new": "New Activity",
+  "search": "Search activities...",
+  "types": {
+    "call": "Call",
+    "email": "Email",
+    "meeting": "Meeting",
+    "task": "Task",
+    "note": "Note"
+  },
+  "columns": {
+    "type": "Type",
+    "subject": "Subject",
+    "account": "Account",
+    "date": "Date",
+    "status": "Status",
+    "owner": "Owner"
+  },
+  "status": {
+    "planned": "Planned",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "form": {
+    "type": "Activity Type",
+    "subject": "Subject",
+    "notes": "Notes",
+    "account": "Account",
+    "contact": "Contact",
+    "date": "Date"
+  },
+  "empty": {
+    "title": "No activities",
+    "description": "Activities from SAP will appear here"
+  }
+}

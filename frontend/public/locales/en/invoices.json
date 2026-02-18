@@ -1,0 +1,34 @@
+{
+  "title": "Invoices",
+  "subtitle": "Billing and accounts receivable",
+  "search": "Search invoices...",
+  "columns": {
+    "number": "Invoice #",
+    "client": "Client",
+    "total": "Total",
+    "paid": "Paid",
+    "balance": "Balance",
+    "status": "Status",
+    "date": "Date",
+    "dueDate": "Due Date",
+    "seller": "Seller"
+  },
+  "status": {
+    "paid": "Paid",
+    "partial": "Partial",
+    "unpaid": "Unpaid",
+    "overdue": "Overdue"
+  },
+  "detail": {
+    "lineItems": "Line Items",
+    "payments": "Payments",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "total": "Total",
+    "amountDue": "Amount Due"
+  },
+  "empty": {
+    "title": "No invoices",
+    "description": "Invoices from SAP will appear here"
+  }
+}

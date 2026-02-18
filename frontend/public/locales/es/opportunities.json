@@ -1,0 +1,37 @@
+{
+  "title": "Oportunidades",
+  "subtitle": "Oportunidades de ventas activas",
+  "new": "Nueva Oportunidad",
+  "search": "Buscar oportunidades...",
+  "columns": {
+    "name": "Oportunidad",
+    "account": "Cuenta",
+    "amount": "Monto",
+    "stage": "Etapa",
+    "probability": "Probabilidad",
+    "closeDate": "Fecha de Cierre",
+    "owner": "Propietario"
+  },
+  "stages": {
+    "opportunity": "Oportunidad",
+    "proposal": "Propuesta",
+    "follow_up": "Seguimiento",
+    "negotiation": "Negociacion",
+    "closed_won": "Cerrada Ganada",
+    "closed_lost": "Cerrada Perdida"
+  },
+  "form": {
+    "name": "Nombre",
+    "account": "Cuenta",
+    "contact": "Contacto",
+    "amount": "Monto",
+    "stage": "Etapa",
+    "probability": "Probabilidad",
+    "closeDate": "Fecha Esperada de Cierre",
+    "notes": "Notas"
+  },
+  "empty": {
+    "title": "Sin oportunidades",
+    "description": "Crea tu primera oportunidad para comenzar a dar seguimiento a negocios"
+  }
+}

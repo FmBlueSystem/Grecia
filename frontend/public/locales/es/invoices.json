@@ -1,0 +1,34 @@
+{
+  "title": "Facturas",
+  "subtitle": "Facturacion y cuentas por cobrar",
+  "search": "Buscar facturas...",
+  "columns": {
+    "number": "Factura #",
+    "client": "Cliente",
+    "total": "Total",
+    "paid": "Pagado",
+    "balance": "Saldo",
+    "status": "Estado",
+    "date": "Fecha",
+    "dueDate": "Fecha de Vencimiento",
+    "seller": "Vendedor"
+  },
+  "status": {
+    "paid": "Pagada",
+    "partial": "Parcial",
+    "unpaid": "Sin Pagar",
+    "overdue": "Vencida"
+  },
+  "detail": {
+    "lineItems": "Lineas del Documento",
+    "payments": "Pagos",
+    "subtotal": "Subtotal",
+    "tax": "Impuesto",
+    "total": "Total",
+    "amountDue": "Monto Pendiente"
+  },
+  "empty": {
+    "title": "Sin facturas",
+    "description": "Las facturas de SAP apareceran aqui"
+  }
+}

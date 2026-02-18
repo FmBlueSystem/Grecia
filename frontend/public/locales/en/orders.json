@@ -1,0 +1,29 @@
+{
+  "title": "Orders",
+  "subtitle": "Purchase orders and fulfillment",
+  "search": "Search orders...",
+  "columns": {
+    "number": "Order #",
+    "client": "Client",
+    "total": "Total",
+    "status": "Status",
+    "date": "Date",
+    "seller": "Seller"
+  },
+  "status": {
+    "open": "Open",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
+  },
+  "detail": {
+    "lineItems": "Line Items",
+    "shipping": "Shipping",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "total": "Total"
+  },
+  "empty": {
+    "title": "No orders",
+    "description": "Orders from SAP will appear here"
+  }
+}

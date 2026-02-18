@@ -1,0 +1,29 @@
+{
+  "title": "Pedidos",
+  "subtitle": "Ordenes de compra y cumplimiento",
+  "search": "Buscar pedidos...",
+  "columns": {
+    "number": "Pedido #",
+    "client": "Cliente",
+    "total": "Total",
+    "status": "Estado",
+    "date": "Fecha",
+    "seller": "Vendedor"
+  },
+  "status": {
+    "open": "Abierto",
+    "closed": "Cerrado",
+    "cancelled": "Cancelado"
+  },
+  "detail": {
+    "lineItems": "Lineas del Documento",
+    "shipping": "Envio",
+    "subtotal": "Subtotal",
+    "tax": "Impuesto",
+    "total": "Total"
+  },
+  "empty": {
+    "title": "Sin pedidos",
+    "description": "Los pedidos de SAP apareceran aqui"
+  }
+}

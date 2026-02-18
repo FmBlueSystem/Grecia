@@ -1,0 +1,36 @@
+{
+  "labels": {
+    "required": "Required",
+    "optional": "Optional",
+    "select": "Select...",
+    "selectOption": "Select an option",
+    "noOptions": "No options available",
+    "searchOptions": "Search options..."
+  },
+  "placeholders": {
+    "text": "Enter text...",
+    "email": "email@example.com",
+    "phone": "+1 234 567 8900",
+    "url": "https://example.com",
+    "number": "Enter a number",
+    "date": "Select a date",
+    "search": "Search...",
+    "notes": "Add notes..."
+  },
+  "buttons": {
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "clear": "Clear",
+    "addMore": "Add More",
+    "remove": "Remove"
+  },
+  "fileUpload": {
+    "dragDrop": "Drag and drop files here",
+    "or": "or",
+    "browse": "Browse Files",
+    "maxSize": "Max size: {{size}}",
+    "allowedTypes": "Allowed types: {{types}}"
+  }
+}
