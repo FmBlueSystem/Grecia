@@ -82,6 +82,22 @@ export default function Contacts() {
 
     const totalPages = Math.ceil(totalContacts / PAGE_SIZE);
 
+    const logActivity = (contact: Contact, type: 'Call' | 'Email') => {
+        const subject = type === 'Call'
+            ? `Llamada a ${contact.firstName} ${contact.lastName}`
+            : `Email a ${contact.firstName} ${contact.lastName}`;
+        api.post('/activities', {
+            activityType: type,
+            subject,
+            cardCode: contact.accountId || undefined,
+            notes: type === 'Call' ? `Tel: ${contact.phone}` : `Email: ${contact.email}`,
+        }).then(() => {
+            toast.success('Actividad registrada', `${type === 'Call' ? 'Llamada' : 'Email'} registrado en SAP`);
+        }).catch(() => {
+            // Silent fail — the call/email action already happened
+        });
+    };
+
     const filteredContacts = contacts.filter(c =>
         `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -175,12 +191,12 @@ export default function Contacts() {
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1">
                                             {contact.email && (
-                                                <a href={`mailto:${contact.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
+                                                <a href={`mailto:${contact.email}`} onClick={(e) => { e.stopPropagation(); logActivity(contact, 'Email'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
                                                     <Mail className="w-3 h-3" /> {contact.email}
                                                 </a>
                                             )}
                                             {contact.phone && (
-                                                <a href={`tel:${contact.phone}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 transition-colors">
+                                                <a href={`tel:${contact.phone}`} onClick={(e) => { e.stopPropagation(); logActivity(contact, 'Call'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 transition-colors">
                                                     <Phone className="w-3 h-3" /> {contact.phone}
                                                 </a>
                                             )}

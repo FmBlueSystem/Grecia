@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Building2, User, Target, FileText, ShoppingCart, X, Command } from 'lucide-react';
+import { Search, Building2, User, Target, FileText, ShoppingCart, Receipt, X, Command } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import api from '../../lib/api';
 
@@ -15,7 +15,7 @@ interface SearchResult {
     total?: number;
     stage?: string;
     industry?: string;
-    type: 'account' | 'contact' | 'opportunity' | 'quote' | 'order';
+    type: 'account' | 'contact' | 'opportunity' | 'quote' | 'order' | 'invoice';
 }
 
 interface SearchResults {
@@ -24,6 +24,7 @@ interface SearchResults {
     opportunities: SearchResult[];
     quotes: SearchResult[];
     orders: SearchResult[];
+    invoices: SearchResult[];
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: typeof Building2; color: string; path: string }> = {
@@ -32,6 +33,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: typeof Building2; c
     opportunity: { label: 'Oportunidades', icon: Target, color: 'text-indigo-600 bg-indigo-50', path: '/pipeline' },
     quote: { label: 'Ofertas', icon: FileText, color: 'text-amber-600 bg-amber-50', path: '/quotes' },
     order: { label: 'Órdenes', icon: ShoppingCart, color: 'text-teal-600 bg-teal-50', path: '/orders' },
+    invoice: { label: 'Facturas', icon: Receipt, color: 'text-rose-600 bg-rose-50', path: '/invoices' },
 };
 
 function fmt(n: number): string {
@@ -51,7 +53,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
 
     // Flatten results into a single list for keyboard nav
     const flatResults: SearchResult[] = results
-        ? [...results.accounts, ...results.contacts, ...results.opportunities, ...results.quotes, ...results.orders]
+        ? [...results.accounts, ...results.contacts, ...results.opportunities, ...results.quotes, ...results.orders, ...results.invoices]
         : [];
 
     // Focus input when modal opens
@@ -94,6 +96,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
         if (item.type === 'account') navigate(`/accounts/${item.id}`);
         else if (item.type === 'quote') navigate(`/quotes/${item.id}`);
         else if (item.type === 'order') navigate(`/orders/${item.id}`);
+        else if (item.type === 'invoice') navigate(`/invoices/${item.id}`);
         else if (item.type === 'opportunity') navigate('/pipeline');
         else if (item.type === 'contact') navigate('/contacts');
         onClose();
@@ -136,17 +139,18 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
         if (item.type === 'opportunity') return `${item.stage} - ${fmt(item.amount || 0)}`;
         if (item.type === 'quote') return `${item.number} - ${fmt(item.total || 0)}`;
         if (item.type === 'order') return `${item.number} - ${fmt(item.total || 0)}`;
+        if (item.type === 'invoice') return `${item.number} - ${fmt(item.total || 0)}`;
         return '';
     };
 
     const getTitle = (item: SearchResult): string => {
-        if (item.type === 'quote' || item.type === 'order') return item.client || item.number || '';
+        if (item.type === 'quote' || item.type === 'order' || item.type === 'invoice') return item.client || item.number || '';
         return item.name || '';
     };
 
     // Group results by type for display
     const groups = results
-        ? (['accounts', 'contacts', 'opportunities', 'quotes', 'orders'] as const)
+        ? (['accounts', 'contacts', 'opportunities', 'quotes', 'orders', 'invoices'] as const)
             .filter(key => results[key].length > 0)
             .map(key => ({
                 key,

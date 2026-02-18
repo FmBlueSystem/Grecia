@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, FileText, TrendingUp, ShoppingCart, Loader2, Percent, Package } from 'lucide-react';
+import { DollarSign, Download, FileText, TrendingUp, ShoppingCart, Loader2, Percent, Package } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import StatCard from '../components/shared/StatCard';
 import DataTable, { type Column } from '../components/shared/DataTable';
@@ -63,6 +63,26 @@ export default function Reports() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [months, setMonths] = useState('6');
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await api.get(`/reports/export?months=${months}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte-CRM-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // toast handled by api interceptor
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -106,15 +126,25 @@ export default function Reports() {
             { label: 'Reportes' },
           ]}
         />
-        <select
-          value={months}
-          onChange={(e) => setMonths(e.target.value)}
-          className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          {DATE_RANGES.map(d => (
-            <option key={d.value} value={d.value}>{d.label}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-3">
+          <select
+            value={months}
+            onChange={(e) => setMonths(e.target.value)}
+            className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {DATE_RANGES.map(d => (
+              <option key={d.value} value={d.value}>{d.label}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleExport}
+            disabled={exporting || !data}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 disabled:opacity-50"
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Exportar Excel
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}

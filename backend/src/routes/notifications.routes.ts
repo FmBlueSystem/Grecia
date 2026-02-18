@@ -107,4 +107,53 @@ export default async function notificationsRoutes(fastify: FastifyInstance) {
             reply.code(500).send({ error: 'Error al obtener notificaciones' });
         }
     });
+
+    // GET /api/notifications/stream — SSE real-time notification count
+    // Uses query param auth because EventSource doesn't support custom headers
+    fastify.get('/stream', async (request, reply) => {
+        const query = request.query as Record<string, string>;
+        const token = query.token;
+        if (!token) { reply.code(401).send({ error: 'Missing token' }); return; }
+
+        let user: any;
+        try {
+            user = fastify.jwt.verify(token);
+        } catch {
+            reply.code(401).send({ error: 'Invalid token' }); return;
+        }
+
+        const cc = (query.company || 'CR') as CountryCode;
+        const { sapSalesPersonCode, scopeLevel } = user;
+        const sellerFilter = scopeLevel === 'ALL' ? '' : ` and SalesPersonCode eq ${sapSalesPersonCode}`;
+        const now = () => new Date().toISOString().split('T')[0];
+
+        reply.raw.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        });
+
+        const sendCount = async () => {
+            try {
+                const today = now();
+                const [overdueRes, expiringRes] = await Promise.all([
+                    sapGet(cc, `Invoices/$count?$filter=DocumentStatus eq 'bost_Open' and DocDueDate lt '${today}'${sellerFilter}`).catch(() => 0),
+                    sapGet(cc, `Quotations/$count?$filter=DocumentStatus eq 'bost_Open' and DocDueDate ge '${today}' and DocDueDate le '${new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]}'${sellerFilter}`).catch(() => 0),
+                ]);
+                const total = (Number(overdueRes) || 0) + (Number(expiringRes) || 0);
+                reply.raw.write(`data: ${JSON.stringify({ total, overdue: Number(overdueRes) || 0, expiring: Number(expiringRes) || 0 })}\n\n`);
+            } catch {
+                reply.raw.write(`data: ${JSON.stringify({ total: 0, overdue: 0, expiring: 0 })}\n\n`);
+            }
+        };
+
+        // Send immediately, then every 60 seconds
+        await sendCount();
+        const interval = setInterval(sendCount, 60_000);
+
+        request.raw.on('close', () => {
+            clearInterval(interval);
+        });
+    });
 }

@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { sapGet, loadSalesPersons, CountryCode } from '../services/sap-proxy.service';
+import * as XLSX from 'xlsx';
 
 export default async function reportsRoutes(fastify: FastifyInstance) {
     // GET /api/reports - Dashboard de reportes con datos SAP reales
@@ -203,6 +204,76 @@ export default async function reportsRoutes(fastify: FastifyInstance) {
         } catch (error) {
             request.log.error(error);
             reply.code(500).send({ error: 'Error al generar reportes' });
+        }
+    });
+
+    // GET /api/reports/export — Download report as XLSX
+    fastify.get('/export', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        try {
+            const cc = request.companyCode as CountryCode;
+            const query = request.query as Record<string, string>;
+            const months = Math.min(Math.max(Number(query.months) || 6, 1), 24);
+            const spMap = await loadSalesPersons(cc);
+
+            const dateFrom = new Date();
+            dateFrom.setMonth(dateFrom.getMonth() - months);
+            const dateFilter = dateFrom.toISOString().split('T')[0];
+
+            const [invoicesData, ordersData, quotesData] = await Promise.all([
+                sapGet(cc, `Invoices?$filter=DocDate ge '${dateFilter}'&$select=DocEntry,DocNum,DocTotal,DocDate,SalesPersonCode,PaidToDate,CardCode,CardName&$top=5000`).catch(() => ({ value: [] })),
+                sapGet(cc, `Orders?$filter=DocDate ge '${dateFilter}'&$select=DocEntry,DocNum,DocTotal,DocDate,SalesPersonCode,CardCode,CardName,DocumentStatus&$top=5000`).catch(() => ({ value: [] })),
+                sapGet(cc, `Quotations?$filter=DocDate ge '${dateFilter}'&$select=DocEntry,DocNum,DocTotal,DocDate,SalesPersonCode,CardCode,CardName,DocumentStatus&$top=5000`).catch(() => ({ value: [] })),
+            ]);
+
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Facturas
+            const invoiceRows = (invoicesData.value || []).map((inv: any) => ({
+                'DocNum': inv.DocNum,
+                'Fecha': inv.DocDate,
+                'Cliente (Código)': inv.CardCode,
+                'Cliente (Nombre)': inv.CardName || '',
+                'Total': Number(inv.DocTotal) || 0,
+                'Pagado': Number(inv.PaidToDate) || 0,
+                'Pendiente': (Number(inv.DocTotal) || 0) - (Number(inv.PaidToDate) || 0),
+                'Vendedor': spMap.get(inv.SalesPersonCode) || `#${inv.SalesPersonCode}`,
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invoiceRows), 'Facturas');
+
+            // Sheet 2: Órdenes
+            const orderRows = (ordersData.value || []).map((o: any) => ({
+                'DocNum': o.DocNum,
+                'Fecha': o.DocDate,
+                'Cliente (Código)': o.CardCode,
+                'Cliente (Nombre)': o.CardName || '',
+                'Total': Number(o.DocTotal) || 0,
+                'Estado': o.DocumentStatus === 'bost_Close' ? 'Cerrada' : 'Abierta',
+                'Vendedor': spMap.get(o.SalesPersonCode) || `#${o.SalesPersonCode}`,
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(orderRows), 'Órdenes');
+
+            // Sheet 3: Cotizaciones
+            const quoteRows = (quotesData.value || []).map((q: any) => ({
+                'DocNum': q.DocNum,
+                'Fecha': q.DocDate,
+                'Cliente (Código)': q.CardCode,
+                'Cliente (Nombre)': q.CardName || '',
+                'Total': Number(q.DocTotal) || 0,
+                'Estado': q.DocumentStatus === 'bost_Close' ? 'Cerrada' : 'Abierta',
+                'Vendedor': spMap.get(q.SalesPersonCode) || `#${q.SalesPersonCode}`,
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(quoteRows), 'Cotizaciones');
+
+            const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+            const filename = `Reporte-CRM-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+            reply
+                .header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                .header('Content-Disposition', `attachment; filename="${filename}"`)
+                .send(buffer);
+        } catch (error) {
+            request.log.error(error);
+            reply.code(500).send({ error: 'Error al exportar reporte' });
         }
     });
 }

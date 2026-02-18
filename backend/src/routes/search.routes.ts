@@ -11,7 +11,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
             const limit = Math.min(Number(query.limit) || 5, 10);
 
             if (!q || q.length < 2) {
-                return { accounts: [], contacts: [], opportunities: [], quotes: [], orders: [] };
+                return { accounts: [], contacts: [], opportunities: [], quotes: [], orders: [], invoices: [] };
             }
 
             const { id: userId, sapSalesPersonCode, scopeLevel } = request.user as any;
@@ -19,7 +19,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
             const companyCode = request.companyCode;
 
             // Search all entities in parallel with individual error catching
-            const [accounts, contacts, opportunities, quotes, orders] = await Promise.all([
+            const [accounts, contacts, opportunities, quotes, orders, invoices] = await Promise.all([
                 // SAP Accounts
                 sapProxy.getAccounts(companyCode, { search: q, top: limit }, spCode)
                     .then(r => r.data.map((a: any) => ({
@@ -87,9 +87,24 @@ export default async function searchRoutes(fastify: FastifyInstance) {
                         type: 'order' as const,
                     })))
                     .catch(() => []),
+
+                // SAP Invoices
+                sapProxy.getInvoices(companyCode, {
+                    filter: `contains(CardName,'${q}')`,
+                    top: limit,
+                }, spCode)
+                    .then(r => r.data.map((inv: any) => ({
+                        id: inv.id,
+                        number: inv.invoiceNumber,
+                        client: inv.account?.name || '',
+                        total: inv.amount,
+                        status: inv.status,
+                        type: 'invoice' as const,
+                    })))
+                    .catch(() => []),
             ]);
 
-            return { accounts, contacts, opportunities, quotes, orders };
+            return { accounts, contacts, opportunities, quotes, orders, invoices };
         } catch (error) {
             request.log.error(error);
             reply.code(500).send({ error: 'Search failed' });

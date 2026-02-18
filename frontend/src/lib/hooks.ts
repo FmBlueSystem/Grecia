@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Hook para detectar estado de conexión
@@ -132,4 +132,48 @@ export function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
 
   return debouncedValue;
+}
+
+/**
+ * Hook para notificaciones SSE en tiempo real
+ */
+export function useNotificationSSE() {
+  const [count, setCount] = useState(0);
+  const esRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? `${import.meta.env.BASE_URL}api` : 'http://localhost:3000/api');
+    const company = localStorage.getItem('company') || 'CR';
+
+    const connect = () => {
+      // EventSource doesn't support custom headers, pass token as query param
+      const url = `${baseURL}/notifications/stream?token=${encodeURIComponent(token)}&company=${company}`;
+      const es = new EventSource(url);
+      esRef.current = es;
+
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setCount(data.total || 0);
+        } catch { /* ignore parse errors */ }
+      };
+
+      es.onerror = () => {
+        es.close();
+        // Reconnect after 30 seconds
+        setTimeout(connect, 30_000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      esRef.current?.close();
+    };
+  }, []);
+
+  return count;
 }
