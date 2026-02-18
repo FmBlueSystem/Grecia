@@ -393,23 +393,42 @@ function mapInvoice(inv: any): any {
 }
 
 // ─── ACTIVITIES ───────────────────────────────────────
+// Helper: resolve CardCode → CardName in batch from BusinessPartners
+async function resolveCardNames(companyCode: CountryCode, cardCodes: string[]): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (cardCodes.length === 0) return map;
+    try {
+        const filterStr = cardCodes.slice(0, 50).map(c => `CardCode eq '${c}'`).join(' or ');
+        const data = await sapGet(companyCode, `BusinessPartners?$select=CardCode,CardName&$filter=${filterStr}`);
+        for (const bp of data.value || []) map.set(bp.CardCode, bp.CardName);
+    } catch { /* fallback to CardCode */ }
+    return map;
+}
+
 export async function getActivities(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
     const spMap = await loadSalesPersons(companyCode);
     // Activities use HandledBy instead of SalesPersonCode
     const filter = salesPersonCode != null
         ? (params.filter ? `(${params.filter}) and HandledBy eq ${salesPersonCode}` : `HandledBy eq ${salesPersonCode}`)
         : params.filter;
+    // Note: CardName is NOT a valid field on SAP Activities entity — resolve separately
     const path = buildQuery('Activities',
-        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,CardName,HandledBy',
+        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,HandledBy',
         { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'StartDate desc', filter }
     );
     const data = await sapGet(companyCode, path);
-    const items = (data.value || []).map((act: any) => mapActivity(act, spMap));
+    const activities = data.value || [];
+    // Batch-resolve CardCode → CardName
+    const uniqueCodes = [...new Set(activities.map((a: any) => a.CardCode).filter(Boolean))] as string[];
+    const cardNameMap = await resolveCardNames(companyCode, uniqueCodes);
+    for (const act of activities) act.CardName = cardNameMap.get(act.CardCode) || act.CardCode;
+    const items = activities.map((act: any) => mapActivity(act, spMap));
     return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 const ACT_TYPE_MAP: Record<number, string> = { [-1]: 'Task', 0: 'Call', 1: 'Meeting', 2: 'Task', 3: 'Note', 4: 'Email' };
-const ACT_STATUS_MAP: Record<string, string> = { cn_Open: 'Planned', cn_Closed: 'Completed', cn_Cancel: 'Cancelled' };
+// SAP returns Status as integer (-2=Open, -3=Closed) or string enum (cn_Open, cn_Closed, cn_Cancel)
+const ACT_STATUS_MAP: Record<string, string> = { cn_Open: 'Planned', cn_Closed: 'Completed', cn_Cancel: 'Cancelled', '-2': 'Planned', '-3': 'Completed' };
 
 function mapActivity(act: any, spMap: Map<number, string>): any {
     const typeLabel = ACT_TYPE_MAP[act.ActivityType] || 'Actividad';
@@ -426,8 +445,8 @@ function mapActivity(act: any, spMap: Map<number, string>): any {
         dueDate: act.CloseDate || act.StartDate || null,
         status: ACT_STATUS_MAP[act.Status] || 'Planned',
         priority: null,
-        isCompleted: act.Status === 'cn_Closed',
-        completedAt: act.Status === 'cn_Closed' ? (act.CloseDate || act.StartDate) : null,
+        isCompleted: act.Status === 'cn_Closed' || act.Status === -3,
+        completedAt: (act.Status === 'cn_Closed' || act.Status === -3) ? (act.CloseDate || act.StartDate) : null,
         account: act.CardCode ? { id: act.CardCode, name: act.CardName || act.CardCode } : null,
         contact: null,
         opportunity: null,
@@ -470,7 +489,7 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
         client.get(`Quotations?$select=DocTotal,DocEntry,DocNum,CardName,DocDate&$filter=DocumentStatus eq 'bost_Open'${spFilter}&$orderby=DocDate desc&$top=500&$inlinecount=allpages`).catch(() => ({ data: { value: [] } })),
         client.get(`Orders?$select=DocEntry&$filter=DocumentStatus eq 'bost_Close'${spFilter}&$top=0&$inlinecount=allpages`).catch(() => ({ data: {} })),
         client.get(`Invoices?$select=DocTotal,DocDate,SalesPersonCode,DocEntry,DocNum,CardName&$filter=DocDate ge '${fmtD(sixMonthsAgo)}'${spFilter}&$orderby=DocDate desc&$top=500`).catch(() => ({ data: { value: [] } })),
-        client.get(`Activities?$select=ActivityDate,ActivityType,Status,CardName,Subject&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
+        client.get(`Activities?$select=ActivityDate,ActivityType,Status,CardCode,Subject&$filter=ActivityDate ge '${fmtD(weekStart)}'${salesPersonCode != null ? ` and HandledBy eq ${salesPersonCode}` : ''}&$top=500`).catch(() => ({ data: { value: [] } })),
         client.get(`SalesPersons?$select=SalesEmployeeCode,SalesEmployeeName&$top=500`).catch(() => ({ data: { value: [] } })),
     ]);
 
@@ -482,6 +501,13 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
     const invoices: any[] = invoicesRes.data.value || [];
     const activities: any[] = activitiesRes.data.value || [];
     const salesPersons: any[] = salesPersonsRes.data.value || [];
+
+    // Resolve CardCode → CardName for activities (CardName is not a valid Activities field)
+    if (activities.length > 0) {
+        const actCardNames = await resolveCardNames(companyCode,
+            [...new Set(activities.map(a => a.CardCode).filter(Boolean))] as string[]);
+        for (const a of activities) a.CardName = actCardNames.get(a.CardCode) || a.CardCode;
+    }
 
     // Pipeline totals
     const pipelineOrdersValue = openOrders.reduce((s, o) => s + (Number(o.DocTotal) || 0), 0);
@@ -628,10 +654,18 @@ export async function getMyDay(companyCode: CountryCode, salesPersonCode?: numbe
         // Cotizaciones que vencen en los próximos 7 días
         client.get(`Quotations?$select=DocEntry,DocNum,CardName,DocTotal,DocDueDate&$filter=DocumentStatus eq 'bost_Open' and DocDueDate ge '${today}' and DocDueDate le '${in7Days}'${spFilter}&$orderby=DocDueDate asc&$top=10`)
             .catch(() => ({ data: { value: [] } })),
-        // Actividades de hoy
-        client.get(`Activities?$select=ActivityCode,ActivityDate,ActivityType,Status,CardName,Subject,StartTime&$filter=ActivityDate eq '${today}'${handledByFilter}&$top=20`)
+        // Actividades de hoy (CardName is NOT a valid Activities field)
+        client.get(`Activities?$select=ActivityCode,ActivityDate,ActivityType,Status,CardCode,Subject,StartTime&$filter=ActivityDate eq '${today}'${handledByFilter}&$top=20`)
             .catch(() => ({ data: { value: [] } })),
     ]);
+
+    // Resolve CardCode → CardName for today's activities
+    const todayActs: any[] = todayActivitiesRes.data.value || [];
+    if (todayActs.length > 0) {
+        const actCardNames = await resolveCardNames(companyCode,
+            [...new Set(todayActs.map(a => a.CardCode).filter(Boolean))] as string[]);
+        for (const a of todayActs) a.CardName = actCardNames.get(a.CardCode) || a.CardCode;
+    }
 
     const overdueInvoices = (overdueInvRes.data.value || []).map((inv: any) => ({
         docEntry: inv.DocEntry, docNum: inv.DocNum, client: inv.CardName || '-',
@@ -650,7 +684,7 @@ export async function getMyDay(companyCode: CountryCode, salesPersonCode?: numbe
         if (t === 'cn_Meeting' || t?.includes('Meeting')) return 'Reunión';
         return 'Tarea';
     };
-    const todayActivities = (todayActivitiesRes.data.value || []).map((a: any) => ({
+    const todayActivities = todayActs.map((a: any) => ({
         id: a.ActivityCode, subject: a.Subject || actTypeLabel(String(a.ActivityType || '')),
         client: a.CardName || '-', type: actTypeLabel(String(a.ActivityType || '')),
         time: a.StartTime ? String(a.StartTime).substring(0, 5) : '',
