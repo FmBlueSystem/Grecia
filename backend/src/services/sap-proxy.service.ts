@@ -23,7 +23,7 @@ interface SapListResponse<T> {
 
 // ─── Helpers ──────────────────────────────────────────
 function buildQuery(endpoint: string, select: string, params: PaginationParams = {}): string {
-    const parts: string[] = [`$select=${select}`];
+    const parts: string[] = [`$select=${select}`, '$inlinecount=allpages'];
     if (params.top) parts.push(`$top=${params.top}`);
     if (params.skip) parts.push(`$skip=${params.skip}`);
     if (params.filter) parts.push(`$filter=${params.filter}`);
@@ -96,7 +96,7 @@ export async function getAccounts(companyCode: CountryCode, params: PaginationPa
     );
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map((bp: any) => mapAccount(bp, spMap));
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 export async function getAccountById(companyCode: CountryCode, cardCode: string): Promise<any> {
@@ -182,13 +182,16 @@ export async function getProducts(companyCode: CountryCode, params: PaginationPa
     const filter = params.search
         ? `contains(ItemName,'${params.search}')`
         : undefined;
-    const path = buildQuery('Items',
-        'ItemCode,ItemName,ItemsGroupCode,Frozen,QuantityOnStock,ItemPrices',
-        { top: params.top || 50, skip: params.skip || 0, filter, orderBy: 'ItemName asc' }
-    );
+    // Don't use $select — SAP omits collection properties like ItemPrices when $select is used
+    const parts: string[] = ['$inlinecount=allpages'];
+    parts.push(`$top=${params.top || 50}`);
+    parts.push(`$skip=${params.skip || 0}`);
+    if (filter) parts.push(`$filter=${filter}`);
+    parts.push('$orderby=ItemName asc');
+    const path = `Items?${parts.join('&')}`;
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map(mapProduct);
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 function mapProduct(item: any): any {
@@ -224,7 +227,7 @@ export async function getQuotes(companyCode: CountryCode, params: PaginationPara
     );
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map((q: any) => mapQuote(q, spMap));
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 export async function getQuoteById(companyCode: CountryCode, docEntry: string): Promise<any> {
@@ -275,7 +278,7 @@ export async function getOrders(companyCode: CountryCode, params: PaginationPara
     );
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map((o: any) => mapOrder(o, spMap));
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 export async function getOrderById(companyCode: CountryCode, docEntry: string): Promise<any> {
@@ -331,7 +334,7 @@ export async function getInvoices(companyCode: CountryCode, params: PaginationPa
     );
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map(mapInvoice);
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 export async function getInvoiceStats(companyCode: CountryCode, salesPersonCode?: number): Promise<any> {
@@ -397,12 +400,12 @@ export async function getActivities(companyCode: CountryCode, params: Pagination
         ? (params.filter ? `(${params.filter}) and HandledBy eq ${salesPersonCode}` : `HandledBy eq ${salesPersonCode}`)
         : params.filter;
     const path = buildQuery('Activities',
-        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,HandledBy',
+        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,CardName,HandledBy',
         { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'StartDate desc', filter }
     );
     const data = await sapGet(companyCode, path);
     const items = (data.value || []).map((act: any) => mapActivity(act, spMap));
-    return { data: items, total: items.length };
+    return { data: items, total: Number(data['odata.count']) || items.length };
 }
 
 const ACT_TYPE_MAP: Record<number, string> = { [-1]: 'Task', 0: 'Call', 1: 'Meeting', 2: 'Task', 3: 'Note', 4: 'Email' };
@@ -425,6 +428,7 @@ function mapActivity(act: any, spMap: Map<number, string>): any {
         priority: null,
         isCompleted: act.Status === 'cn_Closed',
         completedAt: act.Status === 'cn_Closed' ? (act.CloseDate || act.StartDate) : null,
+        account: act.CardCode ? { id: act.CardCode, name: act.CardName || act.CardCode } : null,
         contact: null,
         opportunity: null,
         owner: resolveOwner(act.HandledBy, spMap),
@@ -447,13 +451,14 @@ function mapDocLine(line: any): any {
 }
 
 // ─── DASHBOARD Stats (aggregated from SAP — all real data) ────────────
-export async function getDashboardStats(companyCode: CountryCode, salesPersonCode?: number): Promise<any> {
+export async function getDashboardStats(companyCode: CountryCode, salesPersonCode?: number, months: number = 6): Promise<any> {
     const client = await sapService.getClient(companyCode);
     const spFilter = salesPersonCode != null ? ` and SalesPersonCode eq ${salesPersonCode}` : '';
     const spFilterLead = salesPersonCode != null ? `&$filter=SalesPersonCode eq ${salesPersonCode}` : '';
 
     const now = new Date();
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const rangeMonths = Math.max(1, Math.min(months, 24));
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - (rangeMonths - 1), 1);
     const dayOfWeek = now.getDay();
     const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(now);
@@ -491,10 +496,10 @@ export async function getDashboardStats(companyCode: CountryCode, salesPersonCod
         revenueByMonth[key] = (revenueByMonth[key] || 0) + (Number(inv.DocTotal) || 0);
     }
 
-    // Revenue chart: last 6 months
+    // Revenue chart: last N months
     const monthValues: number[] = [];
     const revenueChart: any[] = [];
-    for (let i = 5; i >= 0; i--) {
+    for (let i = rangeMonths - 1; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const rev = revenueByMonth[key] || 0;

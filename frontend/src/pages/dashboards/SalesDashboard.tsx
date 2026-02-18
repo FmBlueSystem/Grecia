@@ -21,11 +21,17 @@ export default function SalesDashboard() {
     const [stats, setStats] = useState<any>(null);
     const [drilldownOpen, setDrilldownOpen] = useState(false);
     const [drilldownType, setDrilldownType] = useState<KpiType>('revenue');
+    const [filterMonths, setFilterMonths] = useState(6);
 
-    useEffect(() => {
-        api.get('/dashboard/stats')
+    const fetchStats = (months: number) => {
+        setStats(null);
+        api.get(`/dashboard/stats?months=${months}`)
             .then(res => { if (res.data) setStats(res.data); })
             .catch(err => console.error('Error al obtener estadísticas del panel', err));
+    };
+
+    useEffect(() => {
+        fetchStats(filterMonths);
     }, []);
 
     const handleChartClick = (chartInfo: any) => {
@@ -100,21 +106,15 @@ export default function SalesDashboard() {
                             <div className="p-6 space-y-5">
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-2">Rango de Fecha</label>
-                                    <select className="w-full px-4 py-2.5 rounded-xl border border-slate-200/60 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white/50 text-sm font-medium">
-                                        <option>Este Mes</option>
-                                        <option>Último Trimestre</option>
-                                        <option>Año Actual</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">País / Compañía</label>
-                                    <select className="w-full px-4 py-2.5 rounded-xl border border-slate-200/60 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white/50 text-sm font-medium">
-                                        <option>Todos los Países</option>
-                                        <option value="CR">Costa Rica</option>
-                                        <option value="GT">Guatemala</option>
-                                        <option value="SV">El Salvador</option>
-                                        <option value="HN">Honduras</option>
-                                        <option value="PA">Panamá</option>
+                                    <select
+                                        value={filterMonths}
+                                        onChange={(e) => setFilterMonths(Number(e.target.value))}
+                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200/60 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white/50 text-sm font-medium"
+                                    >
+                                        <option value={1}>Este Mes</option>
+                                        <option value={3}>Último Trimestre</option>
+                                        <option value={6}>Últimos 6 Meses</option>
+                                        <option value={12}>Año Actual</option>
                                     </select>
                                 </div>
                                 <p className="text-xs text-slate-400">Los datos se actualizan según la compañía seleccionada en el sidebar.</p>
@@ -124,7 +124,7 @@ export default function SalesDashboard() {
                                 <button onClick={() => setFilterModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-xl transition-colors">
                                     Cancelar
                                 </button>
-                                <button onClick={() => setFilterModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95">
+                                <button onClick={() => { fetchStats(filterMonths); setFilterModalOpen(false); }} className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95">
                                     Aplicar Filtros
                                 </button>
                             </div>

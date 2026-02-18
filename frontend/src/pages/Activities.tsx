@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
+import { Building2, Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import api from '../lib/api';
@@ -11,6 +11,7 @@ interface Activity {
     description?: string;
     dueDate?: string;
     status: string;
+    account?: { id: string, name: string } | null;
     contact?: { firstName: string, lastName: string };
     owner: { firstName: string, lastName: string };
     isCompleted: boolean;
@@ -191,6 +192,11 @@ export default function Activities() {
                                             {activity.dueDate && (
                                                 <span className={`flex items-center gap-1 ${new Date(activity.dueDate) < new Date() && !activity.isCompleted ? 'text-red-500' : 'text-slate-400'}`}>
                                                     <Clock className="w-3 h-3" /> {new Date(activity.dueDate).toLocaleDateString()} {new Date(activity.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            )}
+                                            {activity.account && (
+                                                <span className="flex items-center gap-1 text-slate-400">
+                                                    <Building2 className="w-3 h-3" /> {activity.account.name}
                                                 </span>
                                             )}
                                             {activity.contact && (
