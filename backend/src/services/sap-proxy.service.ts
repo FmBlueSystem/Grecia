@@ -204,11 +204,14 @@ export async function getProducts(companyCode: CountryCode, params: PaginationPa
 }
 
 function mapProduct(item: any): any {
-    // Get price from first price list (PriceList 1 is usually default)
+    // Get price from price lists, trying multiple fallbacks
     let price = 0;
     if (item.ItemPrices && Array.isArray(item.ItemPrices)) {
-        const defaultPrice = item.ItemPrices.find((p: any) => p.PriceList === 1) || item.ItemPrices[0];
-        if (defaultPrice) price = Number(defaultPrice.Price) || 0;
+        // Priority: PriceList 1 (default) → first non-zero price → any price
+        const defaultPrice = item.ItemPrices.find((p: any) => p.PriceList === 1 && Number(p.Price) > 0);
+        const anyNonZero = item.ItemPrices.find((p: any) => Number(p.Price) > 0);
+        const fallback = item.ItemPrices[0];
+        price = Number((defaultPrice || anyNonZero || fallback)?.Price) || 0;
     }
     return {
         id: item.ItemCode,
@@ -422,7 +425,7 @@ export async function getActivities(companyCode: CountryCode, params: Pagination
         : params.filter;
     // Note: CardName is NOT a valid field on SAP Activities entity — resolve separately
     const path = buildQuery('Activities',
-        'ActivityCode,ActivityType,Subject,Notes,StartDate,CloseDate,Status,CardCode,HandledBy',
+        'ActivityCode,ActivityType,Subject,Notes,StartDate,EndDate,CloseDate,Status,CardCode,ContactPersonCode,HandledBy',
         { top: params.top || 50, skip: params.skip || 0, orderBy: params.orderBy || 'StartDate desc', filter }
     );
     const data = await sapGet(companyCode, path);
@@ -430,6 +433,23 @@ export async function getActivities(companyCode: CountryCode, params: Pagination
     // Batch-resolve CardCode → CardName
     const uniqueCodes = [...new Set(activities.map((a: any) => a.CardCode).filter(Boolean))] as string[];
     const cardNameMap = await resolveCardNames(companyCode, uniqueCodes);
+    // Batch-resolve ContactPersonCode → contact name from BusinessPartners ContactEmployees
+    const contactsToResolve = activities.filter((a: any) => a.CardCode && a.ContactPersonCode != null && a.ContactPersonCode >= 0);
+    if (contactsToResolve.length > 0) {
+        try {
+            const resolvedCards = [...new Set(contactsToResolve.map((a: any) => a.CardCode))] as string[];
+            for (const cardCode of resolvedCards.slice(0, 20)) {
+                const bpData = await sapGet(companyCode, `BusinessPartners('${cardCode}')?$select=ContactEmployees`);
+                const employees = bpData.ContactEmployees || [];
+                for (const act of activities) {
+                    if (act.CardCode === cardCode && act.ContactPersonCode != null) {
+                        const emp = employees.find((e: any) => e.InternalCode === act.ContactPersonCode);
+                        if (emp) act._contactName = [emp.FirstName, emp.LastName].filter(Boolean).join(' ');
+                    }
+                }
+            }
+        } catch { /* fallback to ContactPersonCode number */ }
+    }
     for (const act of activities) act.CardName = cardNameMap.get(act.CardCode) || act.CardCode;
     const items = activities.map((act: any) => mapActivity(act, spMap));
     return { data: items, total: Number(data['odata.count']) || items.length };
@@ -446,18 +466,23 @@ function mapActivity(act: any, spMap: Map<number, string>): any {
         ? (act.Notes.length > 120 ? act.Notes.substring(0, 120) + '...' : act.Notes)
         : `${typeLabel} #${act.ActivityCode}`;
 
+    // Resolve contact from ContactPersonCode if available
+    const contact = act.ContactPersonCode != null && act.ContactPersonCode >= 0
+        ? { id: String(act.ContactPersonCode), name: act._contactName || `Contacto #${act.ContactPersonCode}` }
+        : null;
+
     return {
         id: String(act.ActivityCode),
         activityType: typeLabel,
         subject,
         description: act.Notes || null,
-        dueDate: act.CloseDate || act.StartDate || null,
+        dueDate: act.EndDate || act.CloseDate || act.StartDate || null,
         status: ACT_STATUS_MAP[act.Status] || 'Planned',
         priority: null,
         isCompleted: act.Status === 'cn_Closed' || act.Status === -3,
         completedAt: (act.Status === 'cn_Closed' || act.Status === -3) ? (act.CloseDate || act.StartDate) : null,
         account: act.CardCode ? { id: act.CardCode, name: act.CardName || act.CardCode } : null,
-        contact: null,
+        contact,
         opportunity: null,
         owner: resolveOwner(act.HandledBy, spMap),
         createdAt: act.StartDate || new Date().toISOString(),

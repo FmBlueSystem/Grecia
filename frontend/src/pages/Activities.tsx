@@ -67,7 +67,7 @@ export default function Activities() {
         cardCode: ''
     });
 
-    useEffect(() => { fetchActivities(); }, [page]);
+    useEffect(() => { fetchActivities(); }, [page, typeFilter, showCompleted]);
 
     useEffect(() => {
         api.get('/accounts?top=200').then(r => {
@@ -90,7 +90,10 @@ export default function Activities() {
     const fetchActivities = async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/activities?top=${pageSize}&skip=${page * pageSize}`);
+            const params = new URLSearchParams({ top: String(pageSize), skip: String(page * pageSize) });
+            if (typeFilter !== 'ALL') params.set('activityType', typeFilter);
+            if (!showCompleted) params.set('completed', 'false');
+            const res = await api.get(`/activities?${params}`);
             if (res.data?.data) setActivities(res.data.data);
             if (res.data?.total != null) setTotal(res.data.total);
         } catch (err) {
@@ -108,6 +111,7 @@ export default function Activities() {
                 subject: formData.subject,
                 notes: formData.description || undefined,
                 cardCode: formData.cardCode || undefined,
+                dueDate: formData.dueDate ? formData.dueDate.split('T')[0] : undefined,
             });
             setShowModal(false);
             fetchActivities();
@@ -157,7 +161,7 @@ export default function Activities() {
                     ].map(opt => (
                         <button
                             key={opt.value}
-                            onClick={() => setTypeFilter(opt.value)}
+                            onClick={() => { setTypeFilter(opt.value); setPage(0); }}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${typeFilter === opt.value ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
                         >
                             {opt.label}
@@ -195,9 +199,8 @@ export default function Activities() {
                     className="grid gap-4"
                 >
                     {activities.filter(a => {
-                        if (typeFilter !== 'ALL' && a.activityType !== typeFilter) return false;
+                        // Type and completion filters are server-side, owner filter is client-side
                         if (ownerFilter !== 'ALL' && `${a.owner.firstName} ${a.owner.lastName}`.trim() !== ownerFilter) return false;
-                        if (!showCompleted && a.isCompleted) return false;
                         return true;
                     }).map((activity) => {
                         const Icon = ICONS[activity.activityType as keyof typeof ICONS] || CheckCircle;
@@ -264,9 +267,7 @@ export default function Activities() {
                         />
                     )}
                     {activities.length > 0 && activities.filter(a => {
-                        if (typeFilter !== 'ALL' && a.activityType !== typeFilter) return false;
                         if (ownerFilter !== 'ALL' && `${a.owner.firstName} ${a.owner.lastName}`.trim() !== ownerFilter) return false;
-                        if (!showCompleted && a.isCompleted) return false;
                         return true;
                     }).length === 0 && (
                         <EmptyState

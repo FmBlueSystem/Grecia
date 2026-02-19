@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Building2, TrendingUp, Activity, X, Filter, Download, FileText } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart3, Building2, TrendingUp, Activity, Download, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { RevenueChart, PipelineChart, PerformanceChart, ActivityChart } from '../../components/Charts';
 import { staggerContainer, fadeIn, slideUp, scaleIn } from '../../lib/animations';
@@ -16,8 +16,6 @@ export default function SalesDashboard() {
     const scopeLevel = useAuthStore(s => s.user?.scopeLevel);
     const navigate = useNavigate();
     const isOwn = scopeLevel === 'OWN';
-    const [filterModalOpen, setFilterModalOpen] = useState(false);
-    const [selectedChart, setSelectedChart] = useState<string | null>(null);
     const [stats, setStats] = useState<any>(null);
     const [drilldownOpen, setDrilldownOpen] = useState(false);
     const [drilldownType, setDrilldownType] = useState<KpiType>('revenue');
@@ -32,12 +30,7 @@ export default function SalesDashboard() {
 
     useEffect(() => {
         fetchStats(filterMonths);
-    }, []);
-
-    const handleChartClick = (chartInfo: any) => {
-        setSelectedChart(chartInfo?.type || 'Gráfico');
-        setFilterModalOpen(true);
-    };
+    }, [filterMonths]);
 
     const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
@@ -71,68 +64,6 @@ export default function SalesDashboard() {
     return (
         <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            {/* Filter Modal */}
-            <AnimatePresence>
-                {filterModalOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
-                        onClick={() => setFilterModalOpen(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-md overflow-hidden"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="p-6 border-b border-slate-100/50 flex justify-between items-center bg-indigo-50/30">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-indigo-100/50 rounded-xl text-indigo-600 shadow-sm">
-                                        <Filter className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-slate-900 text-lg">Filtrar: {selectedChart}</h3>
-                                        <p className="text-sm text-slate-500">Ajustar visualización de datos</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setFilterModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            <div className="p-6 space-y-5">
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Rango de Fecha</label>
-                                    <select
-                                        value={filterMonths}
-                                        onChange={(e) => setFilterMonths(Number(e.target.value))}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200/60 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white/50 text-sm font-medium"
-                                    >
-                                        <option value={1}>Este Mes</option>
-                                        <option value={3}>Último Trimestre</option>
-                                        <option value={6}>Últimos 6 Meses</option>
-                                        <option value={12}>Año Actual</option>
-                                    </select>
-                                </div>
-                                <p className="text-xs text-slate-400">Los datos se actualizan según la compañía seleccionada en el sidebar.</p>
-                            </div>
-
-                            <div className="p-6 border-t border-slate-100/50 bg-slate-50/50 flex justify-end gap-3">
-                                <button onClick={() => setFilterModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 rounded-xl transition-colors">
-                                    Cancelar
-                                </button>
-                                <button onClick={() => { fetchStats(filterMonths); setFilterModalOpen(false); }} className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95">
-                                    Aplicar Filtros
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             {/* Header */}
             <motion.div variants={fadeIn} className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
                 <div>
@@ -145,6 +76,22 @@ export default function SalesDashboard() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-slate-200/60 rounded-xl p-1">
+                        {[
+                            { value: 1, label: '1M' },
+                            { value: 3, label: '3M' },
+                            { value: 6, label: '6M' },
+                            { value: 12, label: '1A' },
+                        ].map(opt => (
+                            <button
+                                key={opt.value}
+                                onClick={() => setFilterMonths(opt.value)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterMonths === opt.value ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
                     {isOwn && (
                         <button
                             onClick={() => navigate('/quotes')}
@@ -207,34 +154,30 @@ export default function SalesDashboard() {
                 <ChartCard
                     title={isOwn ? 'Mi Embudo' : 'Embudo de Ventas'}
                     subtitle={isOwn ? 'Ofertas y órdenes abiertas' : 'Conversión por etapa'}
-                    onClick={() => handleChartClick({ type: 'Pipeline' })}
                 >
-                    <PipelineChart data={stats?.charts?.pipeline} onChartClick={(d) => handleChartClick({ ...d, type: 'Pipeline' })} />
+                    <PipelineChart data={stats?.charts?.pipeline} />
                 </ChartCard>
 
                 <ChartCard
                     title={isOwn ? 'Mis Ingresos vs Objetivo' : 'Ingresos vs Objetivo'}
                     subtitle={isOwn ? 'Tu rendimiento mensual vs meta' : 'Rendimiento mensual vs meta'}
-                    onClick={() => handleChartClick({ type: 'Revenue' })}
                 >
-                    <RevenueChart data={stats?.charts?.revenue} onChartClick={(d) => handleChartClick({ ...d, type: 'Revenue' })} />
+                    <RevenueChart data={stats?.charts?.revenue} />
                 </ChartCard>
 
                 <ChartCard
                     title={isOwn ? 'Mi Actividad' : 'Actividad del Equipo'}
                     subtitle={isOwn ? 'Tus llamadas y reuniones (esta semana)' : 'Llamadas y reuniones (Última semana)'}
-                    onClick={() => handleChartClick({ type: 'Actividad' })}
                 >
-                    <ActivityChart data={stats?.charts?.activity} onChartClick={(d) => handleChartClick({ ...d, type: 'Actividad' })} />
+                    <ActivityChart data={stats?.charts?.activity} />
                 </ChartCard>
 
                 {scopeLevel !== 'OWN' && (
                     <ChartCard
                         title="Mejores Vendedores"
                         subtitle="Líderes en ingresos generados"
-                        onClick={() => handleChartClick({ type: 'Performance' })}
                     >
-                        <PerformanceChart data={stats?.charts?.topSellers} onChartClick={(d) => handleChartClick({ ...d, type: 'Performance' })} />
+                        <PerformanceChart data={stats?.charts?.topSellers} />
                     </ChartCard>
                 )}
             </div>
@@ -243,21 +186,17 @@ export default function SalesDashboard() {
 }
 
 // Sub-component for Charts
-function ChartCard({ title, subtitle, children, onClick }: { title: string, subtitle: string, children: React.ReactNode, onClick: () => void }) {
+function ChartCard({ title, subtitle, children }: { title: string, subtitle: string, children: React.ReactNode }) {
     return (
         <motion.div
             variants={scaleIn}
-            className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/20 shadow-xl shadow-slate-200/50 group hover:bg-white/80 transition-all cursor-pointer relative overflow-hidden"
-            onDoubleClick={onClick}
+            className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/20 shadow-xl shadow-slate-200/50 hover:bg-white/80 transition-all relative overflow-hidden"
         >
             <div className="flex justify-between items-start mb-8">
                 <div>
                     <h4 className="text-xl font-bold text-slate-800">{title}</h4>
                     <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
                 </div>
-                <span className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    Doble clic para filtrar
-                </span>
             </div>
             <div className="chart-container">
                 {children}

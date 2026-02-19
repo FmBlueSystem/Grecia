@@ -8,10 +8,21 @@ export default async function activityRoutes(fastify: FastifyInstance) {
     fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {
             const query = request.query as Record<string, string>;
+            // Build OData filter from query params
+            const filters: string[] = [];
+            if (query.filter) filters.push(query.filter);
+            if (query.activityType) {
+                const typeMap: Record<string, number> = { Call: 0, Email: 4, Meeting: 1, Task: 2 };
+                const typeCode = typeMap[query.activityType];
+                if (typeCode !== undefined) filters.push(`ActivityType eq ${typeCode}`);
+            }
+            if (query.completed === 'true') filters.push('Status eq -3');
+            else if (query.completed === 'false') filters.push('Status ne -3');
+
             const params: PaginationParams = {
                 top: query.top ? Number(query.top) : 50,
                 skip: query.skip ? Number(query.skip) : 0,
-                filter: query.filter || undefined,
+                filter: filters.length > 0 ? filters.join(' and ') : undefined,
                 orderBy: query.orderBy || 'StartDate desc',
             };
             const { sapSalesPersonCode, scopeLevel } = request.user as any;
@@ -64,22 +75,25 @@ export default async function activityRoutes(fastify: FastifyInstance) {
                 subject: string;
                 cardCode?: string;
                 notes?: string;
+                dueDate?: string; // ISO date string YYYY-MM-DD
             };
 
-            // SAP Activity types: -1=General, 0=PhoneCall, 1=Meeting, 2=Task, 3=Note, 4=Other
+            // SAP Activity types: 0=PhoneCall, 1=Meeting, 2=Task, 3=Note, 4=Other(Email)
             const typeMap: Record<string, number> = {
-                Call: 0, Email: -1, Meeting: 1, Task: 2,
+                Call: 0, Email: 4, Meeting: 1, Task: 2,
             };
 
             const now = new Date();
+            const startDate = body.dueDate || now.toISOString().split('T')[0];
             const sapBody = {
                 ActivityType: typeMap[body.activityType] ?? -1,
                 Subject: -1, // SAP requires integer Subject code, -1 = Other
                 Notes: `${body.subject}${body.notes ? '\n' + body.notes : ''}`,
                 ...(body.cardCode && { CardCode: body.cardCode }),
                 HandledBy: sapSalesPersonCode || undefined,
-                StartDate: now.toISOString().split('T')[0],
-                CloseDate: now.toISOString().split('T')[0],
+                StartDate: startDate,
+                EndDate: startDate,
+                CloseDate: startDate,
                 StartTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`,
             };
 

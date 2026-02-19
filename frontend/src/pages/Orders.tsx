@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, MapPin, Search } from 'lucide-react';
-import { toast } from 'sonner';
 import api from '../lib/api';
 import { TableSkeleton, EmptyState } from '../components';
 import Pagination from '../components/shared/Pagination';
@@ -130,12 +129,12 @@ export default function Orders() {
                             >
                                 Ver Detalle
                             </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); toast.info(`Orden #${order.sapDocNum} — El estado logistico se actualiza automaticamente desde SAP.`); }}
-                                className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+                            <span
+                                className="text-xs font-medium text-slate-400 italic cursor-default"
+                                title="El estado logístico se sincroniza automáticamente desde SAP Business One"
                             >
-                                Actualizar Estado
-                            </button>
+                                Estado sincronizado desde SAP
+                            </span>
                         </div>
                     </div>
                 ))}
