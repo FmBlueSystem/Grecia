@@ -1,95 +1,152 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import DetailLayout from '../components/detail/DetailLayout';
 import InfoCard from '../components/detail/InfoCard';
-import Timeline from '../components/detail/Timeline';
-import SLAIndicator from '../components/detail/SLAIndicator';
 import StatusBadge from '../components/shared/StatusBadge';
-import { MessageSquare, UserCheck, Wrench, AlertTriangle, Phone } from 'lucide-react';
+import api from '../lib/api';
+
+interface CaseData {
+  id: string;
+  caseNumber: string;
+  title: string;
+  description?: string;
+  priority: string;
+  status: string;
+  origin?: string;
+  account?: { id: string; name: string } | null;
+  contact?: { id: string; firstName: string; lastName: string; email?: string; phone?: string; jobTitle?: string } | null;
+  owner?: { id: string; firstName: string; lastName: string; email?: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const PRIORITY_VARIANT: Record<string, 'error' | 'warning' | 'info' | 'neutral'> = {
+  CRITICAL: 'error',
+  HIGH: 'error',
+  NORMAL: 'warning',
+  LOW: 'info',
+};
+
+const STATUS_VARIANT: Record<string, 'error' | 'warning' | 'success' | 'info' | 'neutral'> = {
+  NEW: 'info',
+  IN_PROGRESS: 'warning',
+  RESOLVED: 'success',
+  CLOSED: 'neutral',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  NEW: 'Nuevo',
+  IN_PROGRESS: 'En Progreso',
+  RESOLVED: 'Resuelto',
+  CLOSED: 'Cerrado',
+};
+
+function getBPFSteps(status: string) {
+  const steps = ['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
+  const currentIdx = steps.indexOf(status);
+  return [
+    { label: 'Abierto', status: currentIdx > 0 ? 'completed' as const : currentIdx === 0 ? 'active' as const : 'pending' as const },
+    { label: 'En Progreso', status: currentIdx > 1 ? 'completed' as const : currentIdx === 1 ? 'active' as const : 'pending' as const },
+    { label: 'Resuelto', status: currentIdx > 2 ? 'completed' as const : currentIdx === 2 ? 'active' as const : 'pending' as const },
+    { label: 'Cerrado', status: currentIdx >= 3 ? 'active' as const : 'pending' as const },
+  ];
+}
 
 export default function CaseDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [caseData, setCaseData] = useState<CaseData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    api.get(`/cases/${id}`)
+      .then(res => setCaseData(res.data.data))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 text-brand animate-spin" />
+        <span className="ml-3 text-slate-500">Cargando caso...</span>
+      </div>
+    );
+  }
+
+  if (error || !caseData) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-slate-500 mb-4">No se encontró el caso solicitado.</p>
+        <button onClick={() => navigate('/cases')} className="text-brand font-medium hover:underline">Volver a Casos</button>
+      </div>
+    );
+  }
+
+  const fmtDate = (d: string) => new Date(d).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
     <DetailLayout
-      title={`CAS-${id || '5892'}`}
-      subtitle="Falla en selladora automática"
+      title={caseData.caseNumber}
+      subtitle={caseData.title}
       backPath="/cases"
       badges={
         <>
-          <StatusBadge label="En Progreso" variant="warning" />
-          <StatusBadge label="Alta" variant="error" dot />
+          <StatusBadge label={STATUS_LABEL[caseData.status] || caseData.status} variant={STATUS_VARIANT[caseData.status] || 'neutral'} />
+          <StatusBadge label={caseData.priority} variant={PRIORITY_VARIANT[caseData.priority] || 'neutral'} dot />
         </>
       }
-      actions={
-        <>
-          <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Escalar</button>
-          <button className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover">Resolver</button>
-        </>
-      }
-      bpfSteps={[
-        { label: 'Abierto', status: 'completed' },
-        { label: 'Asignado', status: 'completed' },
-        { label: 'En Progreso', status: 'active' },
-        { label: 'Resuelto', status: 'pending' },
-        { label: 'Cerrado', status: 'pending' },
-      ]}
+      bpfSteps={getBPFSteps(caseData.status)}
       left={
         <>
-          {/* Description */}
           <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Descripción del Caso</h3>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Descripcion del Caso</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              El cliente reporta que la selladora automática modelo SEL-2000 presenta fallas intermitentes
-              en el ciclo de sellado. La máquina se detiene aleatoriamente durante el proceso y muestra
-              el código de error E-47 en el panel. El técnico de planta realizó un reinicio sin éxito.
-              Se requiere visita técnica urgente ya que la línea de producción está detenida.
+              {caseData.description || 'Sin descripcion disponible.'}
             </p>
           </div>
 
-          {/* SLA */}
-          <SLAIndicator
-            label="Tiempo de Resolución SLA"
-            elapsed="18h"
-            total="24h"
-            percentage={75}
-            status="warning"
-          />
-
-          {/* Interaction Timeline */}
-          <Timeline
-            title="Interacciones"
-            events={[
-              { id: '1', title: 'Caso abierto por el cliente', description: 'Llamada de Ricardo Solano - Gerente de Planta', date: '12 Feb 2026, 08:30', icon: Phone, iconBg: 'bg-blue-50', iconColor: 'text-brand' },
-              { id: '2', title: 'Asignado a Roberto Vargas', description: 'Técnico Senior - Especialista en sellado', date: '12 Feb 2026, 09:00', icon: UserCheck, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
-              { id: '3', title: 'Diagnóstico remoto', description: 'Error E-47 indica falla en sensor de presión. Se requiere visita.', date: '12 Feb 2026, 10:15', icon: Wrench, iconBg: 'bg-amber-50', iconColor: 'text-amber-600' },
-              { id: '4', title: 'Alerta SLA', description: 'Quedan 6 horas para cumplir el SLA de resolución', date: '13 Feb 2026, 02:30', icon: AlertTriangle, iconBg: 'bg-red-50', iconColor: 'text-red-600' },
-              { id: '5', title: 'Nota del técnico', description: 'Visita programada para hoy 14 Feb. Llevando repuesto sensor presión SP-200.', date: '14 Feb 2026, 07:00', icon: MessageSquare, iconBg: 'bg-sky-50', iconColor: 'text-sky-600' },
-            ]}
-          />
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Linea de Tiempo</h3>
+            <div className="space-y-3 text-sm text-slate-600">
+              <div className="flex justify-between">
+                <span>Creado</span>
+                <span className="font-medium text-slate-900">{fmtDate(caseData.createdAt)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Ultima actualizacion</span>
+                <span className="font-medium text-slate-900">{fmtDate(caseData.updatedAt)}</span>
+              </div>
+            </div>
+          </div>
         </>
       }
       right={
         <>
           <InfoCard
-            title="Información del Caso"
+            title="Informacion del Caso"
             fields={[
-              { label: 'Cliente', value: 'Empacadora CR Industrial' },
-              { label: 'Equipo', value: 'Selladora SEL-2000' },
-              { label: 'Serie', value: 'SN-2024-CR-0847' },
-              { label: 'Técnico', value: 'Roberto Vargas' },
-              { label: 'Prioridad', value: <StatusBadge label="Alta" variant="error" dot /> },
-              { label: 'Canal', value: 'Teléfono' },
+              { label: 'Numero', value: caseData.caseNumber },
+              { label: 'Cliente', value: caseData.account?.name || 'Sin asignar' },
+              { label: 'Prioridad', value: <StatusBadge label={caseData.priority} variant={PRIORITY_VARIANT[caseData.priority] || 'neutral'} dot /> },
+              { label: 'Origen', value: caseData.origin || '-' },
+              { label: 'Responsable', value: caseData.owner ? `${caseData.owner.firstName} ${caseData.owner.lastName}` : 'Sin asignar' },
             ]}
           />
-          <InfoCard
-            title="Contacto del Cliente"
-            fields={[
-              { label: 'Nombre', value: 'Ricardo Solano' },
-              { label: 'Cargo', value: 'Gerente de Planta' },
-              { label: 'Teléfono', value: '+506 2222-3344' },
-              { label: 'Email', value: 'rsolano@empacadora.cr' },
-            ]}
-          />
+          {caseData.contact && (
+            <InfoCard
+              title="Contacto"
+              fields={[
+                { label: 'Nombre', value: `${caseData.contact.firstName} ${caseData.contact.lastName}` },
+                ...(caseData.contact.jobTitle ? [{ label: 'Cargo', value: caseData.contact.jobTitle }] : []),
+                ...(caseData.contact.phone ? [{ label: 'Telefono', value: caseData.contact.phone }] : []),
+                ...(caseData.contact.email ? [{ label: 'Email', value: caseData.contact.email }] : []),
+              ]}
+            />
+          )}
         </>
       }
     />

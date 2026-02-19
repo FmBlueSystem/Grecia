@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Check, X, ArrowRight, Building2, Briefcase, DollarSign, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
+import { toast } from 'sonner';
 
 interface Lead {
     id: string;
@@ -56,7 +57,7 @@ export default function Leads() {
             setLeads(leads.map(l => l.id === leadId ? { ...l, status: 'QUALIFIED' } : l));
             setShowQualifyModal(null);
         } catch (err) {
-            alert("Error al calificar prospecto");
+            toast.error("Error al calificar prospecto");
         }
     };
 

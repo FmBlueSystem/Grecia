@@ -21,6 +21,7 @@ const Invoices = lazy(() => import('./pages/Invoices'));
 const InvoiceDetail = lazy(() => import('./pages/InvoiceDetail'));
 const Activities = lazy(() => import('./pages/Activities'));
 const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Cases = lazy(() => import('./pages/Cases'));
 const CaseDetail = lazy(() => import('./pages/CaseDetail'));
 const LostDeals = lazy(() => import('./pages/LostDeals'));
@@ -78,6 +79,7 @@ function App() {
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/activities" element={<Activities />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
 
             {/* GESTION */}
             <Route path="/cases" element={<Cases />} />

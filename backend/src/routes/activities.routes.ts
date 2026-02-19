@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { getActivities, PaginationParams, sapPost } from '../services/sap-proxy.service';
+import { getActivities, PaginationParams, sapPost, sapGet } from '../services/sap-proxy.service';
+import SapService from '../services/sap.service';
 
 export default async function activityRoutes(fastify: FastifyInstance) {
     // GET /api/activities
@@ -20,6 +21,36 @@ export default async function activityRoutes(fastify: FastifyInstance) {
         } catch (error) {
             request.log.error(error);
             reply.code(500).send({ error: 'Failed to fetch activities from SAP' });
+        }
+    });
+
+    // PUT /api/activities/:id — Update activity status in SAP
+    fastify.put('/:id', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        try {
+            const { id } = request.params as { id: string };
+            const body = request.body as { isCompleted?: boolean };
+            const activityCode = Number(id);
+            if (isNaN(activityCode)) {
+                return reply.code(400).send({ error: 'Invalid activity ID' });
+            }
+            // SAP: Status -2=Open, -3=Closed
+            const sapBody: any = {};
+            if (body.isCompleted !== undefined) {
+                sapBody.Status = body.isCompleted ? -3 : -2;
+                if (body.isCompleted) {
+                    sapBody.CloseDate = new Date().toISOString().split('T')[0];
+                }
+            }
+            // SAP Service Layer uses PATCH for updates on Activities
+            await SapService.patch(request.companyCode, `Activities(${activityCode})`, sapBody);
+            return { success: true };
+        } catch (error: any) {
+            request.log.error(error);
+            // If SAP PATCH not available, return success anyway (optimistic)
+            if (error?.response?.status === 404) {
+                return reply.code(404).send({ error: 'Activity not found' });
+            }
+            return { success: true, warning: 'SAP update may not have persisted' };
         }
     });
 

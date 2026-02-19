@@ -11,7 +11,11 @@ class SapService {
     private sessions: Map<string, Session> = new Map();
     private baseUrl: string = 'https://sap-stiacmzdr-sl.skyinone.net:50000/b1s/v1';
 
-    private constructor() { }
+    private constructor() {
+        if (!process.env.SAP_USER || !process.env.SAP_PASSWORD) {
+            console.warn('[SAP] SAP_USER/SAP_PASSWORD no configurados — usando credenciales por defecto.');
+        }
+    }
 
     public static getInstance(): SapService {
         if (!SapService.instance) {
@@ -81,6 +85,12 @@ class SapService {
         });
 
         return client;
+    }
+
+    public async patch(companyCode: CountryCode, path: string, data: any): Promise<any> {
+        const client = await this.getClient(companyCode);
+        const response = await client.patch(`/${path}`, data);
+        return response.data;
     }
 }
 

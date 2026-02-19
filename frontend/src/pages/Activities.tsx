@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Building2, Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import api from '../lib/api';
+
+interface AccountOption {
+    id: string;
+    name: string;
+    code: string;
+}
 
 interface Activity {
     id: string;
@@ -41,23 +47,38 @@ export default function Activities() {
     const [ownerFilter, setOwnerFilter] = useState<string>('ALL');
     const [showCompleted, setShowCompleted] = useState(true);
 
+    // Accounts for selector
+    const [accounts, setAccounts] = useState<AccountOption[]>([]);
+    const [accountSearch, setAccountSearch] = useState('');
+
     // Form
     const [formData, setFormData] = useState({
         activityType: 'Task',
         subject: '',
         description: '',
         dueDate: '',
-        ownerId: ''
+        ownerId: '',
+        cardCode: ''
     });
 
     useEffect(() => {
         fetchActivities();
+        api.get('/accounts?top=200').then(r => {
+            const list = (r.data?.data || []).map((a: any) => ({ id: a.id, name: a.name, code: a.id }));
+            setAccounts(list);
+        }).catch(() => {});
         const user = localStorage.getItem('user');
         if (user) {
             const userData = JSON.parse(user);
             setFormData(prev => ({ ...prev, ownerId: userData.id }));
         }
     }, []);
+
+    const filteredAccounts = useMemo(() => {
+        if (!accountSearch) return accounts.slice(0, 20);
+        const q = accountSearch.toLowerCase();
+        return accounts.filter(a => a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)).slice(0, 20);
+    }, [accounts, accountSearch]);
 
     const fetchActivities = async () => {
         try {
@@ -73,10 +94,16 @@ export default function Activities() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post('/activities', formData);
+            await api.post('/activities', {
+                activityType: formData.activityType,
+                subject: formData.subject,
+                notes: formData.description || undefined,
+                cardCode: formData.cardCode || undefined,
+            });
             setShowModal(false);
             fetchActivities();
-            setFormData(prev => ({ ...prev, subject: '', description: '', dueDate: '', activityType: 'Task' }));
+            setFormData(prev => ({ ...prev, subject: '', description: '', dueDate: '', activityType: 'Task', cardCode: '' }));
+            setAccountSearch('');
         } catch (err) {
             console.error("Error al crear actividad", err);
         }
@@ -293,6 +320,35 @@ export default function Activities() {
                                         value={formData.description}
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Cuenta / Cliente</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 mb-1"
+                                        placeholder="Buscar cuenta..."
+                                        value={accountSearch}
+                                        onChange={e => { setAccountSearch(e.target.value); setFormData({ ...formData, cardCode: '' }); }}
+                                    />
+                                    {accountSearch && !formData.cardCode && filteredAccounts.length > 0 && (
+                                        <div className="max-h-32 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg">
+                                            {filteredAccounts.map(acc => (
+                                                <button
+                                                    key={acc.id}
+                                                    type="button"
+                                                    onClick={() => { setFormData({ ...formData, cardCode: acc.code }); setAccountSearch(acc.name); }}
+                                                    className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 truncate"
+                                                >
+                                                    <span className="font-medium">{acc.name}</span>
+                                                    <span className="text-xs text-slate-400 ml-2">{acc.code}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {formData.cardCode && (
+                                        <p className="text-xs text-emerald-600 font-medium mt-1">Seleccionado: {accountSearch}</p>
+                                    )}
                                 </div>
 
                                 <div>

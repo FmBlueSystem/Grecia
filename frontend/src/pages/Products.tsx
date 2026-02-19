@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../lib/api';
 
 interface Product {
@@ -13,8 +15,26 @@ interface Product {
 }
 
 export default function Products() {
+    const navigate = useNavigate();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            await api.get('/products?top=50');
+            setLoading(true);
+            const res = await api.get('/products');
+            if (res.data?.data) setProducts(res.data.data);
+            toast.success('Catalogo sincronizado con SAP');
+        } catch {
+            toast.error('Error al sincronizar con SAP');
+        } finally {
+            setSyncing(false);
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         api.get('/products')
@@ -40,10 +60,17 @@ export default function Products() {
                     <p className="text-slate-500 mt-1">Sincronizado con SAP Business One</p>
                 </div>
                 <div className="flex gap-2">
-                    <button className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-slate-50">
-                        Sincronizar SAP
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                    >
+                        {syncing ? 'Sincronizando...' : 'Sincronizar SAP'}
                     </button>
-                    <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-indigo-700">
+                    <button
+                        onClick={() => toast.info('Los productos se gestionan desde SAP Business One')}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-indigo-700"
+                    >
                         Nuevo Producto
                     </button>
                 </div>
@@ -68,7 +95,7 @@ export default function Products() {
 
                         <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                             <span className="text-lg font-bold text-slate-900">{formatCurrency(product.price)}</span>
-                            <button className="text-indigo-600 text-sm font-bold hover:underline">Ver Detalle</button>
+                            <button onClick={() => navigate(`/products/${product.id}`)} className="text-indigo-600 text-sm font-bold hover:underline">Ver Detalle</button>
                         </div>
                     </div>
                 ))}

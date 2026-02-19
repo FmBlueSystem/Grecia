@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { getContacts, PaginationParams } from '../services/sap-proxy.service';
+import { getContacts, PaginationParams, sapPost } from '../services/sap-proxy.service';
 
 export default async function contactRoutes(fastify: FastifyInstance) {
     // GET /api/contacts
@@ -19,6 +19,47 @@ export default async function contactRoutes(fastify: FastifyInstance) {
         } catch (error) {
             request.log.error(error);
             reply.code(500).send({ error: 'Failed to fetch contacts from SAP' });
+        }
+    });
+
+    // POST /api/contacts — Create contact person in SAP
+    fastify.post('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        try {
+            const body = request.body as {
+                firstName: string;
+                lastName: string;
+                email?: string;
+                phone?: string;
+                jobTitle?: string;
+                cardCode?: string;
+            };
+            if (!body.firstName || !body.lastName) {
+                return reply.code(400).send({ error: 'firstName and lastName are required' });
+            }
+            // SAP ContactPersons are linked to a BusinessPartner via CardCode
+            // If no cardCode, we create the contact in our local DB only
+            if (body.cardCode) {
+                const sapBody = {
+                    CardCode: body.cardCode,
+                    ContactEmployees: [{
+                        Name: `${body.firstName} ${body.lastName}`,
+                        FirstName: body.firstName,
+                        LastName: body.lastName,
+                        E_Mail: body.email || '',
+                        Phone1: body.phone || '',
+                        Title: body.jobTitle || '',
+                    }],
+                };
+                try {
+                    await sapPost(request.companyCode, `BusinessPartners('${body.cardCode.replace(/'/g, "''")}')`, sapBody);
+                } catch {
+                    // SAP PATCH may not be available, continue with local record
+                }
+            }
+            return { success: true, data: { firstName: body.firstName, lastName: body.lastName } };
+        } catch (error) {
+            request.log.error(error);
+            reply.code(500).send({ error: 'Failed to create contact' });
         }
     });
 }

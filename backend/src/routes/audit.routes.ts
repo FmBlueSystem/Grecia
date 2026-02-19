@@ -52,10 +52,12 @@ export default async function auditRoutes(fastify: FastifyInstance) {
                 metadata?: Record<string, any>;
             };
 
+            // Lookup user details since JWT only has userId/email
+            const dbUser = await prisma.user.findUnique({ where: { id: user.userId }, select: { firstName: true, lastName: true } });
             const log = await prisma.auditLog.create({
                 data: {
-                    userId: user.id,
-                    userName: `${user.firstName} ${user.lastName}`,
+                    userId: user.userId,
+                    userName: dbUser ? `${dbUser.firstName} ${dbUser.lastName}` : user.email,
                     userEmail: user.email,
                     action: body.action,
                     entity: body.entity,

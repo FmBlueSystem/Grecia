@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, MapPin, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../lib/api';
 import Pagination from '../components/shared/Pagination';
 
@@ -117,10 +118,20 @@ export default function Orders() {
                             </div>
                         </div>
 
-                        {/* Admin Controls (Mock) */}
+                        {/* Admin Controls */}
                         <div className="mt-8 pt-4 border-t border-slate-50 flex justify-end gap-3">
-                            <button className="text-xs font-bold text-slate-500 hover:text-indigo-600">Ver en SAP</button>
-                            <button className="text-xs font-bold text-slate-500 hover:text-indigo-600">Actualizar Estado</button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); navigate(`/orders/${order.id}`); }}
+                                className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+                            >
+                                Ver Detalle
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); toast.info(`Orden #${order.sapDocNum} — El estado logistico se actualiza automaticamente desde SAP.`); }}
+                                className="text-xs font-bold text-slate-500 hover:text-indigo-600"
+                            >
+                                Actualizar Estado
+                            </button>
                         </div>
                     </div>
                 ))}

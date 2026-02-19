@@ -2,6 +2,11 @@ import { FastifyInstance } from 'fastify';
 import prisma from '../lib/prisma';
 import * as sapProxy from '../services/sap-proxy.service';
 
+// Escape single quotes for OData filter strings to prevent injection
+function escapeOData(str: string): string {
+    return str.replace(/'/g, "''");
+}
+
 export default async function searchRoutes(fastify: FastifyInstance) {
     // GET /api/search?q=texto&limit=5
     fastify.get('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
@@ -62,7 +67,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
                 // SAP Quotes
                 sapProxy.getQuotes(companyCode, {
-                    filter: `contains(CardName,'${q}')`,
+                    filter: `contains(CardName,'${escapeOData(q)}')`,
                     top: limit,
                 }, spCode)
                     .then(r => r.data.map((qt: any) => ({
@@ -76,7 +81,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
                 // SAP Orders
                 sapProxy.getOrders(companyCode, {
-                    filter: `contains(CardName,'${q}')`,
+                    filter: `contains(CardName,'${escapeOData(q)}')`,
                     top: limit,
                 }, spCode)
                     .then(r => r.data.map((o: any) => ({
@@ -90,7 +95,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
                 // SAP Invoices
                 sapProxy.getInvoices(companyCode, {
-                    filter: `contains(CardName,'${q}')`,
+                    filter: `contains(CardName,'${escapeOData(q)}')`,
                     top: limit,
                 }, spCode)
                     .then(r => r.data.map((inv: any) => ({

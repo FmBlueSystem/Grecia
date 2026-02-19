@@ -107,9 +107,10 @@ export default async function reportsRoutes(fastify: FastifyInstance) {
             for (const inv of invoices) {
                 entryToSeller.set(inv.DocEntry, inv.SalesPersonCode ?? -1);
             }
+            // Limit detail fetches to top 20 invoices to reduce SAP load
             const topInvoiceEntries = invoices
                 .sort((a: any, b: any) => (Number(b.DocTotal) || 0) - (Number(a.DocTotal) || 0))
-                .slice(0, 50)
+                .slice(0, 20)
                 .map((i: any) => i.DocEntry);
             const productMap = new Map<string, { code: string; name: string; qty: number; revenue: number; profit: number }>();
             const sellerProfit = new Map<number, number>(); // SalesPersonCode -> profit

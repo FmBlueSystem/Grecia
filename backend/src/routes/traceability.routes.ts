@@ -20,6 +20,8 @@ export default async function traceabilityRoutes(fastify: FastifyInstance) {
         try {
             const { docNum, type } = request.query as { docNum?: string; type?: string };
             if (!docNum) return reply.code(400).send({ error: 'Se requiere docNum' });
+            // Validate docNum is numeric to prevent OData injection
+            if (!/^\d+$/.test(docNum)) return reply.code(400).send({ error: 'docNum debe ser numerico' });
 
             const cc = request.companyCode as CountryCode;
             const spMap = await loadSalesPersons(cc);
