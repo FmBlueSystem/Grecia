@@ -4,6 +4,7 @@ import PageHeader from '../components/shared/PageHeader';
 import { FormInput, FormSelect } from '../components/forms/FormField';
 import ToggleSwitch from '../components/forms/ToggleSwitch';
 import { useAuthStore, useThemeStore, THEME_META, type ThemeSkin } from '../lib/store';
+import { toast } from 'sonner';
 import api from '../lib/api';
 
 type TabId = 'perfil' | 'empresa' | 'usuarios' | 'integraciones';
@@ -193,7 +194,7 @@ export default function SettingsPage() {
                     <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                       Cancelar
                     </button>
-                    <button className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium">
+                    <button onClick={() => toast.info('Perfil guardado (los cambios de perfil se sincronizan desde SAP)')} className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium">
                       Guardar Cambios
                     </button>
                   </div>

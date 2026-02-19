@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Shield, Clock, User, FileText, Loader2, Filter, ChevronRight } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import PaginationControls from '../components/shared/PaginationControls';
@@ -181,8 +181,8 @@ export default function AuditLogPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {entries.map((entry) => (
+                  <Fragment key={entry.id}>
                   <tr
-                    key={entry.id}
                     onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
                     className="hover:bg-slate-50 cursor-pointer transition-colors"
                   >
@@ -207,6 +207,43 @@ export default function AuditLogPage() {
                       <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${expandedId === entry.id ? 'rotate-90' : ''}`} />
                     </td>
                   </tr>
+                  {expandedId === entry.id && (
+                    <tr className="bg-slate-50/80">
+                      <td colSpan={7} className="px-6 py-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase">Email</span>
+                            <p className="text-slate-700">{entry.userEmail || '-'}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase">Entity ID</span>
+                            <p className="text-slate-700 font-mono text-xs break-all">{entry.entityId || '-'}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase">IP</span>
+                            <p className="text-slate-700 font-mono">{entry.ipAddress || '-'}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-slate-400 uppercase">Pais</span>
+                            <p className="text-slate-700">{entry.companyCode}</p>
+                          </div>
+                        </div>
+                        {entry.changes && Object.keys(entry.changes).length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <span className="text-xs font-semibold text-slate-400 uppercase mb-1 block">Cambios</span>
+                            <pre className="text-xs text-slate-600 bg-white rounded-lg p-3 border border-slate-200 overflow-x-auto max-h-32">{JSON.stringify(entry.changes, null, 2)}</pre>
+                          </div>
+                        )}
+                        {entry.metadata && Object.keys(entry.metadata).length > 0 && (
+                          <div className="mt-2">
+                            <span className="text-xs font-semibold text-slate-400 uppercase mb-1 block">Metadata</span>
+                            <pre className="text-xs text-slate-600 bg-white rounded-lg p-3 border border-slate-200 overflow-x-auto max-h-32">{JSON.stringify(entry.metadata, null, 2)}</pre>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import DetailLayout from '../components/detail/DetailLayout';
 import InfoCard from '../components/detail/InfoCard';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -115,7 +116,7 @@ export default function InvoiceDetail() {
       backPath="/invoices"
       badges={<StatusBadge label={statusInfo.label} variant={statusInfo.variant} />}
       actions={
-        <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Descargar PDF</button>
+        <button onClick={() => { toast.info('Descarga de PDF: disponible próximamente'); }} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Descargar PDF</button>
       }
       bpfSteps={bpfMap[invoice.status] || bpfMap.UNPAID}
       left={

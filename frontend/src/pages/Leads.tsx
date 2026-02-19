@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Check, X, ArrowRight, Building2, Briefcase, DollarSign, Clock } from 'lucide-react';
+import { Plus, Check, X, ArrowRight, Building2, Briefcase, DollarSign, Clock, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 import { toast } from 'sonner';
@@ -27,10 +27,15 @@ interface Lead {
     createdAt: string;
 }
 
+const EMPTY_FORM = { firstName: '', lastName: '', company: '', email: '', phone: '', jobTitle: '', need: '', budget: '', timeframe: '' };
+
 export default function Leads() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const [showQualifyModal, setShowQualifyModal] = useState<Lead | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createForm, setCreateForm] = useState(EMPTY_FORM);
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         fetchLeads();
@@ -44,6 +49,36 @@ export default function Leads() {
         } catch (err) {
             console.error(err);
             setLoading(false);
+        }
+    };
+
+    const handleCreate = async () => {
+        if (!createForm.firstName.trim() || !createForm.lastName.trim()) {
+            toast.error('Nombre y Apellido son requeridos');
+            return;
+        }
+        setCreating(true);
+        try {
+            const payload: Record<string, any> = {
+                firstName: createForm.firstName.trim(),
+                lastName: createForm.lastName.trim(),
+            };
+            if (createForm.company) payload.company = createForm.company;
+            if (createForm.email) payload.email = createForm.email;
+            if (createForm.phone) payload.phone = createForm.phone;
+            if (createForm.jobTitle) payload.jobTitle = createForm.jobTitle;
+            if (createForm.need) payload.need = createForm.need;
+            if (createForm.budget) payload.budget = Number(createForm.budget);
+            if (createForm.timeframe) payload.timeframe = createForm.timeframe;
+            const res = await api.post('/leads', payload);
+            if (res.data?.data) setLeads([res.data.data, ...leads]);
+            setShowCreateModal(false);
+            setCreateForm(EMPTY_FORM);
+            toast.success('Lead creado exitosamente');
+        } catch {
+            toast.error('Error al crear lead');
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -74,7 +109,7 @@ export default function Leads() {
                     <h2 className="text-3xl font-bold text-slate-900">Leads (Etapa 1-2)</h2>
                     <p className="text-slate-500 mt-1">Captación, Calificación y Conversión</p>
                 </div>
-                <button className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2">
+                <button onClick={() => setShowCreateModal(true)} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:shadow-lg transition-all flex items-center gap-2">
                     <Plus className="w-5 h-5" />
                     Ingreso Manual
                 </button>
@@ -217,6 +252,82 @@ export default function Leads() {
                                         Este lead ya ha sido calificado y convertido.
                                     </div>
                                 )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Create Lead Modal */}
+            <AnimatePresence>
+                {showCreateModal && (
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-slate-900">Nuevo Lead</h3>
+                                <button onClick={() => { setShowCreateModal(false); setCreateForm(EMPTY_FORM); }} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X className="w-5 h-5 text-slate-500" /></button>
+                            </div>
+                            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Nombre *</label>
+                                        <input value={createForm.firstName} onChange={e => setCreateForm({ ...createForm, firstName: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Apellido *</label>
+                                        <input value={createForm.lastName} onChange={e => setCreateForm({ ...createForm, lastName: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1">Empresa</label>
+                                    <input value={createForm.company} onChange={e => setCreateForm({ ...createForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                                        <input type="email" value={createForm.email} onChange={e => setCreateForm({ ...createForm, email: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
+                                        <input value={createForm.phone} onChange={e => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1">Cargo</label>
+                                    <input value={createForm.jobTitle} onChange={e => setCreateForm({ ...createForm, jobTitle: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1">Necesidad</label>
+                                    <textarea value={createForm.need} onChange={e => setCreateForm({ ...createForm, need: e.target.value })} rows={2} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none resize-none" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Presupuesto (USD)</label>
+                                        <input type="number" value={createForm.budget} onChange={e => setCreateForm({ ...createForm, budget: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Plazo</label>
+                                        <select value={createForm.timeframe} onChange={e => setCreateForm({ ...createForm, timeframe: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none bg-white">
+                                            <option value="">Seleccionar...</option>
+                                            <option value="Inmediato">Inmediato</option>
+                                            <option value="1-3 meses">1-3 meses</option>
+                                            <option value="3-6 meses">3-6 meses</option>
+                                            <option value="6-12 meses">6-12 meses</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-slate-100 flex justify-end gap-3">
+                                <button onClick={() => { setShowCreateModal(false); setCreateForm(EMPTY_FORM); }} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900">Cancelar</button>
+                                <button onClick={handleCreate} disabled={creating} className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2">
+                                    {creating && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    Crear Lead
+                                </button>
                             </div>
                         </motion.div>
                     </div>

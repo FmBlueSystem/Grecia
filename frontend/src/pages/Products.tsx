@@ -23,16 +23,13 @@ export default function Products() {
     const handleSync = async () => {
         setSyncing(true);
         try {
-            await api.get('/products?top=50');
-            setLoading(true);
-            const res = await api.get('/products');
+            const res = await api.get('/products?top=100');
             if (res.data?.data) setProducts(res.data.data);
             toast.success('Catalogo sincronizado con SAP');
         } catch {
             toast.error('Error al sincronizar con SAP');
         } finally {
             setSyncing(false);
-            setLoading(false);
         }
     };
 

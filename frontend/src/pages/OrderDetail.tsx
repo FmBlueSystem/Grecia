@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import DetailLayout from '../components/detail/DetailLayout';
 import InfoCard from '../components/detail/InfoCard';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -97,7 +98,7 @@ export default function OrderDetail() {
       backPath="/orders"
       badges={<StatusBadge label={statusLabel} variant={statusVariant} />}
       actions={
-        <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Imprimir</button>
+        <button onClick={() => { toast.info('Preparando impresión...'); window.print(); }} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Imprimir</button>
       }
       bpfSteps={bpfSteps}
       left={

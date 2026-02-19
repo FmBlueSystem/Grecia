@@ -135,8 +135,8 @@ export default function QuoteDetail() {
             {copying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
             Copiar a Orden
           </button>
-          <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Duplicar</button>
-          <button className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover">Enviar al Cliente</button>
+          <button onClick={() => toast.info('Duplicar oferta: disponible próximamente')} className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Duplicar</button>
+          <button onClick={() => toast.info('Envío al cliente por email: disponible próximamente')} className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover">Enviar al Cliente</button>
         </>
       }
       bpfSteps={bpfMap[quote.status] || bpfMap.SENT}

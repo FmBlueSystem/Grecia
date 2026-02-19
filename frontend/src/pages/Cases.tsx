@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LifeBuoy, Loader2, Clock, CheckCircle, MoreHorizontal, MessageSquare } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LifeBuoy, Loader2, Clock, CheckCircle, MoreHorizontal, MessageSquare, Plus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../lib/animations';
 import PageHeader from '../components/shared/PageHeader';
+import { toast } from 'sonner';
 import api from '../lib/api';
+import { useAuthStore } from '../lib/store';
 
 interface Case {
   id: string;
@@ -33,11 +35,41 @@ const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; c
   CLOSED: { label: 'Cerrado', icon: CheckCircle, color: 'bg-slate-100 text-slate-600' },
 };
 
+const EMPTY_CASE = { title: '', description: '', priority: 'NORMAL', origin: 'WEB' };
+
 export default function Cases() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState(EMPTY_CASE);
+  const [creating, setCreating] = useState(false);
+
+  const handleCreateCase = async () => {
+    if (!form.title.trim()) { toast.error('El título es requerido'); return; }
+    setCreating(true);
+    try {
+      const caseNumber = `CS-${Date.now().toString(36).toUpperCase()}`;
+      const res = await api.post('/cases', {
+        title: form.title.trim(),
+        description: form.description || undefined,
+        priority: form.priority,
+        origin: form.origin || undefined,
+        caseNumber,
+        ownerId: user?.id,
+      });
+      if (res.data?.data) setCases([res.data.data, ...cases]);
+      setShowCreate(false);
+      setForm(EMPTY_CASE);
+      toast.success('Caso creado exitosamente');
+    } catch {
+      toast.error('Error al crear caso');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   useEffect(() => {
     api.get('/cases')
@@ -70,6 +102,9 @@ export default function Cases() {
             { label: 'Casos' },
           ]}
         />
+        <button onClick={() => setShowCreate(true)} className="bg-brand text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:shadow-lg transition-all">
+          <Plus className="w-4 h-4" /> Nuevo Caso
+        </button>
       </motion.div>
 
       {/* Filter pills */}
@@ -141,6 +176,56 @@ export default function Cases() {
           )}
         </div>
       </motion.div>
+      {/* Create Case Modal */}
+      <AnimatePresence>
+        {showCreate && (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+              <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-slate-900">Nuevo Caso</h3>
+                <button onClick={() => { setShowCreate(false); setForm(EMPTY_CASE); }} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X className="w-5 h-5 text-slate-500" /></button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Título *</label>
+                  <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none" placeholder="Ej: Problema con facturación" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Descripción</label>
+                  <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none resize-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Prioridad</label>
+                    <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none">
+                      <option value="LOW">Baja</option>
+                      <option value="NORMAL">Normal</option>
+                      <option value="HIGH">Alta</option>
+                      <option value="CRITICAL">Critica</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Origen</label>
+                    <select value={form.origin} onChange={e => setForm({ ...form, origin: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none">
+                      <option value="WEB">Web</option>
+                      <option value="PHONE">Teléfono</option>
+                      <option value="EMAIL">Email</option>
+                      <option value="IN_PERSON">En Persona</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 border-t border-slate-100 flex justify-end gap-3">
+                <button onClick={() => { setShowCreate(false); setForm(EMPTY_CASE); }} className="px-4 py-2 text-sm font-medium text-slate-600">Cancelar</button>
+                <button onClick={handleCreateCase} disabled={creating} className="px-5 py-2 bg-brand text-white rounded-lg text-sm font-bold hover:bg-brand-hover disabled:opacity-50 flex items-center gap-2">
+                  {creating && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Crear Caso
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
