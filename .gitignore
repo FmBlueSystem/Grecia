@@ -51,3 +51,12 @@ coverage/
 # Temporary/Test files
 assets/misc/
 *.tmp
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Build artifacts (alternate dist)
+frontend/dist-xy/
+
+# Design files
+*.pen

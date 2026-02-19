@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueSystem.IO | Software Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@100;300;400;700&family=JetBrains+Mono:wght@100;300;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        ::selection {
+            background: #3b82f6;
+            color: white;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.05), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        #hero-container {
+            transition: opacity 1.2s ease-in-out, transform 1.2s ease-in-out;
+        }
+
+        #hero-container.fade-out {
+            opacity: 0;
+            transform: scale(1.05);
+        }
+
+        .hero-blue {
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(-80px);
+            opacity: 0;
+        }
+
+        .hero-blue.assemble {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .hero-system {
+            transition: all 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(80px);
+            opacity: 0;
+        }
+
+        .hero-system.assemble {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .hero-io {
+            transition: all 2.5s ease-out;
+            transition-delay: 0.3s;
+            transform: translateY(40px);
+            opacity: 0;
+        }
+
+        .hero-io.assemble {
+            transform: translateY(0);
+            opacity: 0.3;
+        }
+
+        .hero-subtitle {
+            transition: all 4s ease-out;
+            transition-delay: 0.5s;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        .hero-subtitle.assemble {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .hero-line {
+            transition: all 2.5s ease-out;
+            transition-delay: 1s;
+            width: 0;
+            opacity: 0;
+        }
+
+        .hero-line.assemble {
+            width: 100%;
+            opacity: 1;
+        }
+
+        .glow-bg {
+            transition: all 3s ease-out;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .glow-bg.assemble {
+            opacity: 1;
+            transform: scale(1.25);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div id="hero-container" class="relative h-screen w-full flex items-center justify-center bg-black overflow-hidden">
+        <canvas id="particle-canvas" class="absolute inset-0 z-0"></canvas>
+        <div class="scan-line"></div>
+        
+        <div class="glow-bg absolute w-[800px] h-[400px] bg-blue-600/10 blur-[150px] rounded-full"></div>
+
+        <div class="relative z-10 flex flex-col items-center">
+            <div class="flex items-center space-x-0">
+                <div class="hero-blue">
+                    <h1 class="font-orbitron text-7xl md:text-9xl font-black tracking-[-0.05em] bg-gradient-to-b from-white to-neutral-500 bg-clip-text text-transparent">
+                        Blue
+                    </h1>
+                </div>
+
+                <div class="hero-system">
+                    <h1 class="font-orbitron text-7xl md:text-9xl font-black italic tracking-[-0.02em] text-blue-600" style="filter: drop-shadow(0 0 40px rgba(37,99,235,0.4))">
+                        System
+                    </h1>
+                </div>
+                
+                <div class="hero-io">
+                    <span class="font-mono text-3xl md:text-5xl font-extralight ml-4 text-white">.IO</span>
+                </div>
+            </div>
+
+            <div class="relative h-12 mt-4 overflow-hidden w-full flex justify-center">
+                <p class="hero-subtitle font-orbitron text-[10px] uppercase font-bold tracking-[2.5em] text-blue-400/50">
+                    Software Architecture
+                </p>
+                
+                <div class="hero-line absolute bottom-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+            </div>
+        </div>
+
+        <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at 50% 50%, transparent 20%, black 100%)"></div>
+        
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url('https://grainy-gradients.vercel.app/noise.svg')"></div>
+    </div>
+
+
+
+    <script>
+        // Particle System
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 150;
+        let status = 'init';
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2;
+                this.color = Math.random() > 0.8 ? '#60a5fa' : '#ffffff';
+                this.alpha = Math.random() * 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (status === 'assemble') {
+                    const dx = (canvas.width / 2) - this.x;
+                    const dy = (canvas.height / 2) - this.y;
+                    this.vx += dx * 0.00001;
+                    this.vy += dy * 0.00001;
+                }
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Animation sequence
+        setTimeout(() => {
+            status = 'assemble';
+            document.querySelector('.hero-blue').classList.add('assemble');
+            document.querySelector('.hero-system').classList.add('assemble');
+            document.querySelector('.hero-io').classList.add('assemble');
+            document.querySelector('.hero-subtitle').classList.add('assemble');
+            document.querySelector('.hero-line').classList.add('assemble');
+            document.querySelector('.glow-bg').classList.add('assemble');
+        }, 500);
+
+        // Mantener el logo visible por 2 segundos y luego desaparecer
+        setTimeout(() => {
+            document.getElementById('hero-container').classList.add('fade-out');
+        }, 4500);
+
+        // Opcional: recargar o redirigir después del fade-out
+        setTimeout(() => {
+            // Aquí puedes redirigir a otra página si lo necesitas
+            // window.location.href = 'main.html';
+        }, 5800);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
