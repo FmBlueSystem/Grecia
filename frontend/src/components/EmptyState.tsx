@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ButtonLoading } from './ButtonLoading';
 
 // Tipo para iconos de Lucide

@@ -164,7 +164,7 @@ export default function ForecastSection() {
                                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} />
                                 <YAxis tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
                                 <Tooltip
-                                    formatter={(value: number, name: string) => [fmt(value), name === 'total' ? 'Total' : 'Ponderado']}
+                                    formatter={((value: number | undefined, name?: string) => [fmt(value ?? 0), name === 'total' ? 'Total' : 'Ponderado']) as any}
                                     contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
                                 />
                                 <Legend formatter={v => v === 'total' ? 'Total' : 'Ponderado'} />

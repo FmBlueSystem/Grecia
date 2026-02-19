@@ -1,8 +1,8 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-interface ButtonLoadingProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonLoadingProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart'> {
   loading?: boolean;
   children: ReactNode;
   loadingText?: string;
@@ -72,7 +72,7 @@ export function IconButtonLoading({
 }: {
   loading?: boolean;
   icon: React.ElementType;
-} & ButtonHTMLAttributes<HTMLButtonElement>) {
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart'>) {
   return (
     <motion.button
       whileHover={!loading ? { scale: 1.1 } : {}}
