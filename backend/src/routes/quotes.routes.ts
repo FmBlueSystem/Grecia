@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getQuotes, getQuoteById, PaginationParams, sapPost, sapGet, CountryCode } from '../services/sap-proxy.service';
+import { sendError, extractSapError } from '../lib/errors';
 
 export default async function quoteRoutes(fastify: FastifyInstance) {
     // GET /api/quotes
@@ -19,7 +20,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             return { data: result.data, total: result.total };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch quotes from SAP' });
+            sendError(reply, 500, 'Error al obtener cotizaciones');
         }
     });
 
@@ -36,7 +37,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             };
 
             if (!body.cardCode || !body.lines?.length) {
-                return reply.code(400).send({ error: 'Se requiere cardCode y al menos una línea' });
+                return sendError(reply, 400, 'Se requiere cardCode y al menos una línea');
             }
 
             const sapBody: any = {
@@ -67,8 +68,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             });
         } catch (error: any) {
             request.log.error(error);
-            const sapMsg = error.response?.data?.error?.message?.value;
-            reply.code(500).send({ error: sapMsg || 'Error al crear cotización en SAP' });
+            sendError(reply, 500, extractSapError(error));
         }
     });
 
@@ -80,10 +80,10 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             return { data: quote };
         } catch (error: any) {
             if (error.response?.status === 404) {
-                return reply.code(404).send({ error: 'Quote not found' });
+                return sendError(reply, 404, 'Cotización no encontrada');
             }
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch quote from SAP' });
+            sendError(reply, 500, 'Error al obtener cotización');
         }
     });
 
@@ -95,7 +95,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             // 1. Obtener la cotización original de SAP
             const quote = await sapGet(cc, `Quotations(${id})`);
             if (!quote || !quote.DocEntry) {
-                return reply.code(404).send({ error: 'Oferta no encontrada en SAP' });
+                return sendError(reply, 404, 'Oferta no encontrada en SAP');
             }
 
             // 2. Construir DocumentLines referenciando la cotización origen
@@ -106,7 +106,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             }));
 
             if (lines.length === 0) {
-                return reply.code(400).send({ error: 'La oferta no tiene líneas para copiar' });
+                return sendError(reply, 400, 'La oferta no tiene líneas para copiar');
             }
 
             // 3. Crear la orden en SAP con referencia a la cotización
@@ -130,8 +130,7 @@ export default async function quoteRoutes(fastify: FastifyInstance) {
             });
         } catch (error: any) {
             request.log.error(error);
-            const sapMsg = error.response?.data?.error?.message?.value;
-            reply.code(500).send({ error: sapMsg || 'Error al copiar oferta a orden en SAP' });
+            sendError(reply, 500, extractSapError(error));
         }
     });
 }

@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { Suspense, lazy } from 'react';
 import { useAuthStore } from './lib/store';
 import AppShell from './components/layout/AppShell';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loader2 } from 'lucide-react';
 
 // Lazy-loaded pages for code-splitting
@@ -55,6 +56,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Toaster position="top-right" richColors closeButton expand={false} duration={4000} />
       <Suspense fallback={<PageLoader />}>
@@ -109,6 +111,7 @@ function App() {
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

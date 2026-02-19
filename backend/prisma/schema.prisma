@@ -340,6 +340,8 @@ model Quote {
   
   @@index([quoteNumber])
   @@index([status])
+  @@index([accountId])
+  @@index([ownerId])
 }
 
 model QuoteItem {
@@ -354,6 +356,9 @@ model QuoteItem {
   unitPrice   Float
   totalPrice  Float
   discount    Float    @default(0)
+
+  @@index([quoteId])
+  @@index([productId])
 }
 
 model Order {
@@ -390,6 +395,8 @@ model Order {
   
   @@index([orderNumber])
   @@index([status])
+  @@index([accountId])
+  @@index([ownerId])
 }
 
 model OrderItem {
@@ -404,6 +411,9 @@ model OrderItem {
   unitPrice   Float
   totalPrice  Float
   discount    Float    @default(0)
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Invoice {
@@ -422,6 +432,10 @@ model Invoice {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([accountId])
+  @@index([status])
+  @@index([dueDate])
 }
 
 model Case {
@@ -451,6 +465,7 @@ model Case {
   @@index([caseNumber])
   @@index([status])
   @@index([ownerId])
+  @@index([accountId])
 }
 
 model Activity {

@@ -7,6 +7,7 @@ import { fadeIn, staggerContainer } from '../lib/animations';
 import api from '../lib/api';
 import { TableSkeleton, EmptyState } from '../components';
 import Pagination from '../components/shared/Pagination';
+import { getStatusColor } from '../lib/hooks';
 
 interface Quote {
     id: string;
@@ -85,16 +86,6 @@ export default function Quotes() {
             console.error('Error al obtener ofertas:', error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'DRAFT': return 'bg-slate-100 text-slate-600';
-            case 'SENT': return 'bg-blue-50 text-blue-600';
-            case 'ACCEPTED': return 'bg-emerald-50 text-emerald-600';
-            case 'REJECTED': return 'bg-red-50 text-red-600';
-            default: return 'bg-slate-100 text-slate-600';
         }
     };
 

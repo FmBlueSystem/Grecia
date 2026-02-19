@@ -1,11 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import prisma from '../lib/prisma';
 import * as sapProxy from '../services/sap-proxy.service';
-
-// Escape single quotes for OData filter strings to prevent injection
-function escapeOData(str: string): string {
-    return str.replace(/'/g, "''");
-}
+import { escapeOData } from '../services/sap-proxy.service';
 
 export default async function searchRoutes(fastify: FastifyInstance) {
     // GET /api/search?q=texto&limit=5

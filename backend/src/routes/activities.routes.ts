@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { getActivities, PaginationParams, sapPost, sapGet } from '../services/sap-proxy.service';
+import { getActivities, PaginationParams, sapPost } from '../services/sap-proxy.service';
 import SapService from '../services/sap.service';
+import { sendError } from '../lib/errors';
 
 export default async function activityRoutes(fastify: FastifyInstance) {
     // GET /api/activities
@@ -20,7 +21,7 @@ export default async function activityRoutes(fastify: FastifyInstance) {
             return { data: result.data, total: result.total };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch activities from SAP' });
+            sendError(reply, 500, 'Error al obtener actividades');
         }
     });
 
@@ -31,7 +32,7 @@ export default async function activityRoutes(fastify: FastifyInstance) {
             const body = request.body as { isCompleted?: boolean };
             const activityCode = Number(id);
             if (isNaN(activityCode)) {
-                return reply.code(400).send({ error: 'Invalid activity ID' });
+                return sendError(reply, 400, 'ID de actividad inválido');
             }
             // SAP: Status -2=Open, -3=Closed
             const sapBody: any = {};
@@ -48,7 +49,7 @@ export default async function activityRoutes(fastify: FastifyInstance) {
             request.log.error(error);
             // If SAP PATCH not available, return success anyway (optimistic)
             if (error?.response?.status === 404) {
-                return reply.code(404).send({ error: 'Activity not found' });
+                return sendError(reply, 404, 'Actividad no encontrada');
             }
             return { success: true, warning: 'SAP update may not have persisted' };
         }
@@ -86,7 +87,7 @@ export default async function activityRoutes(fastify: FastifyInstance) {
             return { success: true, activityCode: result.ActivityCode };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to create activity in SAP' });
+            sendError(reply, 500, 'Error al crear actividad');
         }
     });
 }

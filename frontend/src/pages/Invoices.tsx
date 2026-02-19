@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Search, Download, CreditCard, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import { fadeIn, staggerContainer } from '../lib/animations';
 import api from '../lib/api';
 import { EmptyState, TableSkeleton } from '../components';
 import Pagination from '../components/shared/Pagination';
+import { getStatusColor } from '../lib/hooks';
 
 interface Invoice {
     id: string;
@@ -21,6 +22,70 @@ interface Invoice {
     account?: { name: string };
     sapInvoiceId?: string;
 }
+
+const InvoiceRow = memo(function InvoiceRow({ invoice, index, onNavigate }: {
+    invoice: Invoice;
+    index: number;
+    onNavigate: (id: string) => void;
+}) {
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'PAID': return <CheckCircle className="w-3.5 h-3.5" />;
+            case 'UNPAID': return <Clock className="w-3.5 h-3.5" />;
+            case 'OVERDUE': return <AlertCircle className="w-3.5 h-3.5" />;
+            default: return <FileText className="w-3.5 h-3.5" />;
+        }
+    };
+
+    return (
+        <motion.tr
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            onClick={() => onNavigate(invoice.id)}
+            className="hover:bg-indigo-50/30 transition-colors group cursor-pointer"
+        >
+            <td className="px-8 py-5">
+                <div className="font-bold text-indigo-600 group-hover:text-indigo-700 transition-colors">
+                    {invoice.sapDocNum}
+                </div>
+            </td>
+            <td className="px-8 py-5 text-slate-600 font-medium">
+                {invoice.account?.name || <span className="text-slate-400 italic">Sin Cuenta</span>}
+            </td>
+            <td className="px-8 py-5 text-slate-500">
+                {new Date(invoice.dueDate).toLocaleDateString()}
+            </td>
+            <td className="px-8 py-5 text-center">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(invoice.status)}`}>
+                    {getStatusIcon(invoice.status)}
+                    {{ PAID: 'Pagado', UNPAID: 'Pendiente', OVERDUE: 'Vencido', PARTIAL: 'Parcial' }[invoice.status] || invoice.status}
+                </span>
+            </td>
+            <td className="px-8 py-5 text-right">
+                <span className="font-bold text-slate-900 text-lg">
+                    ${invoice.amount.toLocaleString()}
+                </span>
+            </td>
+            <td className="px-8 py-5 text-right">
+                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); toast.info('Descarga de PDF: disponible próximamente'); }}
+                        className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors" title="Descargar PDF"
+                    >
+                        <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); toast.info('Registro de pago: disponible próximamente'); }}
+                        className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors" title="Registrar Pago"
+                    >
+                        <CreditCard className="w-4 h-4" />
+                    </button>
+                </div>
+            </td>
+        </motion.tr>
+    );
+});
 
 export default function Invoices() {
     const navigate = useNavigate();
@@ -69,24 +134,7 @@ export default function Invoices() {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PAID': return 'bg-emerald-100/50 text-emerald-700 border-emerald-200';
-            case 'UNPAID': return 'bg-amber-100/50 text-amber-700 border-amber-200';
-            case 'OVERDUE': return 'bg-red-100/50 text-red-700 border-red-200';
-            case 'PARTIAL': return 'bg-blue-100/50 text-blue-700 border-blue-200';
-            default: return 'bg-slate-100 text-slate-600 border-slate-200';
-        }
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'PAID': return <CheckCircle className="w-3.5 h-3.5" />;
-            case 'UNPAID': return <Clock className="w-3.5 h-3.5" />;
-            case 'OVERDUE': return <AlertCircle className="w-3.5 h-3.5" />;
-            default: return <FileText className="w-3.5 h-3.5" />;
-        }
-    };
+    const handleNavigate = useCallback((id: string) => navigate(`/invoices/${id}`), [navigate]);
 
     const stats = globalStats || { paid: 0, pending: 0, overdue: 0 };
 
@@ -217,53 +265,7 @@ export default function Invoices() {
                             </thead>
                             <tbody className="divide-y divide-slate-100/50">
                                 {filteredInvoices.map((invoice, index) => (
-                                    <motion.tr
-                                        key={invoice.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        onClick={() => navigate(`/invoices/${invoice.id}`)}
-                                        className="hover:bg-indigo-50/30 transition-colors group cursor-pointer"
-                                    >
-                                        <td className="px-8 py-5">
-                                            <div className="font-bold text-indigo-600 group-hover:text-indigo-700 transition-colors">
-                                                {invoice.sapDocNum}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5 text-slate-600 font-medium">
-                                            {invoice.account?.name || <span className="text-slate-400 italic">Sin Cuenta</span>}
-                                        </td>
-                                        <td className="px-8 py-5 text-slate-500">
-                                            {new Date(invoice.dueDate).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-8 py-5 text-center">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(invoice.status)}`}>
-                                                {getStatusIcon(invoice.status)}
-                                                {{ PAID: 'Pagado', UNPAID: 'Pendiente', OVERDUE: 'Vencido', PARTIAL: 'Parcial' }[invoice.status] || invoice.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <span className="font-bold text-slate-900 text-lg">
-                                                ${invoice.amount.toLocaleString()}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); toast.info('Descarga de PDF: disponible próximamente'); }}
-                                                    className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors" title="Descargar PDF"
-                                                >
-                                                    <Download className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); toast.info('Registro de pago: disponible próximamente'); }}
-                                                    className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors" title="Registrar Pago"
-                                                >
-                                                    <CreditCard className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </motion.tr>
+                                    <InvoiceRow key={invoice.id} invoice={invoice} index={index} onNavigate={handleNavigate} />
                                 ))}
                             </tbody>
                         </table>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Mail, Phone, Eye, Filter, Users, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,7 @@ import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast } from '../lib';
 import { TableSkeleton, EmptyState } from '../components';
 import PaginationControls from '../components/shared/PaginationControls';
+import { useAccountOptions } from '../lib/hooks';
 import api from '../lib/api';
 
 interface Contact {
@@ -23,10 +24,67 @@ interface Contact {
     };
 }
 
-interface AccountOption {
-    id: string;
-    name: string;
-}
+const ContactRow = memo(function ContactRow({ contact, onNavigate, onLogActivity }: {
+    contact: Contact;
+    onNavigate: (id: string) => void;
+    onLogActivity: (contact: Contact, type: 'Call' | 'Email') => void;
+}) {
+    return (
+        <motion.tr variants={fadeIn} onClick={() => onNavigate(contact.id)} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold">
+                        {contact.firstName[0]}{contact.lastName[0]}
+                    </div>
+                    <div>
+                        <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{contact.firstName} {contact.lastName}</div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-2">
+                    <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <span className="text-slate-700 font-medium text-sm truncate max-w-[200px]" title={contact.accountName}>{contact.accountName || '-'}</span>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <span className="text-slate-600 font-medium">{contact.jobTitle || '-'}</span>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex flex-col gap-1">
+                    {contact.email && (
+                        <a href={`mailto:${contact.email}`} onClick={(e) => { e.stopPropagation(); onLogActivity(contact, 'Email'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
+                            <Mail className="w-3 h-3" /> {contact.email}
+                        </a>
+                    )}
+                    {contact.phone && (
+                        <a href={`tel:${contact.phone}`} onClick={(e) => { e.stopPropagation(); onLogActivity(contact, 'Call'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 transition-colors">
+                            <Phone className="w-3 h-3" /> {contact.phone}
+                        </a>
+                    )}
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                        {contact.owner.firstName[0]}{contact.owner.lastName[0]}
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-2">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate(contact.id); }}
+                        className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                        title="Ver detalle"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </button>
+                </div>
+            </td>
+        </motion.tr>
+    );
+});
 
 export default function Contacts() {
     const navigate = useNavigate();
@@ -42,7 +100,7 @@ export default function Contacts() {
 
     // Account filter
     const [accountFilter, setAccountFilter] = useState('');
-    const [accountOptions, setAccountOptions] = useState<AccountOption[]>([]);
+    const accountOptions = useAccountOptions();
     const [showFilters, setShowFilters] = useState(false);
 
     // Form Data
@@ -62,19 +120,6 @@ export default function Contacts() {
             const userData = JSON.parse(user);
             setFormData(prev => ({ ...prev, ownerId: userData.id }));
         }
-    }, []);
-
-    // Fetch account options for filter
-    useEffect(() => {
-        api.get('/accounts', { params: { top: 200 } })
-            .then(r => {
-                const accs = (r.data?.data || []).map((a: any) => ({
-                    id: a.id || a.cardCode,
-                    name: a.name || a.cardName || a.CardName || '',
-                }));
-                setAccountOptions(accs.sort((a: AccountOption, b: AccountOption) => a.name.localeCompare(b.name)));
-            })
-            .catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -110,7 +155,9 @@ export default function Contacts() {
         }
     };
 
-    const logActivity = (contact: Contact, type: 'Call' | 'Email') => {
+    const handleNavigate = useCallback((id: string) => navigate(`/contacts/${id}`), [navigate]);
+
+    const logActivity = useCallback((contact: Contact, type: 'Call' | 'Email') => {
         const subject = type === 'Call'
             ? `Llamada a ${contact.firstName} ${contact.lastName}`
             : `Email a ${contact.firstName} ${contact.lastName}`;
@@ -122,7 +169,7 @@ export default function Contacts() {
         }).then(() => {
             toast.success('Actividad registrada', `${type === 'Call' ? 'Llamada' : 'Email'} registrado en SAP`);
         }).catch(() => {});
-    };
+    }, []);
 
     const handlePageSizeChange = (newSize: number) => {
         setPageSize(newSize);
@@ -247,59 +294,7 @@ export default function Contacts() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredContacts.map((contact) => (
-                                <motion.tr variants={fadeIn} key={contact.id} onClick={() => navigate(`/contacts/${contact.id}`)} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold">
-                                                {contact.firstName[0]}{contact.lastName[0]}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{contact.firstName} {contact.lastName}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                                            <span className="text-slate-700 font-medium text-sm truncate max-w-[200px]" title={contact.accountName}>{contact.accountName || '-'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-slate-600 font-medium">{contact.jobTitle || '-'}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1">
-                                            {contact.email && (
-                                                <a href={`mailto:${contact.email}`} onClick={(e) => { e.stopPropagation(); logActivity(contact, 'Email'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
-                                                    <Mail className="w-3 h-3" /> {contact.email}
-                                                </a>
-                                            )}
-                                            {contact.phone && (
-                                                <a href={`tel:${contact.phone}`} onClick={(e) => { e.stopPropagation(); logActivity(contact, 'Call'); }} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 transition-colors">
-                                                    <Phone className="w-3 h-3" /> {contact.phone}
-                                                </a>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                                                {contact.owner.firstName[0]}{contact.owner.lastName[0]}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => navigate(`/contacts/${contact.id}`)}
-                                                className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
-                                                title="Ver detalle"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
+                                <ContactRow key={contact.id} contact={contact} onNavigate={handleNavigate} onLogActivity={logActivity} />
                             ))}
                         </tbody>
                     </table>

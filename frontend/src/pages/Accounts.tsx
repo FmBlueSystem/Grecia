@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, Search, Globe, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,52 @@ interface Account {
         opportunities: number;
     };
 }
+
+const AccountRow = memo(function AccountRow({ account, onNavigate }: { account: Account; onNavigate: (id: string) => void }) {
+    return (
+        <motion.tr variants={fadeIn} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => onNavigate(account.id)}>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                        <Building2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{account.name}</div>
+                        <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                            {account.website && <><Globe className="w-3 h-3" /> {account.website}</>}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg">{account.industry || 'General'}</span>
+            </td>
+            <td className="px-6 py-4">
+                <div className="text-sm font-bold text-slate-700">{account.phone || '-'}</div>
+                <div className="text-xs text-slate-400">{account._count?.contacts || 0} Contactos</div>
+            </td>
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                        {(account.owner.firstName || '?')[0]}{(account.owner.lastName || '')[0]}
+                    </div>
+                    <span className="text-sm text-slate-600">{account.owner.firstName} {account.owner.lastName}</span>
+                </div>
+            </td>
+            <td className="px-6 py-4 text-right">
+                <div className="flex items-center justify-end gap-2">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate(account.id); }}
+                        className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                        title="Ver detalle"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </button>
+                </div>
+            </td>
+        </motion.tr>
+    );
+});
 
 export default function Accounts() {
     const navigate = useNavigate();
@@ -89,6 +135,8 @@ export default function Accounts() {
         }
     };
 
+    const handleNavigate = useCallback((id: string) => navigate(`/accounts/${id}`), [navigate]);
+
     const filteredAccounts = accounts;
 
     return (
@@ -154,47 +202,7 @@ export default function Accounts() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredAccounts.map((account) => (
-                                <motion.tr variants={fadeIn} key={account.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => navigate(`/accounts/${account.id}`)}>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                                <Building2 className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{account.name}</div>
-                                                <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                                                    {account.website && <><Globe className="w-3 h-3" /> {account.website}</>}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg">{account.industry || 'General'}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-bold text-slate-700">{account.phone || '-'}</div>
-                                        <div className="text-xs text-slate-400">{account._count?.contacts || 0} Contactos</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">
-                                                {(account.owner.firstName || '?')[0]}{(account.owner.lastName || '')[0]}
-                                            </div>
-                                            <span className="text-sm text-slate-600">{account.owner.firstName} {account.owner.lastName}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${account.id}`); }}
-                                                className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
-                                                title="Ver detalle"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
+                                <AccountRow key={account.id} account={account} onNavigate={handleNavigate} />
                             ))}
                         </tbody>
                     </table>

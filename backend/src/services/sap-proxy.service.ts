@@ -24,7 +24,7 @@ interface SapListResponse<T> {
 // ─── Helpers ──────────────────────────────────────────
 
 // C-4: Escape user input for OData filter strings to prevent injection
-function escapeOData(input: string): string {
+export function escapeOData(input: string): string {
     return input.replace(/'/g, "''").replace(/[%_\[\]]/g, '');
 }
 

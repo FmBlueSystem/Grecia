@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import api from './api';
 
 /**
  * Hook para detectar estado de conexión
@@ -176,4 +177,52 @@ export function useNotificationSSE() {
   }, []);
 
   return count;
+}
+
+/**
+ * Hook compartido para cargar opciones de cuentas (usado en Contacts, Quotes, etc.)
+ */
+export interface AccountOption {
+  id: string;
+  name: string;
+}
+
+export function useAccountOptions(): AccountOption[] {
+  const [options, setOptions] = useState<AccountOption[]>([]);
+
+  useEffect(() => {
+    api.get('/accounts', { params: { top: 200 } })
+      .then(r => {
+        const accs = (r.data?.data || []).map((a: any) => ({
+          id: a.id || a.cardCode,
+          name: a.name || a.cardName || a.CardName || '',
+        }));
+        setOptions(accs.sort((a: AccountOption, b: AccountOption) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => {});
+  }, []);
+
+  return options;
+}
+
+/**
+ * Mapas de colores de estado compartidos
+ */
+export const STATUS_COLORS: Record<string, string> = {
+  PAID: 'bg-emerald-100/50 text-emerald-700 border-emerald-200',
+  UNPAID: 'bg-amber-100/50 text-amber-700 border-amber-200',
+  OVERDUE: 'bg-red-100/50 text-red-700 border-red-200',
+  PARTIAL: 'bg-blue-100/50 text-blue-700 border-blue-200',
+  DELIVERED: 'bg-emerald-100/50 text-emerald-700 border-emerald-200',
+  PROCESSING: 'bg-blue-100/50 text-blue-700 border-blue-200',
+  PENDING: 'bg-amber-100/50 text-amber-700 border-amber-200',
+  CANCELLED: 'bg-red-100/50 text-red-700 border-red-200',
+  DRAFT: 'bg-slate-100 text-slate-600 border-slate-200',
+  SENT: 'bg-blue-100/50 text-blue-700 border-blue-200',
+  ACCEPTED: 'bg-emerald-100/50 text-emerald-700 border-emerald-200',
+  REJECTED: 'bg-red-100/50 text-red-700 border-red-200',
+};
+
+export function getStatusColor(status: string): string {
+  return STATUS_COLORS[status] || 'bg-slate-100 text-slate-600 border-slate-200';
 }

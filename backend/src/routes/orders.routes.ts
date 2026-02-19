@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getOrders, getOrderById, PaginationParams } from '../services/sap-proxy.service';
+import { sendError } from '../lib/errors';
 
 export default async function orderRoutes(fastify: FastifyInstance) {
     // GET /api/orders
@@ -19,7 +20,7 @@ export default async function orderRoutes(fastify: FastifyInstance) {
             return { data: result.data, total: result.total };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch orders from SAP' });
+            sendError(reply, 500, 'Error al obtener pedidos');
         }
     });
 
@@ -31,10 +32,10 @@ export default async function orderRoutes(fastify: FastifyInstance) {
             return { data: order };
         } catch (error: any) {
             if (error.response?.status === 404) {
-                return reply.code(404).send({ error: 'Order not found' });
+                return sendError(reply, 404, 'Pedido no encontrado');
             }
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch order from SAP' });
+            sendError(reply, 500, 'Error al obtener pedido');
         }
     });
 }

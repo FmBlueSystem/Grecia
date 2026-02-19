@@ -167,6 +167,9 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Búsqueda global"
                 className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-slate-900/60 backdrop-blur-sm"
                 onClick={onClose}
             >
@@ -180,10 +183,16 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                 >
                     {/* Search input */}
                     <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-                        <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                        <Search className="w-5 h-5 text-slate-400 shrink-0" aria-hidden="true" />
                         <input
                             ref={inputRef}
                             type="text"
+                            role="combobox"
+                            aria-expanded={flatResults.length > 0}
+                            aria-controls="search-results-listbox"
+                            aria-activedescendant={flatResults[selectedIdx] ? `search-option-${selectedIdx}` : undefined}
+                            aria-autocomplete="list"
+                            aria-label="Buscar en el CRM"
                             value={query}
                             onChange={e => handleInputChange(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -191,7 +200,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                             className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
                         />
                         {query && (
-                            <button onClick={() => handleInputChange('')} className="p-1 hover:bg-slate-100 rounded-md">
+                            <button onClick={() => handleInputChange('')} className="p-1 hover:bg-slate-100 rounded-md" aria-label="Limpiar búsqueda">
                                 <X className="w-4 h-4 text-slate-400" />
                             </button>
                         )}
@@ -201,9 +210,9 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                     </div>
 
                     {/* Results */}
-                    <div className="max-h-[50vh] overflow-y-auto">
+                    <div id="search-results-listbox" role="listbox" aria-label="Resultados de búsqueda" className="max-h-[50vh] overflow-y-auto">
                         {loading && (
-                            <div className="px-4 py-8 text-center">
+                            <div className="px-4 py-8 text-center" role="status" aria-live="polite">
                                 <div className="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto" />
                                 <p className="text-xs text-slate-400 mt-2">Buscando...</p>
                             </div>
@@ -223,7 +232,7 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                             const startIdx = runningIdx;
 
                             return (
-                                <div key={group.key}>
+                                <div key={group.key} role="group" aria-label={cfg.label}>
                                     <div className="px-4 pt-3 pb-1">
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                             {cfg.label}
@@ -235,7 +244,10 @@ export default function GlobalSearch({ open, onClose }: { open: boolean; onClose
                                         const isSelected = globalIdx === selectedIdx;
                                         return (
                                             <button
+                                                id={`search-option-${globalIdx}`}
                                                 key={`${item.type}-${item.id}`}
+                                                role="option"
+                                                aria-selected={isSelected}
                                                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                                                     isSelected ? 'bg-indigo-50' : 'hover:bg-slate-50'
                                                 }`}

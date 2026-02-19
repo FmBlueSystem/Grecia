@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getInvoices, getInvoiceById, getInvoiceStats, PaginationParams } from '../services/sap-proxy.service';
+import { sendError } from '../lib/errors';
 
 export default async function invoiceRoutes(fastify: FastifyInstance) {
     // GET /api/invoices/stats — Aggregated stats over full dataset
@@ -11,7 +12,7 @@ export default async function invoiceRoutes(fastify: FastifyInstance) {
             );
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch invoice stats' });
+            sendError(reply, 500, 'Error al obtener estadísticas de facturas');
         }
     });
 
@@ -32,7 +33,7 @@ export default async function invoiceRoutes(fastify: FastifyInstance) {
             return { data: result.data, total: result.total };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch invoices from SAP' });
+            sendError(reply, 500, 'Error al obtener facturas');
         }
     });
 
@@ -44,10 +45,10 @@ export default async function invoiceRoutes(fastify: FastifyInstance) {
             return { data: invoice };
         } catch (error: any) {
             if (error.response?.status === 404) {
-                return reply.code(404).send({ error: 'Invoice not found' });
+                return sendError(reply, 404, 'Factura no encontrada');
             }
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch invoice from SAP' });
+            sendError(reply, 500, 'Error al obtener factura');
         }
     });
 }

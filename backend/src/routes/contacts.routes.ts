@@ -1,5 +1,16 @@
 import { FastifyInstance } from 'fastify';
-import { getContacts, PaginationParams, sapPost } from '../services/sap-proxy.service';
+import { z } from 'zod';
+import { getContacts, PaginationParams, sapPost, escapeOData } from '../services/sap-proxy.service';
+import { sendError, extractSapError } from '../lib/errors';
+
+const createContactSchema = z.object({
+    firstName: z.string().min(1, 'El nombre es requerido').max(100),
+    lastName: z.string().min(1, 'El apellido es requerido').max(100),
+    email: z.string().email().or(z.literal('')).optional(),
+    phone: z.string().max(30).optional(),
+    jobTitle: z.string().max(100).optional(),
+    cardCode: z.string().max(50).optional(),
+});
 
 export default async function contactRoutes(fastify: FastifyInstance) {
     // GET /api/contacts
@@ -18,24 +29,18 @@ export default async function contactRoutes(fastify: FastifyInstance) {
             return { data: result.data, total: result.total };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to fetch contacts from SAP' });
+            sendError(reply, 500, 'Error al obtener contactos');
         }
     });
 
     // POST /api/contacts — Create contact person in SAP
     fastify.post('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         try {
-            const body = request.body as {
-                firstName: string;
-                lastName: string;
-                email?: string;
-                phone?: string;
-                jobTitle?: string;
-                cardCode?: string;
-            };
-            if (!body.firstName || !body.lastName) {
-                return reply.code(400).send({ error: 'firstName and lastName are required' });
+            const parsed = createContactSchema.safeParse(request.body);
+            if (!parsed.success) {
+                return sendError(reply, 400, parsed.error.issues[0]?.message || 'Datos inválidos');
             }
+            const body = parsed.data;
             // SAP ContactPersons are linked to a BusinessPartner via CardCode
             // If no cardCode, we create the contact in our local DB only
             if (body.cardCode) {
@@ -51,21 +56,17 @@ export default async function contactRoutes(fastify: FastifyInstance) {
                     }],
                 };
                 try {
-                    await sapPost(request.companyCode, `BusinessPartners('${body.cardCode.replace(/'/g, "''")}')`, sapBody);
+                    await sapPost(request.companyCode, `BusinessPartners('${escapeOData(body.cardCode)}')`, sapBody);
                 } catch (sapError: any) {
                     // I-7: Surface SAP errors instead of silently swallowing
-                    const sapMsg = sapError.response?.data?.error?.message?.value;
-                    request.log.warn({ sapError: sapMsg }, 'SAP contact creation failed');
-                    return reply.code(502).send({
-                        error: sapMsg || 'Error al crear contacto en SAP',
-                        partial: true,
-                    });
+                    request.log.warn({ sapError: extractSapError(sapError) }, 'SAP contact creation failed');
+                    return sendError(reply, 502, extractSapError(sapError));
                 }
             }
             return { success: true, data: { firstName: body.firstName, lastName: body.lastName } };
         } catch (error) {
             request.log.error(error);
-            reply.code(500).send({ error: 'Failed to create contact' });
+            sendError(reply, 500, 'Error al crear contacto');
         }
     });
 }
