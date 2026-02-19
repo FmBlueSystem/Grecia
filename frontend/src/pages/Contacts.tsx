@@ -50,6 +50,7 @@ export default function Contacts() {
         email: '',
         phone: '',
         jobTitle: '',
+        accountId: '',
         ownerId: ''
     });
 
@@ -95,10 +96,11 @@ export default function Contacts() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post('/contacts', formData);
+            const payload = { ...formData, accountId: formData.accountId || undefined };
+            await api.post('/contacts', payload);
             setShowModal(false);
             fetchContacts();
-            setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '' }));
+            setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '', jobTitle: '', accountId: '' }));
             toast.success('Contacto creado', 'El contacto se creo correctamente');
         } catch (err) {
             console.error("Error al crear contacto", err);
@@ -366,6 +368,20 @@ export default function Contacts() {
                                         value={formData.jobTitle}
                                         onChange={e => setFormData({ ...formData, jobTitle: e.target.value })}
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Cuenta / Socio de Negocios</label>
+                                    <select
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        value={formData.accountId}
+                                        onChange={e => setFormData({ ...formData, accountId: e.target.value })}
+                                    >
+                                        <option value="">Sin cuenta asociada</option>
+                                        {accountOptions.map(acc => (
+                                            <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div>
