@@ -83,7 +83,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar-bg border-r border-sidebar-border flex flex-col z-40">
+    <aside className="h-full w-[260px] bg-sidebar-bg border-r border-sidebar-border flex flex-col">
       {/* Logo */}
       <div className="h-14 flex items-center px-5 border-b border-sidebar-border shrink-0">
         <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center mr-3">
