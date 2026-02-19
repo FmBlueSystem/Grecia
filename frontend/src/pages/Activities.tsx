@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Building2, Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
+import { TableSkeleton, EmptyState } from '../components';
+import Pagination from '../components/shared/Pagination';
 import api from '../lib/api';
 
 interface AccountOption {
@@ -46,6 +48,9 @@ export default function Activities() {
     const [typeFilter, setTypeFilter] = useState<string>('ALL');
     const [ownerFilter, setOwnerFilter] = useState<string>('ALL');
     const [showCompleted, setShowCompleted] = useState(true);
+    const [page, setPage] = useState(0);
+    const [total, setTotal] = useState(0);
+    const pageSize = 50;
 
     // Accounts for selector
     const [accounts, setAccounts] = useState<AccountOption[]>([]);
@@ -61,8 +66,9 @@ export default function Activities() {
         cardCode: ''
     });
 
+    useEffect(() => { fetchActivities(); }, [page]);
+
     useEffect(() => {
-        fetchActivities();
         api.get('/accounts?top=200').then(r => {
             const list = (r.data?.data || []).map((a: any) => ({ id: a.id, name: a.name, code: a.id }));
             setAccounts(list);
@@ -82,8 +88,10 @@ export default function Activities() {
 
     const fetchActivities = async () => {
         try {
-            const res = await api.get('/activities');
+            setLoading(true);
+            const res = await api.get(`/activities?top=${pageSize}&skip=${page * pageSize}`);
             if (res.data?.data) setActivities(res.data.data);
+            if (res.data?.total != null) setTotal(res.data.total);
         } catch (err) {
             console.error("Error al obtener actividades", err);
         } finally {
@@ -177,7 +185,7 @@ export default function Activities() {
 
             {/* List of Activities */}
             {loading ? (
-                <div className="text-center py-12 text-slate-400">Cargando actividades...</div>
+                <TableSkeleton rows={5} />
             ) : (
                 <motion.div
                     variants={staggerContainer}
@@ -242,9 +250,13 @@ export default function Activities() {
                         );
                     })}
                     {activities.length === 0 && (
-                        <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 border-dashed">
-                            No hay actividades pendientes.
-                        </div>
+                        <EmptyState
+                            icon={Calendar}
+                            title="No hay actividades"
+                            description="Crea tu primera actividad para registrar llamadas, reuniones y tareas"
+                            actionLabel="Nueva Actividad"
+                            onAction={() => setShowModal(true)}
+                        />
                     )}
                     {activities.length > 0 && activities.filter(a => {
                         if (typeFilter !== 'ALL' && a.activityType !== typeFilter) return false;
@@ -252,10 +264,14 @@ export default function Activities() {
                         if (!showCompleted && a.isCompleted) return false;
                         return true;
                     }).length === 0 && (
-                        <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-                            No hay actividades que coincidan con los filtros seleccionados.
-                        </div>
+                        <EmptyState
+                            variant="search"
+                            icon={Calendar}
+                            title="Sin resultados"
+                            description="No hay actividades que coincidan con los filtros seleccionados"
+                        />
                     )}
+                    <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
                 </motion.div>
             )}
 

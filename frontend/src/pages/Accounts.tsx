@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, Search, Globe, MoreHorizontal, Filter } from 'lucide-react';
+import { Building2, Plus, Search, Globe, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast } from '../lib';
 import { TableSkeleton, EmptyState } from '../components';
+import Pagination from '../components/shared/Pagination';
 import api from '../lib/api';
 
 interface Account {
@@ -28,6 +29,10 @@ export default function Accounts() {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [page, setPage] = useState(0);
+    const [total, setTotal] = useState(0);
+    const pageSize = 50;
     const [showModal, setShowModal] = useState(false);
     // New Account Form State
     const [formData, setFormData] = useState({
@@ -39,8 +44,6 @@ export default function Accounts() {
     });
 
     useEffect(() => {
-        fetchAccounts();
-        // Pre-fill owner with current user from localStorage for MVP convenience
         const user = localStorage.getItem('user');
         if (user) {
             const userData = JSON.parse(user);
@@ -48,17 +51,29 @@ export default function Accounts() {
         }
     }, []);
 
-    const fetchAccounts = async () => {
+    // Debounce search
+    useEffect(() => {
+        const t = setTimeout(() => { setDebouncedSearch(searchTerm); setPage(0); }, 350);
+        return () => clearTimeout(t);
+    }, [searchTerm]);
+
+    const fetchAccounts = useCallback(async () => {
         try {
-            const res = await api.get('/accounts');
+            setLoading(true);
+            const params = new URLSearchParams({ top: String(pageSize), skip: String(page * pageSize) });
+            if (debouncedSearch) params.set('search', debouncedSearch);
+            const res = await api.get(`/accounts?${params}`);
             if (res.data?.data) setAccounts(res.data.data);
+            if (res.data?.total != null) setTotal(res.data.total);
         } catch (err) {
             console.error("Error al obtener cuentas", err);
             toast.error('Error al cargar cuentas', 'No se pudieron cargar las cuentas');
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearch]);
+
+    useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -74,10 +89,7 @@ export default function Accounts() {
         }
     };
 
-    const filteredAccounts = accounts.filter(acc =>
-        acc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        acc.industry?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredAccounts = accounts;
 
     return (
         <div className="space-y-6">
@@ -107,9 +119,9 @@ export default function Accounts() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold flex items-center gap-2 hover:bg-slate-50">
-                    <Filter className="w-4 h-4" /> Filtros
-                </button>
+                {total > 0 && (
+                    <span className="px-4 py-2 text-sm text-slate-500 font-medium">{total} cuentas</span>
+                )}
             </div>
 
             {/* List */}
@@ -183,7 +195,7 @@ export default function Accounts() {
                         </tbody>
                     </table>
 
-                    {filteredAccounts.length === 0 && accounts.length > 0 && (
+                    {filteredAccounts.length === 0 && (
                         <EmptyState
                             variant="search"
                             icon={Search}
@@ -191,6 +203,7 @@ export default function Accounts() {
                             description={`No hay resultados para "${searchTerm}"`}
                         />
                     )}
+                    <Pagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
                 </motion.div>
             )}
 

@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Search, Download, CreditCard, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { fadeIn, staggerContainer } from '../lib/animations';
 import api from '../lib/api';
-import { EmptyState } from '../components/EmptyState';
+import { EmptyState, TableSkeleton } from '../components';
 import Pagination from '../components/shared/Pagination';
-// import { ButtonLoading } from '../components/ButtonLoading';
-// import { toast } from '../lib/toast';
 
 interface Invoice {
     id: string;
@@ -37,7 +36,7 @@ export default function Invoices() {
 
     useEffect(() => {
         fetchInvoices();
-    }, [page]);
+    }, [page, statusFilter]);
 
     useEffect(() => {
         api.get('/invoices/stats')
@@ -48,14 +47,22 @@ export default function Invoices() {
     const fetchInvoices = async () => {
         try {
             setRefreshing(true);
-            const res = await api.get(`/invoices?top=${pageSize}&skip=${page * pageSize}`);
+            const params = new URLSearchParams({ top: String(pageSize), skip: String(page * pageSize) });
+            if (statusFilter !== 'ALL') {
+                const filterMap: Record<string, string> = {
+                    PAID: "PaidToDate ge DocTotal",
+                    UNPAID: "PaidToDate eq 0",
+                    OVERDUE: "PaidToDate lt DocTotal",
+                };
+                if (filterMap[statusFilter]) params.set('filter', filterMap[statusFilter]);
+            }
+            const res = await api.get(`/invoices?${params}`);
             if (res.data && res.data.data) {
                 setInvoices(res.data.data);
             }
             if (res.data?.total != null) setTotal(res.data.total);
         } catch (error) {
             console.error('Error al obtener facturas:', error);
-            // Error is already handled by api interceptor toast
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -173,7 +180,7 @@ export default function Invoices() {
                             <Filter className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                                onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
                                 className="pl-10 pr-8 py-3 rounded-2xl border border-slate-200/60 bg-white/50 text-slate-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer hover:bg-white transition-all font-medium"
                             >
                                 <option value="ALL">Todos los estados</option>
@@ -182,7 +189,11 @@ export default function Invoices() {
                                 <option value="OVERDUE">Vencido</option>
                             </select>
                         </div>
-                        <button className="px-4 py-3 bg-white/50 border border-slate-200/60 rounded-2xl text-slate-600 hover:bg-white hover:text-indigo-600 transition-all shadow-sm">
+                        <button
+                            onClick={() => toast.info('Exportación de facturas: disponible próximamente')}
+                            className="px-4 py-3 bg-white/50 border border-slate-200/60 rounded-2xl text-slate-600 hover:bg-white hover:text-indigo-600 transition-all shadow-sm"
+                            title="Exportar"
+                        >
                             <Download className="w-5 h-5" />
                         </button>
                     </div>
@@ -191,10 +202,7 @@ export default function Invoices() {
                 {/* Table or Empty State */}
                 <div className="flex-1 overflow-x-auto">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-                            <p className="text-slate-400 animate-pulse">Cargando facturas...</p>
-                        </div>
+                        <div className="p-6"><TableSkeleton rows={6} /></div>
                     ) : filteredInvoices.length > 0 ? (
                         <table className="w-full text-left">
                             <thead>
@@ -241,10 +249,16 @@ export default function Invoices() {
                                         </td>
                                         <td className="px-8 py-5 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors" title="Descargar PDF">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); toast.info('Descarga de PDF: disponible próximamente'); }}
+                                                    className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors" title="Descargar PDF"
+                                                >
                                                     <Download className="w-4 h-4" />
                                                 </button>
-                                                <button className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors" title="Registrar Pago">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); toast.info('Registro de pago: disponible próximamente'); }}
+                                                    className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors" title="Registrar Pago"
+                                                >
                                                     <CreditCard className="w-4 h-4" />
                                                 </button>
                                             </div>

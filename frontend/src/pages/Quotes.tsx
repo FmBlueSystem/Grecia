@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { fadeIn, staggerContainer } from '../lib/animations';
 import api from '../lib/api';
+import { TableSkeleton, EmptyState } from '../components';
 import Pagination from '../components/shared/Pagination';
 
 interface Quote {
@@ -263,7 +264,9 @@ export default function Quotes() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredQuotes.length > 0 ? (
+                            {loading ? (
+                                <tr><td colSpan={7} className="p-6"><TableSkeleton rows={5} /></td></tr>
+                            ) : filteredQuotes.length > 0 ? (
                                 filteredQuotes.map((quote) => (
                                     <tr key={quote.id} onClick={() => navigate(`/quotes/${quote.id}`)} className="hover:bg-slate-50/80 transition-colors cursor-pointer">
                                         <td className="px-6 py-4">
@@ -306,8 +309,15 @@ export default function Quotes() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
-                                        {loading ? 'Cargando ofertas...' : 'No se encontraron ofertas. Crea una nueva para comenzar.'}
+                                    <td colSpan={7} className="p-6">
+                                        <EmptyState
+                                            icon={FileText}
+                                            title={searchTerm ? 'No se encontraron ofertas' : 'No hay ofertas'}
+                                            description={searchTerm ? `No hay resultados para "${searchTerm}"` : 'Crea una nueva oferta para comenzar'}
+                                            variant={searchTerm ? 'search' : undefined}
+                                            actionLabel={searchTerm ? undefined : 'Nueva Oferta'}
+                                            onAction={searchTerm ? undefined : () => setIsModalOpen(true)}
+                                        />
                                     </td>
                                 </tr>
                             )}

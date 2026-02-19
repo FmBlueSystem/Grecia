@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, MapPin, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../lib/api';
+import { TableSkeleton, EmptyState } from '../components';
 import Pagination from '../components/shared/Pagination';
 
 interface Order {
@@ -74,6 +75,9 @@ export default function Orders() {
                 </div>
             </div>
 
+            {loading ? (
+                <TableSkeleton rows={4} />
+            ) : (
             <div className="space-y-6">
                 {orders.filter(o =>
                     !searchTerm ||
@@ -144,17 +148,23 @@ export default function Orders() {
                     o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     o.trackingNumber?.toLowerCase().includes(searchTerm.toLowerCase())
                 ).length === 0 && (
-                    <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-                        No se encontraron órdenes para "{searchTerm}"
-                    </div>
+                    <EmptyState
+                        variant="search"
+                        icon={Search}
+                        title="No se encontraron órdenes"
+                        description={`No hay resultados para "${searchTerm}"`}
+                    />
                 )}
 
-                {orders.length === 0 && !loading && !searchTerm && (
-                    <div className="p-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        No hay órdenes activas. <br /><span className="text-sm">Mueve una oportunidad a "Ganada" para generar una automáticamente.</span>
-                    </div>
+                {orders.length === 0 && !searchTerm && (
+                    <EmptyState
+                        icon={Package}
+                        title="No hay órdenes activas"
+                        description="Las órdenes se crean automáticamente desde ofertas aprobadas en SAP"
+                    />
                 )}
             </div>
+            )}
         </div>
     );
 }
