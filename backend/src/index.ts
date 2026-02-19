@@ -2,10 +2,6 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-// import { db } from './utils/db'; // Removed legacy db
-
 
 const fastify = Fastify({
   logger: {
@@ -47,11 +43,8 @@ import auditRoutes from './routes/audit.routes';
 
 
 
-// ... (existing imports)
-
 import cookie from '@fastify/cookie';
-
-// ... (existing imports)
+import rateLimit from '@fastify/rate-limit';
 
 // Plugins
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -64,6 +57,9 @@ fastify.register(cors, {
 });
 
 fastify.register(cookie);
+
+// I-2: Rate limiting — global 100 req/min, auth routes stricter via route config
+fastify.register(rateLimit, { max: 100, timeWindow: '1 minute' });
 
 fastify.register(helmet);
 fastify.register(authPlugin);

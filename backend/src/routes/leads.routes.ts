@@ -160,7 +160,11 @@ const leadsRoutes: FastifyPluginAsync = async (fastify) => {
                 data: result.data
             });
             return { data: updated };
-        } catch (error) {
+        } catch (error: any) {
+            // I-8: Handle Prisma P2025 (record not found)
+            if (error.code === 'P2025') {
+                return reply.code(404).send({ error: 'Prospecto no encontrado' });
+            }
             request.log.error(error);
             reply.code(500).send({ error: 'Error al actualizar prospecto' });
         }

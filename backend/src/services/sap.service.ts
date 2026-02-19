@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import https from 'https';
 import { COMPANIES, CompanyConfig, CountryCode } from '../config/companies';
 
 interface Session {
@@ -9,11 +10,21 @@ interface Session {
 class SapService {
     private static instance: SapService;
     private sessions: Map<string, Session> = new Map();
+    private loginPromises: Map<string, Promise<string>> = new Map();
     private baseUrl: string = 'https://sap-stiacmzdr-sl.skyinone.net:50000/b1s/v1';
+    private httpsAgent: https.Agent;
 
     private constructor() {
+        // C-1: Require SAP credentials from environment — no hardcoded fallbacks
         if (!process.env.SAP_USER || !process.env.SAP_PASSWORD) {
-            console.warn('[SAP] SAP_USER/SAP_PASSWORD no configurados — usando credenciales por defecto.');
+            throw new Error('[SAP] SAP_USER and SAP_PASSWORD environment variables are required.');
+        }
+
+        // C-2: SSL verification is env-dependent
+        const rejectUnauthorized = process.env.SAP_SSL_VERIFY !== 'false';
+        this.httpsAgent = new https.Agent({ rejectUnauthorized });
+        if (!rejectUnauthorized) {
+            console.warn('[SAP] SSL verification disabled (SAP_SSL_VERIFY=false). Use only for self-signed certs.');
         }
     }
 
@@ -24,16 +35,30 @@ class SapService {
         return SapService.instance;
     }
 
+    // C-3: Login deduplication mutex — prevents race condition when multiple
+    // concurrent requests trigger login for the same company simultaneously
     private async login(companyCode: CountryCode): Promise<string> {
+        // If a login is already in progress for this company, reuse it
+        const pending = this.loginPromises.get(companyCode);
+        if (pending) return pending;
+
+        const loginPromise = this.doLogin(companyCode).finally(() => {
+            this.loginPromises.delete(companyCode);
+        });
+        this.loginPromises.set(companyCode, loginPromise);
+        return loginPromise;
+    }
+
+    private async doLogin(companyCode: CountryCode): Promise<string> {
         const company = COMPANIES[companyCode];
         if (!company) throw new Error(`Invalid company code: ${companyCode}`);
 
         try {
             const response = await axios.post(`${this.baseUrl}/Login`, {
                 CompanyDB: company.dbName,
-                UserName: process.env.SAP_USER || 'stifmolina2',
-                Password: process.env.SAP_PASSWORD || 'FmDiosMio1'
-            });
+                UserName: process.env.SAP_USER,
+                Password: process.env.SAP_PASSWORD,
+            }, { httpsAgent: this.httpsAgent });
 
             const sessionId = response.data.SessionId;
             this.sessions.set(companyCode, {
@@ -67,10 +92,7 @@ class SapService {
                 'Cookie': `B1SESSION=${sessionId}`,
                 'Prefer': 'odata.maxpagesize=500'
             },
-            // Disable SSL verification for self-signed certs if needed (common in dev/private SAP)
-            httpsAgent: new (require('https').Agent)({
-                rejectUnauthorized: false
-            })
+            httpsAgent: this.httpsAgent,
         });
 
         // Add interceptor to handle 401 (Session Expired) -> Retry Login

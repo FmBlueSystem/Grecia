@@ -9,7 +9,8 @@ const loginSchema = z.object({
 });
 
 export default async function authRoutes(fastify: FastifyInstance) {
-    fastify.post('/login', async (request, reply) => {
+    // I-2: Stricter rate limit for login — 10 attempts per minute per IP
+    fastify.post('/login', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (request, reply) => {
         const body = loginSchema.safeParse(request.body);
         if (!body.success) {
             reply.code(400);

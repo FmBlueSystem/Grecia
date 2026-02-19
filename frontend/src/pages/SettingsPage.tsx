@@ -191,7 +191,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="mt-6 flex justify-end gap-3">
-                    <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    <button onClick={() => toast.info('Cambios descartados')} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                       Cancelar
                     </button>
                     <button onClick={() => toast.info('Perfil guardado (los cambios de perfil se sincronizan desde SAP)')} className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium">
@@ -300,10 +300,10 @@ export default function SettingsPage() {
                     )}
                     <div className="pt-4 border-t border-slate-100">
                       <ToggleSwitch
-                        label="Autenticación de dos factores (2FA)"
+                        label="Autenticacion de dos factores (2FA)"
                         description="Aumenta la seguridad de tu cuenta"
                         checked={false}
-                        onChange={() => {}}
+                        onChange={() => toast.info('2FA estara disponible proximamente')}
                       />
                     </div>
                   </div>
@@ -319,7 +319,7 @@ export default function SettingsPage() {
                     <div className="w-24 h-24 bg-gradient-to-br from-brand to-brand-light rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
                       {userInitials}
                     </div>
-                    <button className="text-sm text-brand hover:underline font-medium">
+                    <button onClick={() => toast.info('La foto de perfil se sincroniza desde el directorio empresarial')} className="text-sm text-brand hover:underline font-medium">
                       Cambiar Foto
                     </button>
                   </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Building2, Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, MoreHorizontal } from 'lucide-react';
+import { Building2, Calendar, CheckCircle, Clock, Mail, MessageSquare, Phone, Plus, User, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { TableSkeleton, EmptyState } from '../components';
@@ -243,8 +244,12 @@ export default function Activities() {
                                     </div>
                                 </div>
 
-                                <button className="text-slate-300 hover:text-slate-600">
-                                    <MoreHorizontal className="w-5 h-5" />
+                                <button
+                                    onClick={() => toast.info(`Actividad #${activity.id} — La eliminacion de actividades se gestiona desde SAP`)}
+                                    className="text-slate-300 hover:text-red-500 transition-colors"
+                                    title="Opciones"
+                                >
+                                    <Trash2 className="w-4 h-4" />
                                 </button>
                             </motion.div>
                         );

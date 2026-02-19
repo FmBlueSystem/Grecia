@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Search, Mail, Phone, MoreHorizontal, Filter, Users, Building2, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Search, Mail, Phone, Eye, Filter, Users, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast } from '../lib';
@@ -28,6 +29,7 @@ interface AccountOption {
 }
 
 export default function Contacts() {
+    const navigate = useNavigate();
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [totalContacts, setTotalContacts] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -245,7 +247,7 @@ export default function Contacts() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredContacts.map((contact) => (
-                                <motion.tr variants={fadeIn} key={contact.id} className="hover:bg-slate-50/50 transition-colors group">
+                                <motion.tr variants={fadeIn} key={contact.id} onClick={() => navigate(`/contacts/${contact.id}`)} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold">
@@ -288,8 +290,12 @@ export default function Contacts() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                                                <MoreHorizontal className="w-4 h-4" />
+                                            <button
+                                                onClick={() => navigate(`/contacts/${contact.id}`)}
+                                                className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                                                title="Ver detalle"
+                                            >
+                                                <Eye className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>

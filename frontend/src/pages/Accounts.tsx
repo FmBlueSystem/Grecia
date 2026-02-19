@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, Search, Globe, MoreHorizontal } from 'lucide-react';
+import { Building2, Plus, Search, Globe, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeIn } from '../lib/animations';
 import { toast } from '../lib';
@@ -185,8 +185,12 @@ export default function Accounts() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                                                <MoreHorizontal className="w-4 h-4" />
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${account.id}`); }}
+                                                className="p-2 hover:bg-indigo-50 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                                                title="Ver detalle"
+                                            >
+                                                <Eye className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>

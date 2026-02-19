@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar as CalendarIcon, Clock, AlertCircle } from 'lucide-react';
 import PageHeader from '../components/shared/PageHeader';
 import StatCard from '../components/shared/StatCard';
@@ -24,6 +25,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function CalendarView() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +68,7 @@ export default function CalendarView() {
           { label: 'Calendario' },
         ]}
         action={
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+          <button onClick={() => navigate('/activities')} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
             <Plus className="w-4 h-4" />
             Nueva Actividad
           </button>
@@ -162,13 +164,13 @@ export default function CalendarView() {
           <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl p-5 text-white">
             <h3 className="text-sm font-semibold mb-3">Acciones Rápidas</h3>
             <div className="space-y-2">
-              <button className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
-                Agendar Reunión
+              <button onClick={() => navigate('/activities')} className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
+                Agendar Reunion
               </button>
-              <button className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
+              <button onClick={() => navigate('/activities')} className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
                 Crear Tarea
               </button>
-              <button className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
+              <button onClick={() => navigate('/calendar')} className="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
                 Ver Disponibilidad
               </button>
             </div>

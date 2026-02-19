@@ -22,6 +22,12 @@ interface SapListResponse<T> {
 }
 
 // ─── Helpers ──────────────────────────────────────────
+
+// C-4: Escape user input for OData filter strings to prevent injection
+function escapeOData(input: string): string {
+    return input.replace(/'/g, "''").replace(/[%_\[\]]/g, '');
+}
+
 function buildQuery(endpoint: string, select: string, params: PaginationParams = {}): string {
     const parts: string[] = [`$select=${select}`, '$inlinecount=allpages'];
     if (params.top) parts.push(`$top=${params.top}`);
@@ -50,20 +56,23 @@ async function sapPatch(companyCode: CountryCode, path: string, data: any): Prom
 }
 
 // ─── SalesPersons Cache (para resolver owner names) ──
-const spCache = new Map<string, Map<number, string>>();
+// I-9: Cache with 30-minute TTL to pick up new sales reps
+const SP_CACHE_TTL = 30 * 60 * 1000;
+const spCache = new Map<string, { data: Map<number, string>; loadedAt: number }>();
 
 export async function loadSalesPersons(companyCode: CountryCode): Promise<Map<number, string>> {
-    if (spCache.has(companyCode)) return spCache.get(companyCode)!;
+    const cached = spCache.get(companyCode);
+    if (cached && (Date.now() - cached.loadedAt < SP_CACHE_TTL)) return cached.data;
     try {
         const data = await sapGet(companyCode, 'SalesPersons?$select=SalesEmployeeCode,SalesEmployeeName&$top=500');
         const map = new Map<number, string>();
         for (const sp of data.value || []) {
             map.set(sp.SalesEmployeeCode, sp.SalesEmployeeName || '');
         }
-        spCache.set(companyCode, map);
+        spCache.set(companyCode, { data: map, loadedAt: Date.now() });
         return map;
     } catch {
-        return new Map();
+        return cached?.data || new Map();
     }
 }
 
@@ -87,7 +96,7 @@ function withSalesPersonFilter(baseFilter: string, salesPersonCode?: number): st
 export async function getAccounts(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
     const spMap = await loadSalesPersons(companyCode);
     let filter = params.search
-        ? `CardType eq 'C' and contains(CardName,'${params.search}')`
+        ? `CardType eq 'C' and contains(CardName,'${escapeOData(params.search)}')`
         : "CardType eq 'C'";
     filter = withSalesPersonFilter(filter, salesPersonCode);
     const path = buildQuery('BusinessPartners',
@@ -129,7 +138,7 @@ function mapAccount(bp: any, spMap: Map<number, string>): any {
 export async function getContacts(companyCode: CountryCode, params: PaginationParams = {}, salesPersonCode?: number): Promise<SapListResponse<any>> {
     const spMap = await loadSalesPersons(companyCode);
     let filter = params.search
-        ? `CardType eq 'C' and contains(CardName,'${params.search}')`
+        ? `CardType eq 'C' and contains(CardName,'${escapeOData(params.search)}')`
         : "CardType eq 'C'";
     filter = withSalesPersonFilter(filter, salesPersonCode);
 
@@ -180,7 +189,7 @@ function mapContact(cp: any, cardCode: string, cardName: string, salesPersonCode
 // ─── PRODUCTS (Items) ─────────────────────────────────
 export async function getProducts(companyCode: CountryCode, params: PaginationParams = {}): Promise<SapListResponse<any>> {
     const filter = params.search
-        ? `contains(ItemName,'${params.search}')`
+        ? `contains(ItemName,'${escapeOData(params.search)}')`
         : undefined;
     // Don't use $select — SAP omits collection properties like ItemPrices when $select is used
     const parts: string[] = ['$inlinecount=allpages'];

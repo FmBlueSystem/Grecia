@@ -122,7 +122,8 @@ export default async function notificationsRoutes(fastify: FastifyInstance) {
             reply.code(401).send({ error: 'Invalid token' }); return;
         }
 
-        const cc = (query.company || 'CR') as CountryCode;
+        // C-5: Use company code from request header (middleware), not from query param
+        const cc = request.companyCode || 'CR' as CountryCode;
         const { sapSalesPersonCode, scopeLevel } = user;
         const sellerFilter = scopeLevel === 'ALL' ? '' : ` and SalesPersonCode eq ${sapSalesPersonCode}`;
         const now = () => new Date().toISOString().split('T')[0];

@@ -52,8 +52,14 @@ export default async function contactRoutes(fastify: FastifyInstance) {
                 };
                 try {
                     await sapPost(request.companyCode, `BusinessPartners('${body.cardCode.replace(/'/g, "''")}')`, sapBody);
-                } catch {
-                    // SAP PATCH may not be available, continue with local record
+                } catch (sapError: any) {
+                    // I-7: Surface SAP errors instead of silently swallowing
+                    const sapMsg = sapError.response?.data?.error?.message?.value;
+                    request.log.warn({ sapError: sapMsg }, 'SAP contact creation failed');
+                    return reply.code(502).send({
+                        error: sapMsg || 'Error al crear contacto en SAP',
+                        partial: true,
+                    });
                 }
             }
             return { success: true, data: { firstName: body.firstName, lastName: body.lastName } };

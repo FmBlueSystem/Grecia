@@ -63,7 +63,7 @@ const NAV_SECTIONS = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const location = useLocation();
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
@@ -147,6 +147,7 @@ export default function Sidebar() {
                   <NavLink
                     key={item.id}
                     to={item.path}
+                    onClick={onNavigate}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                       isActive
                         ? 'bg-brand/10 text-brand font-semibold'

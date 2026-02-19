@@ -271,10 +271,9 @@ export default function Invoices() {
                         <div className="p-12">
                             <EmptyState
                                 title="No se encontraron facturas"
-                                description={searchTerm ? `No hay resultados para "${searchTerm}"` : "Comienza creando tu primera factura para registrar ventas."}
-                                actionLabel="Crear Factura"
-                                onAction={() => { }}
+                                description={searchTerm ? `No hay resultados para "${searchTerm}"` : "Las facturas se sincronizan automaticamente desde SAP Business One."}
                                 icon={FileText}
+                                variant={searchTerm ? 'search' : undefined}
                             />
                         </div>
                     )}

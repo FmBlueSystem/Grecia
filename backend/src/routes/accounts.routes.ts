@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { getAccounts, getAccountById, PaginationParams } from '../services/sap-proxy.service';
+import { getAccounts, getAccountById, sapPost, PaginationParams } from '../services/sap-proxy.service';
 
 export default async function accountRoutes(fastify: FastifyInstance) {
     // GET /api/accounts
@@ -35,6 +35,40 @@ export default async function accountRoutes(fastify: FastifyInstance) {
             }
             request.log.error(error);
             reply.code(500).send({ error: 'Failed to fetch account from SAP' });
+        }
+    });
+
+    // C-6: POST /api/accounts — Create a BusinessPartner in SAP
+    fastify.post('/', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+        try {
+            const body = request.body as {
+                name: string;
+                industry?: string;
+                website?: string;
+                phone?: string;
+            };
+            if (!body.name || !body.name.trim()) {
+                return reply.code(400).send({ error: 'El nombre de la cuenta es requerido' });
+            }
+
+            const { sapSalesPersonCode } = request.user as any;
+            const sapBody: Record<string, any> = {
+                CardName: body.name.trim(),
+                CardType: 'cCustomer',
+            };
+            if (body.phone) sapBody.Phone1 = body.phone;
+            if (body.website) sapBody.Website = body.website;
+            if (body.industry) sapBody.Notes = `Industria: ${body.industry}`;
+            if (sapSalesPersonCode != null) sapBody.SalesPersonCode = sapSalesPersonCode;
+
+            const result = await sapPost(request.companyCode, 'BusinessPartners', sapBody);
+            return { success: true, data: { id: result.CardCode, name: result.CardName } };
+        } catch (error: any) {
+            request.log.error(error);
+            const sapMsg = error.response?.data?.error?.message?.value;
+            reply.code(error.response?.status || 500).send({
+                error: sapMsg || 'Error al crear cuenta en SAP',
+            });
         }
     });
 }
