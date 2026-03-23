@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx next lint || true
+
+      - name: Tests
+        run: npx vitest run --passWithNoTests
+        env:
+          JWT_SECRET: test-secret-for-ci
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          SAP_BASE_URL: https://localhost:50000
+          SAP_USER: test
+          SAP_PASSWORD: test
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /data/casos
+            git pull origin main
+            npm ci --production
+            npm run build
+            pm2 restart casos-stia

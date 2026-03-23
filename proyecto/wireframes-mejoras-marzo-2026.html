@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframes — Mejoras Casos Marzo 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Patrick+Hand&display=swap');
+
+  :root {
+    --ink: #2a2a3d;
+    --ink-light: #5a5a7a;
+    --ink-muted: #9a9ab0;
+    --paper: #fafaf8;
+    --paper-dark: #f0f0ec;
+    --sketch-border: #c8c8d8;
+    --accent: #1a5fa8;
+    --accent-light: #dbe8f8;
+    --success: #2e7d52;
+    --success-light: #d4edda;
+    --warn: #c07a30;
+    --warn-light: #fff3cd;
+    --danger: #a04040;
+    --danger-light: #fde8e8;
+    --teal: #2a7a7a;
+    --teal-light: #d4f0f0;
+    --purple: #5a3a8a;
+    --purple-light: #ede8f8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Patrick Hand', cursive;
+    background: #dcdcd4;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-family: 'Architects Daughter', cursive;
+    font-size: 26px;
+    color: var(--ink);
+    border-bottom: 3px solid var(--accent);
+    display: inline-block;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+  .header p {
+    color: var(--ink-light);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .nav-tab {
+    padding: 8px 16px;
+    border: 2px solid var(--ink);
+    border-radius: 6px 6px 0 0;
+    background: var(--paper-dark);
+    cursor: pointer;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 13px;
+    color: var(--ink-light);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .nav-tab:hover { background: var(--accent-light); color: var(--accent); }
+  .nav-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: bold;
+  }
+  .sprint-label {
+    font-size: 10px;
+    opacity: 0.8;
+    display: block;
+  }
+
+  /* ─── SCREEN ─── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── FRAME ─── */
+  .frame {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 5px 6px 0 rgba(0,0,0,0.18);
+    overflow: hidden;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-brand {
+    font-family: 'Architects Daughter', cursive;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  .topbar-brand span { color: #7ab8f5; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  /* ─── LAYOUT ─── */
+  .layout {
+    display: flex;
+    min-height: 600px;
+  }
+  .sidebar {
+    width: 200px;
+    background: #1e2433;
+    color: #aab;
+    padding: 16px 0;
+    flex-shrink: 0;
+  }
+  .sidebar-item {
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-item.active {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-left: 3px solid #7ab8f5;
+  }
+  .sidebar-item:hover:not(.active) { background: rgba(255,255,255,0.05); }
+  .sidebar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+  .sidebar-dot.active-dot { background: #7ab8f5; opacity: 1; }
+
+  .main {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f5f5f0;
+  }
+
+  /* ─── PAGE TITLE ─── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .back-btn {
+    width: 30px; height: 30px;
+    border: 2px dashed var(--sketch-border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .page-title { font-size: 20px; font-weight: bold; color: var(--ink); }
+  .page-subtitle { font-size: 12px; color: var(--ink-muted); }
+
+  /* ─── CARD ─── */
+  .card {
+    background: white;
+    border: 1.5px solid var(--sketch-border);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.05);
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+
+  /* ─── FORM ELEMENTS ─── */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-size: 13px;
+    color: var(--ink-light);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .form-label .req { color: var(--danger); margin-left: 2px; }
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--sketch-border);
+    border-radius: 6px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 14px;
+    color: var(--ink);
+    background: white;
+  }
+  .form-input.with-icon { padding-left: 34px; }
+  .form-input:focus { border-color: var(--accent); outline: none; }
+  .form-input.disabled {
+    background: #f0f0ec;
+    color: var(--ink-muted);
+    cursor: not-allowed;
+    border-style: dashed;
+  }
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  textarea.form-input { resize: vertical; min-height: 70px; }
+
+  /* ─── SEARCH DROPDOWN ─── */
+  .search-dropdown {
+    border: 1.5px solid var(--sketch-border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    background: white;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .search-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0ec;
+    cursor: pointer;
+  }
+  .search-item:last-child { border-bottom: none; }
+  .search-item:hover { background: var(--accent-light); }
+  .search-item.selected { background: var(--accent-light); border-left: 3px solid var(--accent); }
+  .search-item strong { color: var(--accent); }
+  .search-item small { color: var(--ink-muted); display: block; font-size: 11px; }
+
+  /* ─── BADGE ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1.5px solid;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .badge-open { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+  .badge-process { background: var(--warn-light); color: var(--warn); border-color: var(--warn); }
+  .badge-resolved { background: var(--success-light); color: var(--success); border-color: var(--success); }
+  .badge-vendor { background: #f0e8ff; color: var(--purple); border-color: var(--purple); }
+  .badge-other-area { background: #fff0d8; color: #8a5a00; border-color: #c09040; }
+  .badge-feedback { background: var(--teal-light); color: var(--teal); border-color: var(--teal); }
+  .badge-ime { background: #fde8e8; color: #8a2020; border-color: #c04040; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 14px;
+    cursor: pointer;
+    border: 2px solid;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-primary:hover { background: #155090; }
+  .btn-outline { background: white; color: var(--ink); border-color: var(--sketch-border); }
+  .btn-outline:hover { background: var(--paper-dark); }
+  .btn-warn { background: var(--warn); color: white; border-color: var(--warn); }
+  .btn-success { background: var(--success); color: white; border-color: var(--success); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-disabled { background: #e8e8e8; color: var(--ink-muted); border-color: #d0d0d0; cursor: not-allowed; }
+
+  /* ─── ALERT CARDS ─── */
+  .alert-card {
+    border: 1.5px solid;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .alert-card-pre { background: #fffbeb; border-color: #d4a017; }
+  .alert-card-overdue { background: #fef2f2; border-color: #dc2626; }
+  .alert-card-overdue-high { background: #fff0f0; border-color: #991b1b; }
+  .alert-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .alert-icon-pre { background: #fef9c3; }
+  .alert-icon-overdue { background: #fee2e2; }
+  .alert-icon-high { background: #fecaca; }
+  .alert-content { flex: 1; }
+  .alert-title { font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+  .alert-title-pre { color: #92400e; }
+  .alert-title-overdue { color: #991b1b; }
+  .alert-meta { font-size: 12px; color: var(--ink-muted); }
+  .alert-badge-pre { background: #fef9c3; color: #92400e; border: 1px solid #d4a017; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+  .alert-badge-overdue { background: #fee2e2; color: #991b1b; border: 1px solid #dc2626; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+  .alert-badge-high { background: #fecaca; color: #7f1d1d; border: 1px solid #991b1b; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: bold; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    background: rgba(0,0,0,0.12);
+    border: 2px dashed var(--sketch-border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 16px;
+  }
+  .modal-box {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 420px;
+    margin: 0 auto;
+    box-shadow: 6px 7px 0 rgba(0,0,0,0.15);
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px dashed var(--sketch-border);
+  }
+
+  /* ─── STATUS SELECTOR ─── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .status-option {
+    border: 2px solid var(--sketch-border);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .status-option:hover { border-color: var(--accent); background: var(--accent-light); }
+  .status-option.selected { border-color: var(--accent); background: var(--accent-light); }
+  .status-option-title { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+  .status-option-desc { font-size: 11px; color: var(--ink-muted); margin-top: 3px; }
+
+  /* ─── ANNOTATION ─── */
+  .annotation {
+    background: #fffbeb;
+    border: 1.5px dashed #d4a017;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .annotation-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* ─── CALIDAD SECTION ─── */
+  .calidad-section {
+    background: #f0f8ff;
+    border: 2px dashed #1a5fa8;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .calidad-header {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lock-icon {
+    background: var(--accent);
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  /* ─── TIMELINE ─── */
+  .timeline { border-left: 2px dashed var(--sketch-border); padding-left: 16px; }
+  .timeline-item { margin-bottom: 16px; position: relative; }
+  .timeline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    left: -21px;
+    top: 4px;
+    border: 2px solid var(--sketch-border);
+    background: white;
+  }
+  .timeline-dot.active { background: var(--accent); border-color: var(--accent); }
+  .timeline-dot.extension { background: var(--warn); border-color: var(--warn); }
+  .timeline-time { font-size: 11px; color: var(--ink-muted); }
+  .timeline-body { font-size: 13px; margin-top: 3px; }
+
+  /* ─── SCREEN LABELS ─── */
+  .screen-label {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .screen-label h2 {
+    font-family: 'Architects Daughter', cursive;
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .screen-label p { font-size: 13px; color: var(--ink-light); font-style: italic; margin-top: 4px; }
+
+  /* ─── MANUAL MODE ─── */
+  .manual-mode-banner {
+    background: #fff3cd;
+    border: 1.5px dashed #d4a017;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #856404;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ─── SELECTED GREEN ─── */
+  .selected-info {
+    background: #d4edda;
+    border: 1px solid #2e7d52;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+    color: var(--success);
+    margin-top: 6px;
+  }
+
+  /* ─── DIVIDER ─── */
+  hr.sketch { border: none; border-top: 2px dashed var(--sketch-border); margin: 16px 0; }
+
+  /* ─── COLUMN ROW ─── */
+  .row { display: flex; gap: 20px; }
+  .col { flex: 1; }
+
+  /* ─── IME TABLE ─── */
+  .ime-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ime-table th {
+    background: var(--ink);
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+  }
+  .ime-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--paper-dark);
+    color: var(--ink-light);
+  }
+  .ime-table tr:hover td { background: var(--accent-light); }
+  .ime-table .val { color: var(--ink); font-weight: normal; }
+
+  /* ─── NOTA GENERADA ─── */
+  .auto-note {
+    background: #f0f8ff;
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--ink-light);
+    border-radius: 0 6px 6px 0;
+    margin-top: 8px;
+  }
+
+  /* print / export hint */
+  .hint { text-align: center; font-size: 12px; color: var(--ink-muted); margin-top: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Wireframes — Mejoras Casos de Servicio</h1>
+  <p>Stia Comercializadora · Marzo 2026 · Para aprobación de cliente</p>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="show('s1')">
+    <span class="sprint-label">S1</span>Buscar Contacto
+  </div>
+  <div class="nav-tab" onclick="show('s2')">
+    <span class="sprint-label">S2</span>Retroalimentación Positiva
+  </div>
+  <div class="nav-tab" onclick="show('s3')">
+    <span class="sprint-label">S3</span>Nuevos Estados
+  </div>
+  <div class="nav-tab" onclick="show('s4')">
+    <span class="sprint-label">S4</span>Extender Plazo
+  </div>
+  <div class="nav-tab" onclick="show('s5')">
+    <span class="sprint-label">S5</span>Alertas Vencimiento
+  </div>
+  <div class="nav-tab" onclick="show('s6')">
+    <span class="sprint-label">S6</span>Inconformidad Empaque
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S1 — BUSCAR CONTACTO                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s1" class="screen active">
+  <div class="screen-label">
+    <h2>S1 — Nuevo Caso: Buscar Contacto</h2>
+    <p>Se agrega buscador de contacto SAP + modo manual si no existe en base</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 &nbsp; Ana García &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Casos</div>
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Alertas</div>
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Estadísticas</div>
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Conocimiento</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div class="back-btn">←</div>
+          <div>
+            <div class="page-title">Nuevo Caso</div>
+            <div class="page-subtitle">Complete los datos para crear un caso de servicio</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+
+            <!-- CLIENTE -->
+            <div class="card">
+              <div class="card-title">Cliente</div>
+              <div class="form-group">
+                <label class="form-label">Buscar cliente</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🔍</span>
+                  <input class="form-input with-icon" value="Cargill S.A." readonly>
+                </div>
+                <div class="selected-info">✓ Cliente seleccionado: <strong>C00245</strong> — Cargill S.A.</div>
+              </div>
+            </div>
+
+            <!-- CONTACTO — NUEVO -->
+            <div class="card" style="border-color: var(--accent); border-width: 2px;">
+              <div class="card-title" style="color: var(--accent);">★ NUEVO — Contacto</div>
+
+              <div class="annotation">
+                <span class="annotation-icon">💡</span>
+                <span>El buscador aparece <strong>solo cuando hay cliente seleccionado</strong>. Busca entre los contactos registrados del BP en SAP.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Buscar contacto</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🔍</span>
+                  <input class="form-input with-icon" value="Andrés" readonly style="border-color: var(--accent);">
+                </div>
+                <!-- Dropdown de resultados -->
+                <div class="search-dropdown">
+                  <div class="search-item">
+                    <strong>C-001</strong> — Andrés Ramírez
+                    <small>Gerente de Compras · andrés@cargill.com · +506 8800-1234</small>
+                  </div>
+                  <div class="search-item selected">
+                    <strong>C-002</strong> — Andrés Villalobos
+                    <small>Director de Operaciones · avillalobos@cargill.com</small>
+                  </div>
+                  <div class="search-item">
+                    <strong>C-003</strong> — Andrés Solís
+                    <small>Asistente Administrativo</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="manual-mode-banner">
+                ⚠️ <strong>Modo manual:</strong> Si el contacto no aparece en la lista, puede escribir los datos directamente.
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Nombre del contacto</label>
+                  <input class="form-input" value="Andrés Villalobos" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Cargo</label>
+                  <input class="form-input" placeholder="Ej: Gerente de Compras">
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Teléfono</label>
+                  <input class="form-input" placeholder="+506 0000-0000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" value="avillalobos@cargill.com" readonly>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="col">
+
+            <!-- DETALLE -->
+            <div class="card">
+              <div class="card-title">Detalle del Caso</div>
+              <div class="form-group">
+                <label class="form-label">Asunto <span class="req">*</span></label>
+                <input class="form-input" value="Reclamo entrega incompleta">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Descripción <span class="req">*</span></label>
+                <textarea class="form-input">El pedido #58975 llegó con faltante de 3 unidades...</textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Prioridad <span class="req">*</span></label>
+                  <select class="form-input"><option>Normal</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Canal de Ingreso <span class="req">*</span></label>
+                  <select class="form-input"><option>Correo electrónico</option></select>
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Tipo de Caso <span class="req">*</span></label>
+                  <select class="form-input"><option>Error en despacho</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Área Responsable <span class="req">*</span></label>
+                  <select class="form-input"><option>Logística</option></select>
+                </div>
+              </div>
+            </div>
+
+            <!-- COLABORADOR ASIGNADO (renombrado) -->
+            <div class="card">
+              <div class="card-title" style="color: var(--accent);">★ CAMBIO — Colaborador Asignado</div>
+              <div class="annotation">
+                <span class="annotation-icon">✏️</span>
+                <span>Renombrado de "Técnico Asignado" a <strong>"Colaborador Asignado"</strong></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Buscar colaborador</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🔍</span>
+                  <input class="form-input with-icon" placeholder="Nombre del colaborador...">
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+              <button class="btn btn-outline">Cancelar</button>
+              <button class="btn btn-primary">✓ Crear Caso</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S2 — RETROALIMENTACIÓN POSITIVA                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s2" class="screen">
+  <div class="screen-label">
+    <h2>S2 — Nuevo Tipo: Retroalimentación Positiva</h2>
+    <p>Al seleccionar este tipo, Prioridad y Tiempo Estimado se deshabilitan</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 &nbsp; Ana García &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Casos</div>
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Alertas</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div class="back-btn">←</div>
+          <div>
+            <div class="page-title">Nuevo Caso</div>
+            <div class="page-subtitle">Complete los datos para crear un caso de servicio</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Cliente</div>
+              <div class="form-group">
+                <label class="form-label">Buscar cliente</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🔍</span>
+                  <input class="form-input with-icon" value="Centro de Carnes San Carlos">
+                </div>
+                <div class="selected-info">✓ Cliente: <strong>C00389</strong> — Centro de Carnes San Carlos</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Contacto</div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Teléfono</label>
+                  <input class="form-input" value="+506 2460-1234">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" value="viviana@carnes.cr">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Detalle del Caso</div>
+
+              <div class="form-group">
+                <label class="form-label">Asunto <span class="req">*</span></label>
+                <input class="form-input" value="Felicitación al equipo de ventas CR">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Descripción <span class="req">*</span></label>
+                <textarea class="form-input">El cliente menciona que Luis García atendió de forma excelente su última solicitud de cotización...</textarea>
+              </div>
+
+              <div class="form-grid-2">
+                <!-- PRIORIDAD DESHABILITADA -->
+                <div class="form-group">
+                  <label class="form-label" style="color: var(--ink-muted);">Prioridad
+                    <span style="font-size:11px; color: var(--ink-muted);">(no aplica)</span>
+                  </label>
+                  <input class="form-input disabled" value="Normal — N/A" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Canal de Ingreso <span class="req">*</span></label>
+                  <select class="form-input"><option>WhatsApp</option></select>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Tipo de Caso <span class="req">*</span></label>
+                  <select class="form-input" style="border-color: var(--teal); color: var(--teal); font-weight: bold;">
+                    <option>★ Retroalimentación positiva</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Área Responsable <span class="req">*</span></label>
+                  <select class="form-input"><option>Ventas</option></select>
+                </div>
+              </div>
+
+              <!-- TIEMPO DESHABILITADO -->
+              <div class="form-group">
+                <label class="form-label" style="color: var(--ink-muted);">Tiempo Estimado
+                  <span style="font-size:11px; color: var(--ink-muted);">(no aplica para retroalimentación)</span>
+                </label>
+                <input class="form-input disabled" value="— No requiere seguimiento" readonly>
+              </div>
+
+              <!-- BANNER INFORMATIVO -->
+              <div style="background: var(--teal-light); border: 1.5px solid var(--teal); border-radius: 8px; padding: 12px 14px; margin-top: 8px;">
+                <div style="font-size: 13px; color: var(--teal); font-weight: bold; margin-bottom: 4px;">✓ Retroalimentación Positiva</div>
+                <div style="font-size: 12px; color: var(--teal);">Este caso funcionará como <strong>notificación</strong> al colaborador asignado. No requiere seguimiento ni cierre.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+              <button class="btn btn-outline">Cancelar</button>
+              <button class="btn btn-success">★ Crear Retroalimentación</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CÓMO SE VE EN LISTA -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-title">Cómo se ve en la lista de casos</div>
+          <table style="width:100%; font-size:13px; border-collapse: collapse;">
+            <thead>
+              <tr style="background: var(--paper-dark);">
+                <th style="padding: 8px 12px; text-align:left; font-size:12px; color: var(--ink-muted);">#</th>
+                <th style="padding: 8px 12px; text-align:left; font-size:12px; color: var(--ink-muted);">Asunto</th>
+                <th style="padding: 8px 12px; text-align:left; font-size:12px; color: var(--ink-muted);">Cliente</th>
+                <th style="padding: 8px 12px; text-align:left; font-size:12px; color: var(--ink-muted);">Tipo</th>
+                <th style="padding: 8px 12px; text-align:left; font-size:12px; color: var(--ink-muted);">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--paper-dark);">
+                <td style="padding: 8px 12px;">#1042</td>
+                <td style="padding: 8px 12px;">Reclamo entrega incompleta</td>
+                <td style="padding: 8px 12px;">Cargill S.A.</td>
+                <td style="padding: 8px 12px;"><span class="badge badge-process">Error en despacho</span></td>
+                <td style="padding: 8px 12px;"><span class="badge badge-process">En Proceso</span></td>
+              </tr>
+              <tr style="background: #f8fffc;">
+                <td style="padding: 8px 12px; color: var(--teal);">#1043</td>
+                <td style="padding: 8px 12px; color: var(--teal);">Felicitación al equipo ventas CR</td>
+                <td style="padding: 8px 12px;">Centro de Carnes SC</td>
+                <td style="padding: 8px 12px;"><span class="badge badge-feedback">★ Retroalimentación positiva</span></td>
+                <td style="padding: 8px 12px;"><span class="badge badge-feedback">Notificación</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S3 — NUEVOS ESTADOS                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s3" class="screen">
+  <div class="screen-label">
+    <h2>S3 — Nuevos Estados del Caso</h2>
+    <p>Se agregan "Pendiente de proveedor" y "Pendiente de otra área" al selector de estado</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 &nbsp; Ana García &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Casos</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div class="back-btn">←</div>
+          <div>
+            <div class="page-title">Caso #1038</div>
+            <div class="page-subtitle">Pedido retrasado · Cargill S.A.</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Información del Caso</div>
+              <div class="form-grid-2">
+                <div><label class="form-label">Cliente</label><div style="font-size:14px; color:var(--ink);">Cargill S.A.</div></div>
+                <div><label class="form-label">Contacto</label><div style="font-size:14px; color:var(--ink);">Andrés Villalobos</div></div>
+                <div><label class="form-label">Prioridad</label><span class="badge badge-process">Alta</span></div>
+                <div><label class="form-label">Tipo</label><div style="font-size:14px;">Pedido retrasado</div></div>
+                <div><label class="form-label">Área</label><div style="font-size:14px;">Logística</div></div>
+                <div><label class="form-label">Colaborador asignado</label><div style="font-size:14px; color: var(--accent);">★ Carlos Méndez</div></div>
+              </div>
+            </div>
+
+            <!-- SELECTOR DE ESTADO — NUEVO -->
+            <div class="card" style="border-color: var(--accent); border-width: 2px;">
+              <div class="card-title" style="color: var(--accent);">★ NUEVO — Cambiar Estado del Caso</div>
+
+              <div class="annotation">
+                <span class="annotation-icon">💡</span>
+                <span>Se agregan 2 nuevos estados. Los estados "Pendiente" pausan el conteo del SLA mientras se espera respuesta externa.</span>
+              </div>
+
+              <div class="status-grid">
+                <div class="status-option">
+                  <div class="status-option-title"><span style="color: var(--warn);">●</span> En Proceso</div>
+                  <div class="status-option-desc">Estoy trabajando activamente en esto</div>
+                </div>
+                <div class="status-option">
+                  <div class="status-option-title"><span style="color: var(--accent);">●</span> Pendiente de cliente</div>
+                  <div class="status-option-desc">Esperando respuesta o acción del cliente</div>
+                </div>
+                <!-- NUEVOS -->
+                <div class="status-option selected" style="border-color: var(--purple); background: var(--purple-light);">
+                  <div class="status-option-title" style="color: var(--purple);">
+                    <span style="background: var(--purple); color:white; font-size:9px; padding:1px 5px; border-radius:3px;">NUEVO</span>
+                    ● Pendiente de proveedor
+                  </div>
+                  <div class="status-option-desc">Esperando respuesta o acción del proveedor</div>
+                </div>
+                <div class="status-option" style="border-color: #c09040;">
+                  <div class="status-option-title" style="color: #8a5a00;">
+                    <span style="background: #c09040; color:white; font-size:9px; padding:1px 5px; border-radius:3px;">NUEVO</span>
+                    ● Pendiente de otra área
+                  </div>
+                  <div class="status-option-desc">Esperando respuesta de otra área/departamento</div>
+                </div>
+                <div class="status-option">
+                  <div class="status-option-title"><span style="color: var(--success);">●</span> Resuelto</div>
+                  <div class="status-option-desc">El problema fue solucionado</div>
+                </div>
+                <div class="status-option">
+                  <div class="status-option-title"><span style="color: var(--ink-muted);">●</span> Requiere visita adicional</div>
+                  <div class="status-option-desc">Se necesita otra visita técnica</div>
+                </div>
+              </div>
+
+              <div style="margin-top: 14px; display:flex; justify-content:flex-end; gap:10px;">
+                <button class="btn btn-outline btn-sm">Cancelar</button>
+                <button class="btn btn-primary btn-sm">Cambiar Estado</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <!-- BADGES EN LISTA -->
+            <div class="card">
+              <div class="card-title">Badges en lista de casos</div>
+              <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+                <div style="display:flex; align-items:center; gap:12px; padding: 8px; background: var(--paper-dark); border-radius:6px;">
+                  <span style="font-size:13px; color: var(--ink-muted);">#1035</span>
+                  <span style="flex:1; font-size:13px;">Error en factura Pemex</span>
+                  <span class="badge badge-open"><span class="badge-dot" style="background:var(--accent)"></span>Abierto</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; padding: 8px; background: var(--paper-dark); border-radius:6px;">
+                  <span style="font-size:13px; color: var(--ink-muted);">#1036</span>
+                  <span style="flex:1; font-size:13px;">Garantía equipo industrial</span>
+                  <span class="badge badge-process"><span class="badge-dot" style="background:var(--warn)"></span>En Proceso</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; padding: 8px; background: #f8f0ff; border-radius:6px; border: 1px solid var(--purple);">
+                  <span style="font-size:13px; color: var(--ink-muted);">#1037</span>
+                  <span style="flex:1; font-size:13px;">Pedido pendiente con proveedor</span>
+                  <span class="badge badge-vendor"><span class="badge-dot" style="background:var(--purple)"></span>Pend. proveedor</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; padding: 8px; background: #fff8f0; border-radius:6px; border: 1px solid #c09040;">
+                  <span style="font-size:13px; color: var(--ink-muted);">#1038</span>
+                  <span style="flex:1; font-size:13px;">Pedido retrasado — en revisión contabilidad</span>
+                  <span class="badge badge-other-area"><span class="badge-dot" style="background:#c09040"></span>Pend. otra área</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; padding: 8px; background: var(--paper-dark); border-radius:6px;">
+                  <span style="font-size:13px; color: var(--ink-muted);">#1039</span>
+                  <span style="flex:1; font-size:13px;">Servicio técnico completado</span>
+                  <span class="badge badge-resolved"><span class="badge-dot" style="background:var(--success)"></span>Resuelto</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="background: #f0f8ff;">
+              <div class="card-title">Nota técnica — SLA</div>
+              <div style="font-size: 13px; color: var(--ink-light); line-height: 1.6;">
+                Cuando el caso está en estado <strong>Pendiente de proveedor</strong> o <strong>Pendiente de otra área</strong>, el contador de tiempo del SLA se <strong>pausa automáticamente</strong> mientras se espera la respuesta externa.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S4 — EXTENDER PLAZO                                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s4" class="screen">
+  <div class="screen-label">
+    <h2>S4 — Extensión del Tiempo de Resolución</h2>
+    <p>El gestor de servicio al cliente puede ampliar el plazo con justificación documentada</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 &nbsp; Jennifer Rojas (Gestora SAC) &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Casos</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div class="back-btn">←</div>
+          <div>
+            <div class="page-title">Caso #1041</div>
+            <div class="page-subtitle">Servicio Técnico · Empresa Lácteos El Valle · <span class="badge badge-process" style="font-size:12px;">En Proceso</span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-title">Resumen del Caso</div>
+              <div class="form-grid-2">
+                <div>
+                  <label class="form-label">Tiempo Estimado</label>
+                  <div style="font-size:15px; font-weight:bold; color: var(--warn);">48 horas ⚠️</div>
+                  <div style="font-size:11px; color:var(--ink-muted); margin-top:2px;">Vence hoy a las 3:00 PM</div>
+                </div>
+                <div>
+                  <label class="form-label">Creado</label>
+                  <div style="font-size:14px;">15 Mar 2026, 3:00 PM</div>
+                </div>
+                <div>
+                  <label class="form-label">Colaborador asignado</label>
+                  <div style="font-size:14px;">Mario Soto</div>
+                </div>
+                <div>
+                  <label class="form-label">Prioridad</label>
+                  <span class="badge badge-process">Alta</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- BOTÓN EXTENDER — NUEVO -->
+            <div class="card" style="border-color: var(--warn); border-width: 2px;">
+              <div class="card-title" style="color: var(--warn);">★ NUEVO — Extender Plazo de Resolución</div>
+
+              <div class="annotation">
+                <span class="annotation-icon">🔒</span>
+                <span>Este botón es visible solo para <strong>Gestores SAC y Supervisores</strong>. Los agentes normales no lo ven.</span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px; color:var(--ink-light);">Tiempo actual: <strong style="color:var(--warn);">48 horas</strong></div>
+                  <div style="font-size:12px; color:var(--ink-muted);">El caso está próximo a vencer</div>
+                </div>
+                <button class="btn btn-warn">⏱ Extender Plazo</button>
+              </div>
+
+              <!-- MODAL DE EXTENSIÓN -->
+              <div class="modal-overlay">
+                <div style="font-size:11px; color:var(--ink-muted); text-align:center; margin-bottom:8px; font-style:italic;">— Modal que aparece al hacer clic en "Extender Plazo" —</div>
+                <div class="modal-box">
+                  <div class="modal-title">⏱ Extender Plazo de Resolución</div>
+
+                  <div style="background: var(--warn-light); border-radius:6px; padding: 10px 12px; margin-bottom: 14px; font-size:13px; color: var(--warn);">
+                    <strong>Tiempo actual:</strong> 48 horas<br>
+                    <strong>Caso:</strong> #1041 — Servicio Técnico
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Nuevo tiempo estimado <span class="req">*</span></label>
+                    <select class="form-input" style="border-color: var(--warn);">
+                      <option>Seleccionar...</option>
+                      <option>72 horas</option>
+                      <option selected>1 semana</option>
+                      <option>2 semanas</option>
+                      <option>1 mes</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Justificación <span class="req">*</span> <span style="font-size:11px; color:var(--ink-muted);">(mínimo 20 caracteres)</span></label>
+                    <textarea class="form-input" rows="3" style="border-color: var(--warn);">El técnico requiere pieza de repuesto que llegará el 22 de marzo. El cliente fue notificado y acepta la extensión.</textarea>
+                  </div>
+
+                  <div class="auto-note">
+                    📝 Se creará automáticamente una <strong>nota interna</strong> con esta justificación y quedará registrada en el historial del caso.
+                  </div>
+
+                  <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+                    <button class="btn btn-outline btn-sm">Cancelar</button>
+                    <button class="btn btn-warn btn-sm">Confirmar Extensión</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <!-- TIMELINE CON EXTENSIÓN -->
+            <div class="card">
+              <div class="card-title">Historial del Caso</div>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-dot active"></div>
+                  <div class="timeline-time">15 Mar · 3:02 PM</div>
+                  <div class="timeline-body">Caso creado por <strong>Ana García</strong></div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-time">15 Mar · 4:30 PM</div>
+                  <div class="timeline-body">Asignado a <strong>Mario Soto</strong> — Servicio Técnico</div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-time">16 Mar · 9:00 AM</div>
+                  <div class="timeline-body">Nota: "Se realizó visita inicial, se requiere repuesto"</div>
+                </div>
+
+                <!-- EXTENSIÓN EN TIMELINE — NUEVO -->
+                <div class="timeline-item">
+                  <div class="timeline-dot extension"></div>
+                  <div class="timeline-time" style="color: var(--warn);">16 Mar · 2:45 PM ★ NUEVO</div>
+                  <div class="timeline-body">
+                    <div style="font-size:13px; color: var(--warn); font-weight:bold;">⏱ Plazo extendido por Jennifer Rojas</div>
+                    <div style="font-size:12px; color: var(--ink-muted); margin-top:3px;">48 horas → 1 semana</div>
+                    <div style="background: var(--warn-light); border-radius:6px; padding:8px 10px; margin-top:6px; font-size:12px; color: var(--warn);">
+                      <em>"El técnico requiere pieza de repuesto que llegará el 22 de marzo. El cliente fue notificado y acepta la extensión."</em>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S5 — ALERTAS VENCIMIENTO                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s5" class="screen">
+  <div class="screen-label">
+    <h2>S5 — Alertas de Vencimiento</h2>
+    <p>Nuevos tipos: pre-vencimiento (12h antes), vencido, y vencido con prioridad Alta → jefatura</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 3 &nbsp; Jennifer Rojas (Gestora SAC) &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Casos</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Alertas</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Centro de Alertas</div>
+            <div class="page-subtitle">3 alertas activas · Última actualización: hace 5 minutos</div>
+          </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" style="border-color:var(--sketch-border);">Todas (3)</button>
+          <button class="btn btn-sm" style="background:#fffbeb; color:#92400e; border:1.5px solid #d4a017;">⏰ Pre-vencimiento (1)</button>
+          <button class="btn btn-sm" style="background:#fef2f2; color:#991b1b; border:1.5px solid #dc2626;">🔴 Vencidas (1)</button>
+          <button class="btn btn-sm" style="background:#fff0f0; color:#7f1d1d; border:2px solid #991b1b; font-weight:bold;">🚨 Alta Prioridad (1)</button>
+        </div>
+
+        <!-- ALERTA 1: PRE-DEADLINE -->
+        <div class="alert-card alert-card-pre">
+          <div class="alert-icon alert-icon-pre">⏰</div>
+          <div class="alert-content">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+              <div class="alert-title alert-title-pre">Caso #1038 — Vence en 11 horas</div>
+              <span class="alert-badge-pre">⏰ Pre-vencimiento</span>
+            </div>
+            <div class="alert-meta">
+              Pedido retrasado · Cargill S.A. · Asignado a: Carlos Méndez · Tiempo estimado: 48h · Vence hoy a las 11:00 PM
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+            <button class="btn btn-outline btn-sm">Ver caso</button>
+            <button class="btn btn-sm" style="background:#fffbeb; color:#92400e; border:1px solid #d4a017;">Extender</button>
+          </div>
+        </div>
+
+        <!-- ALERTA 2: VENCIDA -->
+        <div class="alert-card alert-card-overdue">
+          <div class="alert-icon alert-icon-overdue">🔴</div>
+          <div class="alert-content">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+              <div class="alert-title alert-title-overdue">Caso #1035 — Vencido hace 3 horas</div>
+              <span class="alert-badge-overdue">🔴 Vencido</span>
+            </div>
+            <div class="alert-meta">
+              Error en despacho · Empresa Maderas Norte · Asignado a: Luis García · Tiempo estimado: 24h · Venció ayer a las 11:00 PM
+            </div>
+            <div style="font-size:12px; color:#991b1b; margin-top:5px; font-style:italic;">
+              → Notificado a: Jennifer Rojas (Gestora SAC)
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            <button class="btn btn-sm" style="background:#fef2f2; color:#991b1b; border:1.5px solid #dc2626;">Ver caso</button>
+          </div>
+        </div>
+
+        <!-- ALERTA 3: ALTA PRIORIDAD + VENCIDA -->
+        <div class="alert-card alert-card-overdue-high" style="border-width:2px; border-style: solid;">
+          <div class="alert-icon alert-icon-high">🚨</div>
+          <div class="alert-content">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px; flex-wrap:wrap;">
+              <div class="alert-title alert-title-overdue">Caso #1041 — PRIORIDAD ALTA · Vencido hace 5 horas</div>
+              <span class="alert-badge-high">🚨 ALTA PRIORIDAD</span>
+              <span class="alert-badge-overdue">🔴 Vencido</span>
+            </div>
+            <div class="alert-meta">
+              Garantía industrial · Lácteos El Valle · Asignado a: Mario Soto · Prioridad: ALTA
+            </div>
+            <div style="font-size:12px; color:#7f1d1d; margin-top:5px; background:#fecaca; padding:6px 10px; border-radius:5px;">
+              ⚠️ <strong>Notificado a:</strong> Jennifer Rojas (Gestora SAC) y <strong>Diego Mora (Jefatura / Supervisor)</strong>
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            <button class="btn btn-sm" style="background:#fecaca; color:#7f1d1d; border:2px solid #991b1b; font-weight:bold;">Ver caso urgente</button>
+          </div>
+        </div>
+
+        <hr class="sketch">
+
+        <!-- CONFIGURACIÓN DE ALERTAS -->
+        <div class="card" style="border-color: var(--accent); border-width: 2px;">
+          <div class="card-title" style="color: var(--accent);">★ NUEVO — Lógica de Notificaciones</div>
+          <table style="width:100%; font-size:13px; border-collapse:collapse;">
+            <thead>
+              <tr style="background: var(--paper-dark);">
+                <th style="padding:8px 12px; text-align:left; font-size:12px; color:var(--ink-muted);">Evento</th>
+                <th style="padding:8px 12px; text-align:left; font-size:12px; color:var(--ink-muted);">Destinatario</th>
+                <th style="padding:8px 12px; text-align:left; font-size:12px; color:var(--ink-muted);">Condición extra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--paper-dark);">
+                <td style="padding:8px 12px;"><span class="alert-badge-pre">⏰ 12h antes del vencimiento</span></td>
+                <td style="padding:8px 12px;">Colaborador asignado</td>
+                <td style="padding:8px 12px; color:var(--ink-muted);">Caso no cerrado, sin alerta previa</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--paper-dark);">
+                <td style="padding:8px 12px;"><span class="alert-badge-overdue">🔴 Al vencer</span></td>
+                <td style="padding:8px 12px;">Gestora Servicio al Cliente</td>
+                <td style="padding:8px 12px; color:var(--ink-muted);">Caso no cerrado</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px;"><span class="alert-badge-high">🚨 Al vencer + Alta</span></td>
+                <td style="padding:8px 12px;">Gestora SAC <strong>+ Jefatura</strong></td>
+                <td style="padding:8px 12px; color:var(--ink-muted);">Prioridad = Alta</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- S6 — INCONFORMIDAD MATERIAL EMPAQUE                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="s6" class="screen">
+  <div class="screen-label">
+    <h2>S6 — Inconformidad de Material de Empaque (F069)</h2>
+    <p>Formulario extendido al seleccionar este tipo + sección Uso Administrativo solo para Calidad</p>
+  </div>
+  <div class="frame">
+    <div class="topbar">
+      <div class="topbar-brand">⬡ <span>STIA</span> · Casos de Servicio</div>
+      <div class="topbar-right">🔔 &nbsp; Ana García (Vendedora) &nbsp; CR ▾</div>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-item"><span class="sidebar-dot"></span>Dashboard</div>
+        <div class="sidebar-item active"><span class="sidebar-dot active-dot"></span>Casos</div>
+      </div>
+      <div class="main">
+        <div class="page-header">
+          <div class="back-btn">←</div>
+          <div>
+            <div class="page-title">Nuevo Caso — Inconformidad de Empaque</div>
+            <div class="page-subtitle">Formulario F069 digitalizado</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <!-- CLIENTE -->
+            <div class="card">
+              <div class="card-title">Cliente</div>
+              <div class="form-group">
+                <div class="input-wrap">
+                  <span class="input-icon">🔍</span>
+                  <input class="form-input with-icon" value="Cargill S.A." readonly>
+                </div>
+                <div class="selected-info">✓ <strong>C00245</strong> — Cargill S.A.</div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Contacto</label>
+                  <input class="form-input" value="Andrés Villalobos">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Teléfono</label>
+                  <input class="form-input" value="+506 8800-1234">
+                </div>
+              </div>
+            </div>
+
+            <!-- TIPO SELECCIONADO -->
+            <div class="card">
+              <div class="card-title">Tipo de Caso</div>
+              <div class="form-group">
+                <select class="form-input" style="border-color:#c04040; color:#8a2020; font-weight:bold;">
+                  <option>★ Inconformidad de material de empaque</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Área Responsable</label>
+                <select class="form-input"><option>Calidad</option></select>
+              </div>
+            </div>
+
+            <!-- DETALLE IME — NUEVO -->
+            <div class="card" style="border-color: #c04040; border-width: 2px;">
+              <div class="card-title" style="color:#8a2020;">★ NUEVO — Detalle del Reclamo (F069)</div>
+
+              <div class="annotation">
+                <span class="annotation-icon">📋</span>
+                <span>Esta sección aparece <strong>solo cuando el tipo es "Inconformidad de material de empaque"</strong>. La llena el vendedor o el cliente.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Asunto <span class="req">*</span></label>
+                <input class="form-input" value="Bolsas con sellado defectuoso lote MAR-0031">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Descripción del reclamo <span class="req">*</span></label>
+                <textarea class="form-input">Se detectaron bolsas con sellado defectuoso en el lote recibido el 14/03/2026. Evidencia fotográfica adjunta.</textarea>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Producto</label>
+                  <input class="form-input" value="Bolsa BOPP Transparente 200g">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Código Stia del material</label>
+                  <input class="form-input" value="MAT-00489">
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Lote / Orden de producción</label>
+                  <input class="form-input" value="MAR-0031-2026">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Factura</label>
+                  <input class="form-input" value="FAC-058921">
+                </div>
+              </div>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Cantidad inicial</label>
+                  <input class="form-input" value="5000" type="number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Cantidad en reclamo</label>
+                  <input class="form-input" value="320" type="number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Reportado por</label>
+                  <input class="form-input" value="Ana García">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+
+            <!-- ADJUNTOS -->
+            <div class="card">
+              <div class="card-title">📎 Adjuntos (2)</div>
+              <div style="background: var(--paper-dark); border-radius:6px; padding:8px 12px; margin-bottom:8px; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <span>📸</span>
+                <span style="flex:1;">evidencia-sellado-01.jpg</span>
+                <span style="color:var(--ink-muted); font-size:11px;">1.2 MB</span>
+              </div>
+              <div style="background: var(--paper-dark); border-radius:6px; padding:8px 12px; margin-bottom:8px; font-size:13px; display:flex; align-items:center; gap:10px;">
+                <span>📸</span>
+                <span style="flex:1;">evidencia-sellado-02.jpg</span>
+                <span style="color:var(--ink-muted); font-size:11px;">0.9 MB</span>
+              </div>
+              <button class="btn btn-outline btn-sm">+ Agregar evidencia</button>
+            </div>
+
+            <!-- SECCIÓN CALIDAD — SOLO ADMIN/CALIDAD -->
+            <div class="calidad-section">
+              <div class="calidad-header">
+                🔒 <span class="lock-icon">SOLO CALIDAD</span>
+                Uso Administrativo — Área de Calidad
+              </div>
+
+              <div class="annotation" style="background: #e8f0ff;">
+                <span class="annotation-icon">🔒</span>
+                <span>Esta sección es <strong>visible y editable solo para el rol Calidad/Admin</strong>. Los agentes de ventas no la ven.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="color:var(--accent);">Consecutivo SGI</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <input class="form-input" value="SGI-2026-0042" readonly style="border-color:var(--accent); flex:1;">
+                  <span style="font-size:11px; color:var(--accent); white-space:nowrap;">Auto-generado</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="color:var(--accent);">Causa del Reclamo</label>
+                <textarea class="form-input" rows="2" style="border-color:var(--accent);">Falla en el control de temperatura durante el proceso de sellado en línea 3.</textarea>
+              </div>
+
+              <hr class="sketch">
+              <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">Plan de Acción</div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Corrección inmediata</label>
+                  <textarea class="form-input" rows="2" style="border-color:var(--accent);">Separar lote afectado y suspender uso inmediato.</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Fecha cumplimiento</label>
+                  <input class="form-input" type="date" value="2026-03-18" style="border-color:var(--accent);">
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Acción correctiva</label>
+                  <textarea class="form-input" rows="2" style="border-color:var(--accent);">Calibración de termostatos en línea 3. Revisión de protocolo.</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Fecha cumplimiento</label>
+                  <input class="form-input" type="date" value="2026-03-25" style="border-color:var(--accent);">
+                </div>
+              </div>
+
+              <hr class="sketch">
+              <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">Investigación y Corrección Ejecutada (SGI)</div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Gestionado por</label>
+                  <input class="form-input" value="María Calderón" style="border-color:var(--accent);">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Verificado por</label>
+                  <input class="form-input" value="Roberto Vargas" style="border-color:var(--accent);">
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Fecha verificación</label>
+                  <input class="form-input" type="date" value="2026-03-26" style="border-color:var(--accent);">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="color:var(--accent);">Retroalimentación al cliente</label>
+                  <select class="form-input" style="border-color:var(--accent);">
+                    <option>Sí</option>
+                    <option>No</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="color:var(--accent);">Persona de ventas responsable</label>
+                <input class="form-input" value="Ana García" style="border-color:var(--accent);">
+              </div>
+
+              <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+                <button class="btn btn-primary btn-sm">💾 Guardar Sección Calidad</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+          <button class="btn btn-outline">Cancelar</button>
+          <button class="btn btn-primary">✓ Crear Caso IME</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hint">Wireframes para aprobación — Herramienta Casos de Servicio STIA · Marzo 2026</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const ids = ['s1','s2','s3','s4','s5','s6'];
+  tabs[ids.indexOf(id)].classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>

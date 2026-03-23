@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bs-blue:        #0f49bd;
+    --bs-blue-dark:   #0a2d7e;
+    --bs-navy:        #0f172a;
+    --bs-cyan:        #00D1FF;
+    --bs-cyan-dim:    #00b8e0;
+    --bs-blue-light:  #dbeafe;
+    --bs-blue-mid:    #3b82f6;
+    --gray-50:        #f8fafc;
+    --gray-100:       #f1f5f9;
+    --gray-200:       #e2e8f0;
+    --gray-400:       #94a3b8;
+    --gray-600:       #475569;
+    --gray-800:       #1e293b;
+    --green:          #16a34a;
+    --green-light:    #dcfce7;
+    --amber:          #d97706;
+    --amber-light:    #fef3c7;
+    --red:            #dc2626;
+    --red-light:      #fee2e2;
+    --purple:         #7c3aed;
+    --purple-light:   #ede9fe;
+    --teal:           #0f766e;
+    --teal-light:     #ccfbf1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: white;
+    color: var(--gray-800);
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    min-height: 100vh;
+    background: linear-gradient(145deg, var(--bs-navy) 0%, var(--bs-blue-dark) 45%, var(--bs-blue) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 40px;
+    text-align: center;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,209,255,0.08) 0%, transparent 70%);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -60px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(15,73,189,0.2) 0%, transparent 70%);
+  }
+  /* cyan accent line top */
+  .cover-top-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--bs-cyan) 0%, var(--bs-blue) 100%);
+  }
+
+  .cover-logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 56px;
+    z-index: 1;
+  }
+  .cover-logo {
+    font-size: 22pt;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .cover-logo span { color: var(--bs-cyan); }
+  .cover-logo-tagline {
+    font-size: 8pt;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .cover-badge {
+    background: rgba(0,209,255,0.15);
+    color: var(--bs-cyan);
+    border: 1px solid rgba(0,209,255,0.3);
+    padding: 5px 20px;
+    border-radius: 999px;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    z-index: 1;
+  }
+  .cover h1 {
+    font-size: 30pt;
+    font-weight: 800;
+    color: white;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    max-width: 580px;
+    z-index: 1;
+  }
+  .cover h1 span { color: var(--bs-cyan); }
+  .cover-client {
+    font-size: 11pt;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 8px;
+    font-weight: 400;
+    z-index: 1;
+  }
+  .cover-client strong { color: rgba(255,255,255,0.9); font-weight: 700; }
+  .cover-sub {
+    font-size: 10pt;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 56px;
+    font-weight: 300;
+    z-index: 1;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    flex-wrap: wrap;
+    z-index: 1;
+  }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-item .val {
+    font-size: 24pt;
+    font-weight: 800;
+    color: white;
+  }
+  .cover-meta-item .val span { color: var(--bs-cyan); }
+  .cover-meta-item .lbl {
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 2px;
+  }
+  .cover-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.15);
+  }
+  .cover-sep {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,209,255,0.4), transparent);
+    margin: 48px auto;
+    z-index: 1;
+  }
+  .cover-footer {
+    font-size: 8pt;
+    color: rgba(255,255,255,0.35);
+    z-index: 1;
+    line-height: 1.8;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 48px 52px;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--bs-blue);
+    margin-bottom: 32px;
+  }
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-header-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--bs-cyan);
+  }
+  .page-header-brand {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: var(--bs-blue);
+    letter-spacing: 0.5px;
+  }
+  .page-header-title {
+    font-size: 8pt;
+    color: var(--gray-400);
+  }
+
+  /* ── SECTION HEADINGS ── */
+  h2.section {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+
+  /* ── SUMMARY TABLE ── */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .summary-table thead tr {
+    background: var(--bs-navy);
+    color: white;
+  }
+  .summary-table thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .summary-table thead th:first-child {
+    border-left: 4px solid var(--bs-cyan);
+  }
+  .summary-table tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .summary-table tbody tr:hover { background: var(--gray-50); }
+  .summary-table tbody tr.total {
+    background: var(--bs-navy);
+    color: white;
+    font-weight: 700;
+  }
+  .summary-table tbody td { padding: 10px 14px; font-size: 9pt; }
+  .summary-table tbody tr.total td { color: white; }
+  .days-badge {
+    display: inline-block;
+    background: var(--bs-blue-light);
+    color: var(--bs-blue-dark);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 8pt;
+    font-weight: 700;
+  }
+  .days-badge.total-badge {
+    background: var(--bs-cyan);
+    color: var(--bs-navy);
+    font-size: 10pt;
+  }
+
+  /* ── SPRINT CARD ── */
+  .sprint-card {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    page-break-inside: avoid;
+  }
+  .sprint-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bs-navy);
+    color: white;
+    position: relative;
+  }
+  .sprint-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--bs-cyan) 0%, transparent 60%);
+  }
+  .sprint-number {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: rgba(0,209,255,0.15);
+    border: 1.5px solid rgba(0,209,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12pt;
+    font-weight: 800;
+    flex-shrink: 0;
+    color: var(--bs-cyan);
+  }
+  .sprint-title { font-size: 13pt; font-weight: 700; }
+  .sprint-subtitle { font-size: 8pt; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .sprint-days {
+    margin-left: auto;
+    text-align: right;
+  }
+  .sprint-days .d { font-size: 16pt; font-weight: 800; color: var(--bs-cyan); }
+  .sprint-days .dl { font-size: 7pt; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+
+  .sprint-body { padding: 20px; }
+
+  /* ── OBJETIVO ── */
+  .objetivo {
+    background: var(--bs-blue-light);
+    border-left: 4px solid var(--bs-blue);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 18px;
+    font-size: 9.5pt;
+    color: var(--bs-blue-dark);
+    font-weight: 500;
+  }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* ── SCOPE BOX ── */
+  .scope-box {
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .scope-box h4 {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .scope-box.alcance h4 { color: var(--bs-blue); }
+  .scope-box.anti h4 { color: var(--red); }
+  .scope-box ul { padding-left: 16px; }
+  .scope-box li {
+    font-size: 8.5pt;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .scope-box .file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    background: white;
+    border: 1px solid var(--gray-200);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--bs-blue);
+  }
+
+  /* ── STEPS ── */
+  .steps { margin-bottom: 16px; }
+  .step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--bs-blue);
+    color: white;
+    font-size: 8pt;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 9pt; font-weight: 600; color: var(--gray-800); }
+  .step-details {
+    margin-top: 4px;
+    padding-left: 12px;
+    border-left: 2px solid var(--gray-200);
+  }
+  .step-detail {
+    font-size: 8pt;
+    color: var(--gray-600);
+    margin-bottom: 2px;
+  }
+  .step-detail code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    background: var(--gray-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--bs-blue);
+  }
+
+  /* ── VERIFICATION ── */
+  .verif {
+    background: var(--green-light);
+    border: 1.5px solid #86efac;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .verif h4 {
+    font-size: 8pt;
+    font-weight: 700;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .verif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 8.5pt;
+    color: #166534;
+  }
+  .verif-check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ── WARNING BOX ── */
+  .warn-box {
+    background: var(--amber-light);
+    border: 1.5px solid #fcd34d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 8.5pt;
+    color: #92400e;
+  }
+  .warn-box strong { color: var(--amber); }
+
+  /* ── UDF TABLE ── */
+  .udf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .udf-table thead tr { background: var(--bs-navy); color: white; }
+  .udf-table thead th { padding: 8px 10px; text-align: left; font-weight: 600; }
+  .udf-table tbody tr { border-bottom: 1px solid var(--gray-200); }
+  .udf-table tbody tr:nth-child(even) { background: var(--gray-50); }
+  .udf-table tbody td { padding: 6px 10px; }
+  .udf-table .code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    color: var(--bs-blue);
+    background: var(--bs-blue-light);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .udf-calidad { background: #ede9fe !important; }
+  .udf-calidad .code { background: var(--purple-light); color: var(--purple); }
+  .role-vendor {
+    background: var(--bs-blue-light);
+    color: var(--bs-blue-dark);
+    font-size: 7pt;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .role-calidad {
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 7pt;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  /* ── DEPENDENCY DIAGRAM ── */
+  .dep-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .dep-item {
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .dep-item .dep-sprint { font-size: 9pt; font-weight: 700; color: var(--bs-blue); }
+  .dep-item .dep-name { font-size: 7.5pt; color: var(--gray-600); margin-top: 2px; }
+  .dep-item .dep-days { font-size: 8pt; font-weight: 600; color: var(--gray-800); margin-top: 4px; }
+  .dep-item.blocked { border-color: #fca5a5; background: var(--red-light); }
+  .dep-item.blocked .dep-sprint { color: var(--red); }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 9pt;
+    border: 1px solid var(--gray-200);
+    background: var(--gray-50);
+  }
+  .checklist li .check {
+    width: 16px; height: 16px;
+    border: 2px solid var(--gray-400);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── STATUS TABLE ── */
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-top: 16px;
+  }
+  .status-table thead tr { background: var(--bs-navy); color: white; }
+  .status-table thead th { padding: 10px 14px; text-align: left; font-size: 8pt; font-weight: 600; letter-spacing: 0.5px; }
+  .status-table thead th:first-child { border-left: 3px solid var(--bs-cyan); }
+  .status-table tbody tr { border-bottom: 1px solid var(--gray-200); }
+  .status-table tbody tr:nth-child(even) { background: var(--gray-50); }
+  .status-table tbody td { padding: 10px 14px; }
+  .status-pending {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+  .status-blocked {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--amber-light);
+    color: var(--amber);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+  .status-review {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--purple-light);
+    color: var(--purple);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+
+  /* ── NOTE BOX ── */
+  .note {
+    background: var(--bs-blue-light);
+    border-left: 4px solid var(--bs-blue-mid);
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 8.5pt;
+    color: var(--bs-blue-dark);
+    margin-bottom: 16px;
+  }
+
+  /* ── FOOTER BRAND ── */
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .page-footer-bs {
+    font-size: 8pt;
+    font-weight: 800;
+    color: var(--bs-blue);
+  }
+  .page-footer-bs span { color: var(--bs-cyan); }
+  .page-footer-info {
+    font-size: 7.5pt;
+    color: var(--gray-400);
+    text-align: right;
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cover { min-height: 100vh; }
+    .page { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PORTADA                                               -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-top-line"></div>
+
+  <div class="cover-logo-wrap">
+    <div class="cover-logo">Blue<span>System</span></div>
+    <div class="cover-logo-tagline">Soluciones de Tecnología Empresarial</div>
+  </div>
+
+  <div class="cover-badge">Propuesta de Implementación</div>
+
+  <h1>Mejoras<br><span>Herramienta de<br>Casos de Servicio</span></h1>
+
+  <div class="cover-client">Preparado para: <strong>Stia Comercializadora S.A.</strong></div>
+  <div class="cover-sub">Marzo 2026</div>
+
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="val"><span>7</span></div>
+      <div class="lbl">Sprints</div>
+    </div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-item">
+      <div class="val"><span>~14.5</span></div>
+      <div class="lbl">Días estimados</div>
+    </div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-item">
+      <div class="val"><span>6</span></div>
+      <div class="lbl">Módulos nuevos</div>
+    </div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta-item">
+      <div class="val"><span>5</span></div>
+      <div class="lbl">Países SAP</div>
+    </div>
+  </div>
+
+  <div class="cover-sep"></div>
+
+  <div class="cover-footer">
+    Next.js 15 · SAP Business One Service Layer · PostgreSQL · AWS EC2<br>
+    BlueSystem · bluesystem.io · 16 de marzo de 2026
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 1 — RESUMEN EJECUTIVO                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <h2 class="section">Resumen Ejecutivo</h2>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>Sprint</th>
+        <th>Módulo</th>
+        <th>Días</th>
+        <th>Entregable</th>
+        <th>Complejidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S1</strong></td>
+        <td>Buscar Contacto en Nuevo Caso</td>
+        <td><span class="days-badge">2.5</span></td>
+        <td>Buscador SAP + modo manual</td>
+        <td>⬛⬛⬛⬜⬜ Media</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S2</strong></td>
+        <td>Tipo: Retroalimentación Positiva</td>
+        <td><span class="days-badge">0.5</span></td>
+        <td>Nuevo tipo, campos deshabilitados</td>
+        <td>⬛⬜⬜⬜⬜ Baja</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S3</strong></td>
+        <td>Renombrar + Nuevos Estados</td>
+        <td><span class="days-badge">1</span></td>
+        <td>"Colaborador asignado" + 2 estados</td>
+        <td>⬛⬛⬜⬜⬜ Baja-Media</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S4</strong></td>
+        <td>Extensión Tiempo de Resolución</td>
+        <td><span class="days-badge">2</span></td>
+        <td>Botón extender + modal + audit log</td>
+        <td>⬛⬛⬛⬜⬜ Media</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S5</strong></td>
+        <td>Alertas de Vencimiento</td>
+        <td><span class="days-badge">1.5</span></td>
+        <td>Alertas 12h + vencido + Alta→jefatura</td>
+        <td>⬛⬛⬜⬜⬜ Baja-Media</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--red)">S6</strong></td>
+        <td>Inconformidad Material Empaque</td>
+        <td><span class="days-badge">5</span></td>
+        <td>Form F069 + UDFs SAP + sección Calidad</td>
+        <td>⬛⬛⬛⬛⬛ Alta</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S7</strong></td>
+        <td>Ampliar Módulo Conocimiento</td>
+        <td><span class="days-badge">2</span></td>
+        <td>Categorías + editor + búsqueda mejorada</td>
+        <td>⬛⬛⬛⬜⬜ Media</td>
+      </tr>
+      <tr class="total">
+        <td colspan="2"><strong>TOTAL</strong></td>
+        <td><span class="days-badge total-badge">~14.5</span></td>
+        <td colspan="2">días hábiles de desarrollo</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>WhatsApp:</strong> Requiere análisis de costo (Twilio / Meta API) — fuera de scope hasta aprobación de presupuesto.<br>
+    <strong>Acceso Móvil:</strong> La herramienta ya es responsive con Tailwind CSS — solo requiere QA en dispositivos.
+  </div>
+
+  <h2 class="section" style="margin-top:28px;">Dependencias y Orden de Ejecución</h2>
+
+  <div class="dep-grid">
+    <div class="dep-item">
+      <div class="dep-sprint">S2</div>
+      <div class="dep-name">Retroalimentación Positiva</div>
+      <div class="dep-days">0.5 días · Sin bloqueante</div>
+    </div>
+    <div class="dep-item">
+      <div class="dep-sprint">S3</div>
+      <div class="dep-name">Renombrar + Nuevos Estados</div>
+      <div class="dep-days">1 día · Sin bloqueante</div>
+    </div>
+    <div class="dep-item">
+      <div class="dep-sprint">S1</div>
+      <div class="dep-name">Buscar Contacto</div>
+      <div class="dep-days">2.5 días · Sin bloqueante</div>
+    </div>
+    <div class="dep-item">
+      <div class="dep-sprint">S4</div>
+      <div class="dep-name">Extensión Tiempo</div>
+      <div class="dep-days">2 días · Sin bloqueante</div>
+    </div>
+    <div class="dep-item">
+      <div class="dep-sprint">S5</div>
+      <div class="dep-name">Alertas Vencimiento</div>
+      <div class="dep-days">1.5 días · Sin bloqueante</div>
+    </div>
+    <div class="dep-item blocked">
+      <div class="dep-sprint">S6</div>
+      <div class="dep-name">Inconformidad Empaque</div>
+      <div class="dep-days">⚠ Requiere UDFs SAP primero</div>
+    </div>
+  </div>
+
+  <div style="background:var(--gray-50); border:1.5px solid var(--gray-200); border-left:3px solid var(--bs-cyan); border-radius:8px; padding:14px 16px;">
+    <div style="font-size:8pt; font-weight:700; color:var(--bs-blue); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Sprints paralelizables</div>
+    <div style="font-size:8.5pt; color:var(--gray-600); line-height:1.8;">
+      · <strong>S2 + S3</strong> se pueden ejecutar el mismo día (ambos son pequeños).<br>
+      · <strong>S1 y S4</strong> son completamente independientes entre sí.<br>
+      · <strong>S6</strong> está bloqueado hasta que el administrador SAP cree los 16 UDFs en las 5 bases de datos.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 2 — S1 BUSCAR CONTACTO                         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <div class="sprint-card">
+    <div class="sprint-header">
+      <div class="sprint-number">1</div>
+      <div>
+        <div class="sprint-title">Buscar Contacto en Nuevo Caso</div>
+        <div class="sprint-subtitle">Buscador SAP de personas de contacto + modo manual si no existe en base</div>
+      </div>
+      <div class="sprint-days"><div class="d">2.5</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="objetivo">Agregar un buscador "Buscar contacto" vinculado a SAP, similar al de "Buscar cliente". Si el contacto no existe en la base de datos, permitir el llenado manual de todos los campos.</div>
+
+      <div class="two-col">
+        <div class="scope-box alcance">
+          <h4>Alcance</h4>
+          <ul>
+            <li><span class="file">api/bp/[code]/contacts/route.ts</span> — endpoint nuevo</li>
+            <li><span class="file">casos/nuevo/page.tsx</span> — nueva sección Contacto</li>
+            <li><span class="file">lib/types.ts</span> — campos contactName, contactCargo</li>
+            <li>SAP UDFs: <span class="file">U_ContactName</span>, <span class="file">U_ContactCargo</span></li>
+          </ul>
+        </div>
+        <div class="scope-box anti">
+          <h4>Anti-scope</h4>
+          <ul>
+            <li>NO modificar el buscador de cliente (BP)</li>
+            <li>NO cambiar proceso de creación en SAP</li>
+            <li>NO afectar casos existentes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Crear endpoint <code>GET /api/bp/[code]/contacts</code></div>
+            <div class="step-details">
+              <div class="step-detail">Query SAP: <code>BusinessPartners('CODE')/ContactEmployees</code></div>
+              <div class="step-detail">Retorna: <code>[{ code, name, phone, email, position }]</code></div>
+              <div class="step-detail">Manejo de error si BP no tiene contactos registrados</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Agregar estado al formulario Nuevo Caso</div>
+            <div class="step-details">
+              <div class="step-detail">Estados: <code>contactSearch</code>, <code>contactResults</code>, <code>contactLoading</code>, <code>contactRef</code></div>
+              <div class="step-detail">Campos manuales: <code>contactName</code>, <code>contactCargo</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">UI: Sección CONTACTO actualizada</div>
+            <div class="step-details">
+              <div class="step-detail">Buscador aparece SOLO cuando hay cliente seleccionado</div>
+              <div class="step-detail">Al seleccionar contacto SAP → auto-llenar nombre, teléfono, email, cargo</div>
+              <div class="step-detail">Modo manual habilitado si escribe sin seleccionar de la lista</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Actualizar payload de creación del caso</div>
+            <div class="step-details">
+              <div class="step-detail">Agregar <code>contactName</code> y <code>contactCargo</code> al <code>CreateCasoPayload</code></div>
+              <div class="step-detail">Mapear a UDFs SAP <code>U_ContactName</code> / <code>U_ContactCargo</code></div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">Actualizar vista Detalle del Caso</div>
+            <div class="step-details">
+              <div class="step-detail">Mostrar nombre y cargo del contacto en la ficha del caso</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="verif">
+        <h4>✓ Criterios de Verificación</h4>
+        <div class="verif-item"><span class="verif-check">✓</span> GET /api/bp/C00001/contacts → 200 OK con lista de contactos</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Seleccionar cliente → aparece buscador de contacto</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Seleccionar contacto → auto-llena todos los campos</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Sin seleccionar → campos editables manualmente</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Crear caso → U_ContactName guardado correctamente en SAP</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- S2 en misma página -->
+  <div class="sprint-card" style="border-color: var(--teal); border-width:2px;">
+    <div class="sprint-header" style="background: #0d5c55;">
+      <div class="sprint-number" style="background:rgba(0,209,255,0.15); border-color:rgba(0,209,255,0.3);">2</div>
+      <div>
+        <div class="sprint-title">Tipo: Retroalimentación Positiva</div>
+        <div class="sprint-subtitle">Nuevo tipo de caso que funciona como notificación — sin seguimiento requerido</div>
+      </div>
+      <div class="sprint-days"><div class="d">0.5</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+      <div class="objetivo" style="background:var(--teal-light); border-color:var(--teal); color:var(--teal);">Al seleccionar "Retroalimentación positiva" como tipo, los campos de Prioridad y Tiempo Estimado se deshabilitan automáticamente ya que este tipo solo funciona como notificación al colaborador.</div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:var(--teal)">1</div>
+          <div class="step-content">
+            <div class="step-title">Agregar "Retroalimentación positiva" al dropdown tipo_caso en configuración</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--teal)">2</div>
+          <div class="step-content">
+            <div class="step-title">Lógica condicional en Nuevo Caso</div>
+            <div class="step-details">
+              <div class="step-detail">Deshabilitar Prioridad → mostrar "Normal — N/A"</div>
+              <div class="step-detail">Deshabilitar Tiempo Estimado → mostrar "No requiere seguimiento"</div>
+              <div class="step-detail">Al cambiar de tipo → restaurar ambos campos</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--teal)">3</div>
+          <div class="step-content">
+            <div class="step-title">Badge visual verde/teal en lista y detalle de casos para este tipo</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 3 — S3 y S4                                   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <div class="sprint-card">
+    <div class="sprint-header" style="background:#1e293b;">
+      <div class="sprint-number">3</div>
+      <div>
+        <div class="sprint-title">Renombrar + Nuevos Estados de Caso</div>
+        <div class="sprint-subtitle">"Técnico asignado" → "Colaborador asignado" · Pendiente de proveedor / otra área</div>
+      </div>
+      <div class="sprint-days"><div class="d">1</div><div class="dl">día</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="two-col">
+        <div>
+          <div class="objetivo" style="height:100%;">Renombrar "Técnico asignado" a "Colaborador asignado" en toda la UI. Agregar 2 nuevos estados que pausan el SLA mientras se espera respuesta externa.</div>
+        </div>
+        <div class="scope-box anti">
+          <h4>Anti-scope</h4>
+          <ul>
+            <li>NO cambiar nombre en base de datos (solo UI)</li>
+            <li>NO afectar autenticación ni permisos</li>
+            <li>NO tocar lógica de asignación existente</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Renombrar en UI — find/replace controlado en 5 archivos</div>
+            <div class="step-details">
+              <div class="step-detail">"Técnico Asignado" → "Colaborador Asignado"</div>
+              <div class="step-detail">"Buscar empleado" → "Buscar colaborador"</div>
+              <div class="step-detail">"Nombre del técnico..." → "Nombre del colaborador..."</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Nuevos estados — implementar UDF <code>U_SubEstado</code> en SAP</div>
+            <div class="step-details">
+              <div class="step-detail">Los nuevos estados NO son valores SAP nativos → usar UDF texto adicional</div>
+              <div class="step-detail">Valores: NULL | "Pendiente de proveedor" | "Pendiente de otra área"</div>
+              <div class="step-detail">Status SAP se mantiene en -2 (En Proceso) mientras hay subestado activo</div>
+              <div class="step-detail">El SLA se pausa automáticamente con estos estados</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">UI: Actualizar selector de estado y badges en lista de casos</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">API: PATCH <code>/api/casos/[id]</code> acepta campo <code>subEstado</code></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sprint-card">
+    <div class="sprint-header" style="background:#7c2d12;">
+      <div class="sprint-number">4</div>
+      <div>
+        <div class="sprint-title">Extensión del Tiempo de Resolución</div>
+        <div class="sprint-subtitle">Solo gestores SAC y supervisores pueden ampliar el plazo con justificación documentada</div>
+      </div>
+      <div class="sprint-days"><div class="d">2</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="objetivo" style="background:var(--amber-light); border-color:var(--amber); color:#78350f;">El gestor de servicio al cliente puede ampliar el tiempo estimado de resolución. La extensión queda registrada en un log de auditoría con justificación obligatoria y se crea una nota interna automática en el caso.</div>
+
+      <div class="two-col">
+        <div class="scope-box alcance">
+          <h4>Alcance</h4>
+          <ul>
+            <li><span class="file">casos/[id]/page.tsx</span> — botón "Extender plazo"</li>
+            <li><span class="file">api/casos/[id]/extend</span> — nuevo endpoint POST</li>
+            <li>Nueva tabla <span class="file">casos.extension_logs</span> en PostgreSQL</li>
+          </ul>
+        </div>
+        <div class="scope-box anti">
+          <h4>Anti-scope</h4>
+          <ul>
+            <li>NO permitir extensión a agentes normales</li>
+            <li>NO cambiar el tiempo automáticamente</li>
+            <li>NO afectar SLA histórico registrado</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:#7c2d12">1</div>
+          <div class="step-content">
+            <div class="step-title">Migración DB: tabla <code>casos.extension_logs</code></div>
+            <div class="step-details">
+              <div class="step-detail">Campos: case_id, prev_tiempo, new_tiempo, justification (TEXT), extended_by, extended_at</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7c2d12">2</div>
+          <div class="step-content">
+            <div class="step-title">API <code>POST /api/casos/[id]/extend</code></div>
+            <div class="step-details">
+              <div class="step-detail">Verificar rol (solo supervisor/admin/gestor SAC)</div>
+              <div class="step-detail">PATCH SAP: actualizar <code>U_TiempoEst</code></div>
+              <div class="step-detail">INSERT en extension_logs + crear nota interna automática</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7c2d12">3</div>
+          <div class="step-content">
+            <div class="step-title">UI: Modal "Extender plazo" con selector de tiempo + justificación obligatoria</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7c2d12">4</div>
+          <div class="step-content">
+            <div class="step-title">Mostrar extensiones en el timeline del caso con justificación expandible</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="verif">
+        <h4>✓ Criterios de Verificación</h4>
+        <div class="verif-item"><span class="verif-check">✓</span> Rol agente: NO ve botón "Extender plazo"</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Rol supervisor/gestor: SÍ ve el botón</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Justificación vacía: formulario no permite enviar</div>
+        <div class="verif-item"><span class="verif-check">✓</span> Al confirmar: U_TiempoEst actualizado en SAP + entrada en timeline</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 4 — S5 ALERTAS + S6 EMPAQUE                   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <div class="sprint-card">
+    <div class="sprint-header" style="background:#7f1d1d;">
+      <div class="sprint-number">5</div>
+      <div>
+        <div class="sprint-title">Alertas de Vencimiento</div>
+        <div class="sprint-subtitle">Notificaciones automáticas 12h antes, al vencer, y prioridad Alta → jefatura</div>
+      </div>
+      <div class="sprint-days"><div class="d">1.5</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="objetivo" style="background:var(--red-light); border-color:var(--red); color:#7f1d1d;">El sistema ya cuenta con infraestructura de escalation. Se amplía con tres nuevos triggers automáticos de notificación in-app basados en el tiempo estimado de resolución.</div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:#7f1d1d">1</div>
+          <div class="step-content">
+            <div class="step-title">Alerta 12h antes del vencimiento → responsable del caso</div>
+            <div class="step-details">
+              <div class="step-detail">Condición: <code>NOW() &gt;= (fecha_creacion + tiempo_estimado) - INTERVAL '12 hours'</code></div>
+              <div class="step-detail">Y: caso no cerrado (status ≠ -1) Y: sin alerta previa para este caso</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7f1d1d">2</div>
+          <div class="step-content">
+            <div class="step-title">Alerta al vencer → gestora de Servicio al Cliente</div>
+            <div class="step-details">
+              <div class="step-detail">Condición: <code>NOW() &gt;= (fecha_creacion + tiempo_estimado)</code></div>
+              <div class="step-detail">Y: caso no cerrado Y: sin extensión en las últimas 24h</div>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7f1d1d">3</div>
+          <div class="step-content">
+            <div class="step-title">Alerta Prioridad Alta al vencer → también notificar Jefatura / Supervisor</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:#7f1d1d">4</div>
+          <div class="step-content">
+            <div class="step-title">UI: Diferenciación visual en página de Alertas</div>
+            <div class="step-details">
+              <div class="step-detail">Pre-vencimiento: fondo amarillo · Vencido: fondo rojo · Alta prioridad: rojo intenso + badge URGENTE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- S6 HEADER ONLY — detalle en siguiente página -->
+  <div class="sprint-card" style="border-color:#dc2626; border-width:2px;">
+    <div class="sprint-header" style="background:#450a0a;">
+      <div class="sprint-number" style="background:rgba(220,38,38,0.2); border-color:rgba(220,38,38,0.4); color:#fca5a5;">6</div>
+      <div>
+        <div class="sprint-title">Inconformidad de Material de Empaque (F069)</div>
+        <div class="sprint-subtitle">Formulario extendido + 16 UDFs SAP en 5 bases de datos + sección exclusiva Calidad</div>
+      </div>
+      <div class="sprint-days"><div class="d" style="color:#fca5a5;">5</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="warn-box">
+        <strong>⚠ Sprint más complejo.</strong> Requiere que el administrador SAP cree los 16 UDFs nuevos en las 5 bases de datos de producción (CR, SV, GT, HN, PA) antes de comenzar el desarrollo. Se recomienda ejecutar primero en la base de staging para validar.
+      </div>
+
+      <div class="objetivo" style="background:var(--red-light); border-color:var(--red); color:#7f1d1d;">Digitalizar el formulario F069 "Respuesta a Reclamo" dentro de la herramienta de casos. Al seleccionar el tipo "Inconformidad de material de empaque" se despliega la sección extendida con los campos del reclamo. La sección de Uso Administrativo es visible solo para el rol Calidad/Admin.</div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 5 — S6 DETALLE UDFs + S7                      -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <h2 class="section">S6 — UDFs SAP a crear en las 5 bases de datos</h2>
+
+  <table class="udf-table">
+    <thead>
+      <tr>
+        <th>UDF SAP</th>
+        <th>Tipo</th>
+        <th>Llena</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="code">U_IME_Producto</span></td><td>Text</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Nombre del producto reclamado</td></tr>
+      <tr><td><span class="code">U_IME_CodMaterial</span></td><td>Text</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Código Stia del material</td></tr>
+      <tr><td><span class="code">U_IME_Lote</span></td><td>Text</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Lote / Orden de producción</td></tr>
+      <tr><td><span class="code">U_IME_Factura</span></td><td>Text</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Número de factura</td></tr>
+      <tr><td><span class="code">U_IME_CantInicial</span></td><td>Numeric</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Cantidad inicial recibida</td></tr>
+      <tr><td><span class="code">U_IME_CantReclamo</span></td><td>Numeric</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Cantidad en reclamo</td></tr>
+      <tr><td><span class="code">U_IME_ReportadoPor</span></td><td>Text</td><td><span class="role-vendor">Vendedor / Cliente</span></td><td>Nombre de quien reporta</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_CnsecSGI</span></td><td>Text</td><td><span class="role-calidad">Calidad (auto)</span></td><td>Consecutivo SGI — formato SGI-YYYY-NNNN</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_CausaReclamo</span></td><td>Memo</td><td><span class="role-calidad">Calidad</span></td><td>Causa del reclamo identificada</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_PlanAccion</span></td><td>Memo</td><td><span class="role-calidad">Calidad</span></td><td>Corrección inmediata + fecha cumplimiento</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_AccionCorrectiva</span></td><td>Memo</td><td><span class="role-calidad">Calidad</span></td><td>Acción correctiva + fecha cumplimiento</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_GestionadoPor</span></td><td>Text</td><td><span class="role-calidad">Calidad</span></td><td>Gestionado por (uso SGI)</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_VerificadoPor</span></td><td>Text</td><td><span class="role-calidad">Calidad</span></td><td>Verificado por (uso SGI)</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_FechaVerif</span></td><td>Date</td><td><span class="role-calidad">Calidad</span></td><td>Fecha de verificación</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_Retroalim</span></td><td>Text</td><td><span class="role-calidad">Calidad</span></td><td>Retroalimentación al cliente: Sí/No + fecha</td></tr>
+      <tr class="udf-calidad"><td><span class="code">U_IME_VentasResp</span></td><td>Text</td><td><span class="role-calidad">Calidad</span></td><td>Persona de ventas responsable del reclamo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sprint-card" style="margin-top:24px;">
+    <div class="sprint-header" style="background: linear-gradient(135deg, var(--bs-blue-dark) 0%, var(--bs-blue) 100%);">
+      <div class="sprint-number">7</div>
+      <div>
+        <div class="sprint-title">Ampliar Módulo Conocimiento</div>
+        <div class="sprint-subtitle">Categorías · búsqueda full-text · editor mejorado · artículos vinculados a tipos de caso</div>
+      </div>
+      <div class="sprint-days"><div class="d">2</div><div class="dl">días</div></div>
+    </div>
+    <div class="sprint-body">
+
+      <div class="warn-box">
+        <strong>Pendiente de confirmación:</strong> Se requiere validar con el equipo el alcance exacto del módulo Conocimiento antes de iniciar este sprint.
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content"><div class="step-title">Revisar estado actual del módulo y estructura de <code>kb_articles</code></div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Agregar categorías a artículos con filtro en la lista</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Mejorar búsqueda — full-text en título Y contenido con resaltado</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Editor de artículos mejorado — markdown básico + preview antes de guardar</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">Vincular artículos a tipos de caso → sugerencias al crear caso</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PÁGINA 6 — DEPLOY + ESTADO                           -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" style="page-break-after:avoid;">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-dot"></div>
+      <div class="page-header-brand">BlueSystem · <span style="color:var(--gray-600);font-weight:500;">Propuesta para STIA</span></div>
+    </div>
+    <div class="page-header-title">Mejoras Herramienta Casos · Marzo 2026</div>
+  </div>
+
+  <h2 class="section">Checklist de Deploy</h2>
+
+  <ul class="checklist" style="margin-bottom:32px;">
+    <li><div class="check"></div> Probar cada sprint en staging (<strong>pr.bluesystem.io</strong>) antes de pasar a producción</li>
+    <li><div class="check"></div> UDFs de S6: crear primero en staging, validar, luego aplicar en las 5 DBs productivas</li>
+    <li><div class="check"></div> <code style="font-family:monospace; font-size:8pt; background:var(--gray-100); padding:2px 6px; border-radius:3px;">npm run build</code> sin errores TypeScript antes de cada deploy</li>
+    <li><div class="check"></div> PM2 restart con <code style="font-family:monospace; font-size:8pt; background:var(--gray-100); padding:2px 6px; border-radius:3px;">--update-env</code> si hay cambios en variables de entorno</li>
+    <li><div class="check"></div> Verificar logs post-deploy: <code style="font-family:monospace; font-size:8pt; background:var(--gray-100); padding:2px 6px; border-radius:3px;">/home/ubuntu/.pm2/logs/casos-stia-error.log</code></li>
+  </ul>
+
+  <h2 class="section">Estado de Sprints</h2>
+
+  <table class="status-table">
+    <thead>
+      <tr>
+        <th>Sprint</th>
+        <th>Módulo</th>
+        <th>Días</th>
+        <th>Estado</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S1</strong></td>
+        <td>Buscar Contacto</td>
+        <td>2.5</td>
+        <td><span class="status-pending">⬜ Pendiente</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S2</strong></td>
+        <td>Retroalimentación Positiva</td>
+        <td>0.5</td>
+        <td><span class="status-pending">⬜ Pendiente</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S3</strong></td>
+        <td>Renombrar + Nuevos Estados</td>
+        <td>1</td>
+        <td><span class="status-pending">⬜ Pendiente</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S4</strong></td>
+        <td>Extensión Tiempo Resolución</td>
+        <td>2</td>
+        <td><span class="status-pending">⬜ Pendiente</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--bs-blue)">S5</strong></td>
+        <td>Alertas Vencimiento</td>
+        <td>1.5</td>
+        <td><span class="status-pending">⬜ Pendiente</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--red)">S6</strong></td>
+        <td>Inconformidad Material Empaque</td>
+        <td>5</td>
+        <td><span class="status-blocked">⚠ Bloqueado — UDFs SAP</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--purple)">S7</strong></td>
+        <td>Ampliar Módulo Conocimiento</td>
+        <td>2</td>
+        <td><span class="status-review">⚙ Confirmar alcance</span></td>
+        <td style="color:var(--gray-400)">—</td>
+        <td style="color:var(--gray-400)">—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Footer de propuesta BlueSystem -->
+  <div style="margin-top:40px; border-radius:12px; overflow:hidden; box-shadow: 0 2px 12px rgba(15,73,189,0.12);">
+    <div style="background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-blue-dark) 60%, var(--bs-blue) 100%); padding:24px 28px; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:16pt; font-weight:800; color:white;">Blue<span style="color:var(--bs-cyan);">System</span></div>
+        <div style="font-size:8pt; color:rgba(255,255,255,0.5); letter-spacing:2px; text-transform:uppercase; margin-top:2px;">Soluciones de Tecnología Empresarial</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9pt; color:rgba(255,255,255,0.8);">Preparado para: <strong style="color:white;">Stia Comercializadora S.A.</strong></div>
+        <div style="font-size:8pt; color:rgba(255,255,255,0.45); margin-top:4px;">16 de marzo de 2026 · Confidencial</div>
+      </div>
+    </div>
+    <div style="background:var(--gray-50); border:1px solid var(--gray-200); border-top:none; padding:12px 28px; display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:8pt; color:var(--gray-400);">Next.js 15 · SAP Business One Service Layer · PostgreSQL · AWS EC2</div>
+      <div style="font-size:8pt; color:var(--bs-blue); font-weight:600;">bluesystem.io</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

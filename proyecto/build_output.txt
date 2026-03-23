@@ -1,0 +1,54 @@
+
+> casos-stia@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/freddymolina/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/freddymolina/Desktop/Stia/Casos/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · serverActions
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Error: Cannot apply unknown utility class `shadow-[0_8px_30px_rgb(200,`
+    [2m[at onInvalidCandidate (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:21:1511)][0m
+    [2m[at Ee (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:16:36740)][0m
+    [2m[at /Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:21:355][0m
+    [2m[at Pr (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:3:1733)][0m
+    [2m[at _ (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:3:1377)][0m
+    [2m[at Te (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:21:172)][0m
+    [2m[at pn (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:38:294)][0m
+    [2m[at async dn (/Users/freddymolina/Desktop/Stia/Casos/node_modules/tailwindcss/dist/lib.js:38:631)][0m
+    [2m[at async Xr (/Users/freddymolina/Desktop/Stia/Casos/node_modules/@tailwindcss/node/dist/index.js:10:3417)][0m
+    [2m[at async N (/Users/freddymolina/Desktop/Stia/Casos/node_modules/@tailwindcss/postcss/dist/index.js:10:3979)][0m
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./Desktop/Stia/Casos/src/app/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: /Users/freddymolina/Desktop/Stia/Casos/src/app/globals.css:1:1: Cannot apply unknown utility class `shadow-[0_8px_30px_rgb(200,`
+    at Input.error (Desktop/Stia/Casos/node_modules/postcss/lib/input.js:135:16) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/837f0_768ee278._.js:4651:22]
+    at Root.error (Desktop/Stia/Casos/node_modules/postcss/lib/node.js:146:32) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/837f0_768ee278._.js:928:38]
+    [at Object.Once (/Users/freddymolina/Desktop/Stia/Casos/node_modules/@tailwindcss/postcss/dist/index.js:10:6913)]
+    at async LazyResult.runAsync (Desktop/Stia/Casos/node_modules/postcss/lib/lazy-result.js:293:11) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/837f0_768ee278._.js:6206:21]
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/[root-of-the-server]__d1692d25._.js:146:36]
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/[root-of-the-server]__3159be76._.js:443:31]
+
+Import traces:
+  App Route:
+    ./Desktop/Stia/Casos/src/app/globals.css
+    ./Desktop/Stia/Casos/src/app/api/casos/[id]/attachments/route.ts
+
+  Client Component Browser:
+    ./Desktop/Stia/Casos/src/app/globals.css [Client Component Browser]
+    ./Desktop/Stia/Casos/src/app/layout.tsx [Server Component]
+
+
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/[root-of-the-server]__d1692d25._.js:146:36])
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [/Users/freddymolina/Desktop/Stia/Casos/.next/build/chunks/[root-of-the-server]__3159be76._.js:443:31])

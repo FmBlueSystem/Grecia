@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.next.broken/
+.env
+.env.local
+*.pem
+.DS_Store
+out/
+build/
+.turbo/
+.playwright-mcp/
+ojo/
+*.png
+!public/favicon-*.png
+!public/apple-touch-icon.png
+!public/android-chrome-*.png
