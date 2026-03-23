@@ -1,0 +1,54 @@
+name: Deploy a Producción
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'proyecto/src/**'
+      - 'proyecto/package*.json'
+      - 'proyecto/next.config.ts'
+      - 'proyecto/tsconfig.json'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Sincronizar código al servidor
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='.next.broken' \
+            --exclude='.env*' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            proyecto/ "$SSH_USER@$SSH_HOST:/data/casos/"
+
+      - name: Build y restart en servidor
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" '
+            cd /data/casos
+            npm ci --omit=dev
+            npm run build
+            pm2 restart 4 --update-env
+            echo "Deploy completado OK"
+          '
